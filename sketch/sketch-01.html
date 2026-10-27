@@ -1,0 +1,204 @@
+<title>תעודת זהות משבשת</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=Heebo:wght@900&family=Amatic+SC:wght@700&display=swap">
+<style>
+/* Layout: a visible 12-column Swiss grid (the order). Each pair is an AI image-text
+   split along a diagonal seam; pulling the seam, against resistance, opens the real layer. */
+:root{
+  --paper:#f6f6f4;      /* cool off-white, the order */
+  --ink:#121212;
+  --grey:#8a8a86;
+  --rule:#d9d9d4;
+  --red:#d7191c;        /* Kruger red, used only for the human's voice */
+  --real:#2b2925;       /* warm dark of the real layer */
+  --real-ink:#efe9de;
+  --ai-a:#e9ecf3; --ai-b:#d7dcec; --ai-c:#c9d3ea; /* the smooth, cooled AI palette */
+  --f-body:"IBM Plex Sans Hebrew","Arial Hebrew",Arial,sans-serif;
+  --f-shout:"Heebo","IBM Plex Sans Hebrew",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --f-hand:"Amatic SC","IBM Plex Sans Hebrew",cursive;
+  --col:calc((100% - 11 * 16px) / 12);
+  color-scheme:light;
+}
+html{background:var(--paper)}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+.wrap{max-width:1180px;margin-inline:auto;position:relative}
+/* the grid, made visible */
+.wrap::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(to left,transparent 0,transparent var(--col),rgba(215,25,28,.07) var(--col),rgba(215,25,28,.07) calc(var(--col) + 16px))}
+.wrap>*{position:relative;z-index:1}
+.mono{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+
+header.spec{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;border-bottom:1px solid var(--ink);padding-block:14px;direction:ltr;text-align:left}
+header.spec span:nth-child(n+3){text-align:right}
+.hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;padding-block:72px 56px}
+.hero h1{grid-column:1/-1;margin:0;font-weight:700;font-size:clamp(64px,13vw,168px);line-height:.86;letter-spacing:-.03em;text-wrap:balance}
+.hero .label{grid-column:1/4;margin-top:28px;color:var(--grey)}
+.hero .bio{grid-column:4/11;margin-top:24px;font-size:clamp(18px,1.9vw,22px);font-weight:300;line-height:1.45;max-width:36em}
+.hero .bio em{font-style:normal;background:linear-gradient(transparent 62%,var(--ai-b) 62%)}
+.hero .how{grid-column:4/11;margin-top:32px;display:flex;gap:12px;align-items:center;color:var(--red)}
+.hero .how::before{content:"";width:40px;height:1px;background:var(--red)}
+
+section.pair{border-top:1px solid var(--ink);padding-block:28px 72px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.pair .meta{grid-column:1/4;display:flex;flex-direction:column;gap:6px}
+.pair .meta h2{margin:0;font-size:32px;line-height:1.05;font-weight:700}
+.pair .meta .q{color:var(--grey)}
+.stage{grid-column:4/-1;position:relative;aspect-ratio:16/10;max-width:100%;overflow:hidden;background:var(--real);touch-action:pan-y;user-select:none}
+
+/* real layer */
+.real{position:absolute;inset:0;color:var(--real-ink);padding:28px;display:grid;grid-template-rows:auto 1fr auto;
+  background-color:var(--real);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 .95  0 0 0 0 .88  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.real .photo{justify-self:start;width:44%;aspect-ratio:3/4;border:1px dashed rgba(239,233,222,.45);display:grid;place-items:center;text-align:center;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;color:rgba(239,233,222,.6);transform:rotate(-2.4deg);padding:12px}
+.real .hand{font-family:var(--f-hand);font-size:clamp(26px,3.4vw,40px);line-height:1;align-self:end;justify-self:end;max-width:52%;transform:rotate(1.5deg)}
+.real .shout{position:absolute;inset-inline-start:28px;bottom:28px;max-width:46%}
+.real .shout b{display:inline;font-family:var(--f-shout);font-weight:900;font-size:clamp(18px,2.4vw,28px);line-height:1.25;background:var(--red);color:#fff;padding:2px 8px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.real .shout small{display:block;margin-top:8px;font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;color:rgba(239,233,222,.55)}
+
+/* AI layer: two halves of one image */
+.ai{position:absolute;inset:0;transition:transform .9s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.ai.dragging{transition:none}
+.ai.a{clip-path:polygon(0 0,56% 0,44% 100%,0 100%)}
+.ai.b{clip-path:polygon(56% 0,100% 0,100% 100%,44% 100%)}
+.ai .img{position:absolute;inset:0;background:
+  radial-gradient(60% 70% at 50% 42%,#f4f6fb 0,transparent 60%),
+  radial-gradient(38% 46% at 50% 40%,var(--ai-c) 0,transparent 70%),
+  linear-gradient(160deg,var(--ai-a),var(--ai-b))}
+.ai .img::after{content:"";position:absolute;left:50%;top:22%;width:26%;aspect-ratio:3/4;transform:translateX(-50%);border-radius:48% 48% 44% 44%;background:linear-gradient(#e3e7f1,#cdd5ea);filter:blur(.5px)}
+.ai .cap{position:absolute;inset-inline:28px;bottom:24px;display:flex;justify-content:space-between;gap:16px;align-items:end}
+.ai .cap p{margin:0;font-size:15px;line-height:1.45;max-width:30em;color:#38404f}
+.ai .cap .mono{color:#7a8296;direction:ltr;white-space:nowrap}
+
+.seam{position:absolute;top:50%;left:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:1px solid var(--ink);
+  background:var(--paper);display:grid;place-items:center;cursor:grab;z-index:3;font-family:var(--f-mono);font-size:16px;color:var(--ink);transition:opacity .4s}
+.seam:active{cursor:grabbing}
+.seam:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.stage.open .seam{opacity:0;pointer-events:none}
+.resist{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:3;color:var(--ink);background:var(--paper);padding:2px 8px;opacity:0;transition:opacity .3s}
+.stage.pulling .resist{opacity:1}
+
+section.stance{border-top:1px solid var(--ink);padding-block:28px 96px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.stance h2{grid-column:1/4;margin:0;font-family:var(--f-shout);font-weight:900;font-size:clamp(44px,6vw,72px);line-height:.9;color:var(--red)}
+.stance .text{grid-column:4/10;font-size:19px;line-height:1.6;max-width:34em}
+.stance .text p{margin:0 0 1em}
+.stance .draft{color:var(--grey)}
+footer{border-top:1px solid var(--ink);padding-block:14px 32px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--grey)}
+
+@media (max-width:760px){
+  .hero .label,.hero .bio,.hero .how,.pair .meta,.stage,.stance h2,.stance .text{grid-column:1/-1}
+  .stage{aspect-ratio:4/5}
+  .real .photo{width:58%}
+  .real .hand{max-width:70%}
+  .real .shout{max-width:80%;bottom:auto;top:28px;inset-inline-start:auto;inset-inline-end:28px}
+  .ai .cap{flex-direction:column;align-items:start}
+  header.spec{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){.ai{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="spec mono">
+    <span>Tzahi Shemesh</span><span>ID / Order × Break</span><span>Task 01 · HIT 2026</span><span>Sketch 01</span>
+  </header>
+
+  <div class="hero">
+    <h1>צחי שמש</h1>
+    <div class="label mono">מה המודל כתב עליי</div>
+    <p class="bio">צחי שמש הוא <em>מעצב יצירתי ונלהב</em> שמאמין בכוחו של עיצוב לשפר את חיי היומיום. הוא <em>אוהב משפחה</em>, מחפש <em>איזון בין פשטות לחום</em>, ומביא לכל פרויקט <em>תשומת לב לפרטים הקטנים</em>.</p>
+    <div class="how mono">משכו את התפר. הוא לא נפתח בקלות.</div>
+  </div>
+
+  <section class="pair" data-k="1">
+    <div class="meta"><span class="mono">01 · דיוקן</span><h2>הפנים</h2><span class="q">מה המודל רואה כשהוא שומע את השם שלי</span></div>
+    <div class="stage">
+      <div class="real">
+        <div class="photo">כאן: תמונה אמיתית שלך<br>לא מחמיאה במיוחד</div>
+        <div class="hand">כאן: משפט בכתב יד שלך</div>
+        <div class="shout"><b>את הפנים האלה אף אחד לא צילם.</b><small>טיוטה · המשפט יהיה שלך</small></div>
+      </div>
+      <div class="ai a"><div class="img"></div><div class="cap"><p>גבר בשנות הארבעים לחייו, חיוך בטוח, רקע אפור נקי.</p><span class="mono">AI · "portrait of Tzahi Shemesh"</span></div></div>
+      <div class="ai b"><div class="img"></div><div class="cap"><p>גבר בשנות הארבעים לחייו, חיוך בטוח, רקע אפור נקי.</p><span class="mono">AI · "portrait of Tzahi Shemesh"</span></div></div>
+      <span class="resist mono">חיכוך</span>
+      <button class="seam" aria-label="משכו כדי לפתוח את התמונה">⇆</button>
+    </div>
+  </section>
+
+  <section class="pair" data-k="2">
+    <div class="meta"><span class="mono">02 · בית</span><h2>הסלון</h2><span class="q">איך נראה בית של מעצב, לפי הממוצע</span></div>
+    <div class="stage">
+      <div class="real">
+        <div class="photo">כאן: פינה אמיתית בבית<br>בלי לסדר</div>
+        <div class="hand">כאן: מה באמת קורה בפינה הזו</div>
+        <div class="shout"><b>אצלי יש כביסה על הספה.</b><small>טיוטה · המשפט יהיה שלך</small></div>
+      </div>
+      <div class="ai a"><div class="img"></div><div class="cap"><p>סלון מינימליסטי מואר, ספה בהירה, מונסטרה בפינה.</p><span class="mono">AI · "Tzahi Shemesh's home"</span></div></div>
+      <div class="ai b"><div class="img"></div><div class="cap"><p>סלון מינימליסטי מואר, ספה בהירה, מונסטרה בפינה.</p><span class="mono">AI · "Tzahi Shemesh's home"</span></div></div>
+      <span class="resist mono">חיכוך</span>
+      <button class="seam" aria-label="משכו כדי לפתוח את התמונה">⇆</button>
+    </div>
+  </section>
+
+  <section class="pair" data-k="3">
+    <div class="meta"><span class="mono">03 · ילדות</span><h2>הרחוב</h2><span class="q">מקום, שפה, זיכרון: מה שאין במאגר</span></div>
+    <div class="stage">
+      <div class="real">
+        <div class="photo">כאן: תמונת ילדות סרוקה<br>או הרחוב שגדלת בו</div>
+        <div class="hand">כאן: משפט שרק המשפחה שלך אומרת</div>
+        <div class="shout"><b>הממוצע לא גדל בשום רחוב.</b><small>טיוטה · המשפט יהיה שלך</small></div>
+      </div>
+      <div class="ai a"><div class="img"></div><div class="cap"><p>ילד מחייך ברחוב שטוף שמש בעיר ישראלית.</p><span class="mono">AI · "Tzahi Shemesh as a child"</span></div></div>
+      <div class="ai b"><div class="img"></div><div class="cap"><p>ילד מחייך ברחוב שטוף שמש בעיר ישראלית.</p><span class="mono">AI · "Tzahi Shemesh as a child"</span></div></div>
+      <span class="resist mono">חיכוך</span>
+      <button class="seam" aria-label="משכו כדי לפתוח את התמונה">⇆</button>
+    </div>
+  </section>
+
+  <section class="stance">
+    <h2>חיכוך</h2>
+    <div class="text">
+      <p class="draft">כאן ייכנס טקסט העמדה, 300 עד 500 מילים. הכיוון: המודל מייצר דימוי ממוצע, חלק ומשכנע, שזמין מיד. האמת דורשת מאמץ. בעמוד הזה הסדר שייך למכונה, והשבירה היא הפעולה שלי נגדו: לחתוך את מה שהיא כתבה ולהראות מה היא לא יכלה לדעת.</p>
+      <p class="draft">החיכוך הוא לא באג. הוא העמדה.</p>
+    </div>
+  </section>
+
+  <footer class="mono"><span>Process → /process</span><span>Sketch 01 · placeholders</span></footer>
+</div>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.stage').forEach(stage => {
+    const a = stage.querySelector('.ai.a'), b = stage.querySelector('.ai.b'), seam = stage.querySelector('.seam');
+    let startX = 0, pull = 0, open = false, active = false;
+    const FRICTION = 0.32;            /* every 100px of pulling opens ~32px */
+    const max = () => stage.clientWidth * 0.62;
+    const set = d => { a.style.transform = `translateX(${-d}px)`; b.style.transform = `translateX(${d}px)`; };
+    const finish = () => {
+      active = false; stage.classList.remove('pulling'); a.classList.remove('dragging'); b.classList.remove('dragging');
+      if (pull * FRICTION > stage.clientWidth * 0.16) { open = true; stage.classList.add('open'); set(max()); }
+      else { pull = 0; set(0); }       /* not enough effort: it closes again */
+    };
+    seam.addEventListener('pointerdown', e => {
+      if (open) return; active = true; startX = e.clientX; seam.setPointerCapture(e.pointerId);
+      stage.classList.add('pulling'); a.classList.add('dragging'); b.classList.add('dragging');
+    });
+    seam.addEventListener('pointermove', e => {
+      if (!active) return;
+      pull = Math.abs(e.clientX - startX);
+      const jitter = reduce ? 0 : (Math.random() - .5) * 2;  /* the seam resists unevenly */
+      set(Math.min(pull * FRICTION + jitter, max()));
+    });
+    seam.addEventListener('pointerup', finish);
+    seam.addEventListener('pointercancel', finish);
+    seam.addEventListener('keydown', e => {
+      if (open || !['ArrowLeft','ArrowRight','Enter',' '].includes(e.key)) return;
+      e.preventDefault(); pull += 90; set(Math.min(pull * FRICTION, max()));
+      if (pull * FRICTION > stage.clientWidth * 0.16) { open = true; stage.classList.add('open'); set(max()); }
+    });
+  });
+})();
+</script>

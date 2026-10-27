@@ -1,0 +1,262 @@
+<title>תעודת זהות משבשת</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Hebrew:wght@200;300;400&family=Frank+Ruhl+Libre:wght@900&family=Heebo:wght@900&family=Suez+One&family=Secular+One&family=Amatic+SC:wght@700&display=swap">
+<style>
+/* Concept: one scroll journey. The machine's layer is cold, clean, Swiss; as you scroll it tears.
+   Under the tears: a hand-made collage on kraft (riso pink and yellow, tape, handwriting, ransom letters). */
+:root{
+  --ai-paper:#f7f8fa;   /* the machine: cool, clean, no texture */
+  --ai-ink:#5b6577;
+  --ai-soft:#dfe4ee;
+  --kraft:#a88f6c;      /* the human: cardboard */
+  --kraft-dark:#3a3128;
+  --ink:#141210;
+  --pink:#ff3fa4;       /* riso fluorescent pink */
+  --yellow:#ffe14a;     /* riso yellow */
+  --red:#e0201b;        /* Kruger */
+  --white:#fffdf8;
+  --f-ai:"IBM Plex Sans Hebrew",Arial,sans-serif;
+  --f-serif:"Frank Ruhl Libre","David",serif;
+  --f-shout:"Heebo",Arial,sans-serif;
+  --f-hand:"Amatic SC",cursive;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+html{background:var(--kraft-dark)}
+body{margin:0;background:var(--kraft-dark);color:var(--ink);font-family:var(--f-ai);overflow-x:hidden;
+  padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* textures */
+.kraft{background-color:var(--kraft);background-image:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .14  0 0 0 0 .08  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.006 .03' numOctaves='2'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 .95  0 0 0 0 .85  0 0 0 .25 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>")}
+.paper-white{background-color:var(--white);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- the machine's layer ---------- */
+.skin{position:absolute;inset:0;background:var(--ai-paper);color:var(--ai-ink)}
+.skin .grid{position:absolute;inset:0;background:repeating-linear-gradient(to left,transparent 0 calc(8.333% - 1px),rgba(91,101,119,.08) calc(8.333% - 1px) 8.333%)}
+
+/* ---------- tear stages ---------- */
+.pin{position:relative;height:230vh}
+.tear{position:sticky;top:0;height:100vh;min-height:520px;overflow:hidden}
+.tear .under{position:absolute;inset:0}
+.half{position:absolute;inset:0;filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 1px 0 #e9e4d8) drop-shadow(0 14px 18px rgba(0,0,0,.35));will-change:transform;z-index:2}
+.piece{position:absolute;inset:0}
+
+/* cover */
+.cover-skin{display:grid;grid-template-rows:auto 1fr auto;padding-block:20px 28px}
+.cover-skin header{display:flex;justify-content:space-between;gap:12px;direction:ltr;color:#97a0b0}
+.cover-skin h1{align-self:center;margin:0;font-weight:200;font-size:clamp(72px,17vw,250px);line-height:.85;letter-spacing:-.04em;color:#2c3240}
+.cover-skin .bio{max-width:34em;font-size:clamp(17px,1.8vw,22px);font-weight:300;line-height:1.5;margin:0}
+.cover-skin .hint{margin-top:18px;color:#97a0b0}
+
+/* collage pieces */
+.c{position:absolute}
+.photo{background:#1c1814;color:rgba(255,253,248,.55);display:grid;place-items:center;text-align:center;padding:14px;
+  box-shadow:0 10px 24px rgba(0,0,0,.35);font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.photo.white-frame{border:10px solid var(--white);border-bottom-width:34px}
+.tape{position:absolute;width:110px;height:30px;background:rgba(255,248,220,.55);box-shadow:0 1px 2px rgba(0,0,0,.15);
+  clip-path:polygon(3% 8%,10% 0,22% 6%,35% 0,50% 5%,64% 0,78% 6%,90% 0,97% 7%,100% 50%,96% 93%,86% 100%,72% 95%,58% 100%,44% 94%,30% 100%,16% 95%,4% 100%,0 50%)}
+.hand{font-family:var(--f-hand);color:var(--ink);line-height:.95}
+.kruger{font-family:var(--f-shout);font-weight:900;color:#fff;line-height:1.2}
+.kruger b{background:var(--red);padding:2px 10px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.serif{font-family:var(--f-serif);font-weight:900;line-height:.9}
+.stamp{font-family:var(--f-mono);font-weight:600;border:2px solid currentColor;padding:4px 8px;font-size:12px;letter-spacing:.1em}
+.ransom{display:inline-flex;flex-wrap:wrap;gap:3px;align-items:flex-end}
+.ransom span{display:inline-block;padding:2px 5px;box-shadow:0 2px 3px rgba(0,0,0,.25)}
+.splash{position:absolute;pointer-events:none;mix-blend-mode:multiply}
+.strip{background:var(--white);padding:4px 10px;box-shadow:0 2px 4px rgba(0,0,0,.25);font-family:var(--f-ai);font-size:15px;color:var(--ink)}
+.draft{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;color:rgba(20,18,16,.6);display:block;margin-top:6px}
+
+/* ---------- word-peel passage ---------- */
+.passage{position:relative;padding-block:22vh 26vh;overflow:hidden}
+.passage .sheet{position:relative;max-width:1100px;margin-inline:auto;background:var(--ai-paper);color:var(--ai-ink);padding:clamp(28px,6vw,80px);
+  box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.passage .label{color:#97a0b0;margin-bottom:28px;display:block}
+.passage p{margin:0;font-weight:300;font-size:clamp(26px,4vw,52px);line-height:1.3;letter-spacing:-.01em}
+.peel{position:relative;display:inline-block;white-space:nowrap}
+.peel .w{display:inline-block;transform-origin:100% 100%;will-change:transform;background:var(--ai-paper)}
+.peel .r{position:absolute;inset-inline-start:-6%;top:50%;transform:translateY(-50%) rotate(var(--rot,-3deg)) scale(var(--s,0));transform-origin:center;z-index:1;white-space:nowrap}
+
+/* ---------- ending ---------- */
+.ending{position:relative;min-height:120vh;overflow:hidden}
+.ending .inner{position:relative;max-width:1180px;margin-inline:auto;padding-block:16vh 20vh;display:grid;gap:4vh}
+.line{display:block}
+footer{padding-block:18px 28px;display:flex;justify-content:space-between;gap:12px;color:rgba(255,253,248,.5);direction:ltr;flex-wrap:wrap}
+
+@media (max-width:700px){
+  .hide-sm{display:none}
+}
+</style>
+
+<!-- ============ 1 · COVER: the bio tears horizontally ============ -->
+<section class="tear" data-dir="h" id="cover">
+  <div class="under kraft">
+    <div class="c photo white-frame" style="width:clamp(150px,24vw,300px);aspect-ratio:3/4;top:20%;right:12%;transform:rotate(-4deg)">כאן: דיוקן אמיתי שלך<br>מצולם בטלפון</div>
+    <div class="tape" style="top:17%;right:20%;transform:rotate(-14deg)"></div>
+    <div class="c hand" style="top:30%;left:9%;font-size:clamp(34px,5.5vw,76px);max-width:40%;transform:rotate(-3deg)">כאן: משפט בכתב היד שלך<br>על מי שאתה</div>
+    <div class="c kruger" style="bottom:20%;left:8%;font-size:clamp(22px,3.2vw,44px);max-width:56%"><b>את הפנים האלה המודל לא ראה.</b><span class="draft">טיוטה · המשפט יהיה שלך</span></div>
+    <div class="c serif" style="bottom:10%;right:9%;font-size:clamp(70px,13vw,190px);color:var(--yellow);transform:rotate(3deg);mix-blend-mode:multiply">צחי</div>
+    <div class="splash" data-splash="pink" style="top:6%;left:30%;width:clamp(180px,26vw,380px)"></div>
+  </div>
+  <template>
+    <div class="skin cover-skin gut">
+      <div class="grid"></div>
+      <header class="mono"><span>ID / ORDER × BREAK</span><span class="hide-sm">GENERATED PROFILE</span><span>HIT 2026</span></header>
+      <h1>צחי שמש</h1>
+      <div>
+        <p class="bio">מעצב יצירתי ונלהב שמאמין בכוחו של עיצוב לשפר את חיי היומיום. אוהב משפחה, מחפש איזון בין פשטות לחום, ומביא לכל פרויקט תשומת לב לפרטים הקטנים.</p>
+        <div class="hint mono">↓ לגלול</div>
+      </div>
+    </div>
+  </template>
+</section>
+
+<!-- ============ 2 · PASSAGE: single words peel off ============ -->
+<section class="passage kraft gut" id="home">
+  <div class="splash" data-splash="yellow" style="top:8%;right:4%;width:clamp(200px,30vw,460px)"></div>
+  <div class="sheet">
+    <span class="label mono">הבית, לפי המודל</span>
+    <p>בבית של צחי שולט סגנון
+      <span class="peel" data-at=".15"><span class="w">מינימליסטי ומואר</span><span class="r ransom" style="--rot:-4deg">
+        <span style="background:var(--yellow);font-family:var(--f-serif);font-weight:900">ב</span><span style="background:#fff;font-family:'Suez One'">ל</span><span style="background:var(--ink);color:#fff;font-family:'Secular One'">ג</span><span style="background:var(--pink);font-family:var(--f-shout);font-weight:900">ן</span></span></span>.
+      ספה
+      <span class="peel" data-at=".35"><span class="w">בהירה</span><span class="r strip" style="--rot:3deg">עם כביסה עליה</span></span>,
+      צמח
+      <span class="peel" data-at=".5"><span class="w">מונסטרה</span><span class="r hand" style="--rot:-6deg;font-size:1.3em;background:var(--yellow);padding:0 8px">כאן: מה באמת יש שם</span></span>
+      בפינה, ו<span class="peel" data-at=".65"><span class="w">שקט</span><span class="r ransom" style="--rot:5deg">
+        <span style="background:var(--pink);font-family:'Secular One'">ר</span><span style="background:#fff;font-family:var(--f-serif);font-weight:900">ע</span><span style="background:var(--yellow);font-family:'Suez One'">ש</span></span></span>
+      שמאפשר להתרכז.
+    </p>
+    <span class="draft" style="margin-top:32px">טיוטה · המילים שנקרעות יהיו שלך</span>
+  </div>
+</section>
+
+<!-- ============ 3 · IMAGE: the generated childhood rips vertically ============ -->
+<section class="tear" data-dir="v" id="street">
+  <div class="under kraft">
+    <div class="c photo" style="width:clamp(170px,30vw,420px);aspect-ratio:4/3;top:16%;left:50%;transform:translateX(-50%) rotate(2deg)">כאן: תמונת ילדות סרוקה<br>או הרחוב שגדלת בו</div>
+    <div class="tape" style="top:14%;left:42%;transform:rotate(8deg)"></div>
+    <div class="c ransom" style="top:58%;right:8%;font-size:clamp(22px,3.4vw,46px);max-width:84%">
+      <span style="background:#fff;font-family:var(--f-serif);font-weight:900">המודל</span><span style="background:var(--yellow);font-family:'Suez One'">לא</span><span style="background:var(--ink);color:#fff;font-family:'Secular One'">יודע</span><span style="background:var(--pink);font-family:var(--f-shout);font-weight:900">איך</span><span style="background:#fff;font-family:'Suez One'">קוראים</span><span style="background:var(--yellow);font-family:var(--f-serif);font-weight:900">לרחוב</span>
+    </div>
+    <div class="c hand" style="bottom:12%;left:10%;font-size:clamp(30px,4.6vw,64px);transform:rotate(-2deg)">כאן: משפט שרק<br>המשפחה שלך אומרת</div>
+    <div class="c stamp" style="top:9%;right:8%;color:var(--red);transform:rotate(-8deg)">NOT IN DATASET</div>
+    <div class="splash" data-splash="pink" style="bottom:4%;right:30%;width:clamp(160px,22vw,320px)"></div>
+  </div>
+  <template>
+    <div class="skin gut" style="display:grid;place-items:center">
+      <div class="grid"></div>
+      <div style="position:absolute;inset:8% 10% 18%;background:radial-gradient(50% 60% at 50% 40%,#fbfcfe,transparent 70%),linear-gradient(170deg,#e8edf6,#cfd8ea);border-radius:2px"></div>
+      <div style="position:absolute;inset-inline:10%;bottom:7%;display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap">
+        <p style="margin:0;font-weight:300;font-size:clamp(16px,1.6vw,20px)">ילד מחייך ברחוב שטוף שמש בעיר ישראלית.</p>
+        <span class="mono" style="direction:ltr;color:#97a0b0">AI · "TZAHI SHEMESH AS A CHILD"</span>
+      </div>
+    </div>
+  </template>
+</section>
+
+<!-- ============ 4 · ENDING: the stance as collage ============ -->
+<section class="ending kraft gut" id="stance">
+  <div class="splash" data-splash="yellow" style="top:4%;left:-4%;width:clamp(240px,36vw,560px)"></div>
+  <div class="splash" data-splash="pink" style="bottom:10%;right:6%;width:clamp(200px,28vw,420px)"></div>
+  <div class="inner">
+    <span class="line mono" style="color:var(--ink)">עמדה · טיוטה</span>
+    <span class="line serif" style="font-size:clamp(60px,12vw,170px);color:var(--ink)">חיכוך</span>
+    <span class="line" style="font-size:clamp(20px,2.4vw,30px);max-width:24em;font-weight:300">המודל נותן את הממוצע מיד: חלק, נקי, משכנע.</span>
+    <span class="line hand" style="font-size:clamp(40px,6vw,86px);transform:rotate(-2deg);justify-self:end">האמת דורשת מאמץ.</span>
+    <span class="line" style="max-width:36em;font-size:17px;line-height:1.6;background:var(--white);padding:18px 22px;box-shadow:0 8px 20px rgba(0,0,0,.25);transform:rotate(.6deg)">כאן ייכנס טקסט העמדה, 300 עד 500 מילים. הסדר בעמוד שייך למכונה. השבירה היא הפעולה שלי נגדו: לקרוע את מה שהיא כתבה ולהראות מה היא לא יכלה לדעת.</span>
+    <span class="line kruger" style="font-size:clamp(26px,4.4vw,60px)"><b>החיכוך הוא העמדה.</b></span>
+  </div>
+</section>
+
+<footer class="gut mono"><span>TZAHI SHEMESH · TASK 01</span><span>SKETCH 02 · PLACEHOLDERS</span></footer>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd = (a,b) => a + Math.random()*(b-a);
+
+  /* ---- splashes: riso ink blobs, generated fresh on every visit ---- */
+  const colors = {pink:'#ff3fa4', yellow:'#ffe14a'};
+  document.querySelectorAll('[data-splash]').forEach((el,i) => {
+    const c = colors[el.dataset.splash], id = 'sp'+i;
+    let dots = `<circle cx="100" cy="100" r="${rnd(46,62)}"/>`;
+    for (let k=0;k<26;k++){ const a=rnd(0,6.28), d=rnd(50,96), r=rnd(1.5,9)*(1-d/120); dots += `<circle cx="${100+Math.cos(a)*d}" cy="${100+Math.sin(a)*d}" r="${Math.max(r,1.2)}"/>`; }
+    for (let k=0;k<5;k++){ const a=rnd(0,6.28); dots += `<ellipse cx="${100+Math.cos(a)*58}" cy="${100+Math.sin(a)*58}" rx="${rnd(10,22)}" ry="${rnd(4,8)}" transform="rotate(${a*57.3} ${100+Math.cos(a)*58} ${100+Math.sin(a)*58})"/>`; }
+    el.innerHTML = `<svg viewBox="0 0 200 200" width="100%" style="display:block;overflow:visible"><filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency="${rnd(.03,.05)}" numOctaves="3" seed="${Math.floor(rnd(1,99))}"/><feDisplacementMap in="SourceGraphic" scale="${rnd(16,26)}"/></filter><g fill="${c}" opacity=".92" filter="url(#${id})">${dots}</g></svg>`;
+    el.dataset.base = rnd(-30,30).toFixed(1);
+  });
+
+  /* ---- tear stages: cut the machine's layer along a jagged line ---- */
+  function jag(n, lo, hi){ const pts=[]; for(let i=0;i<=n;i++) pts.push([i/n*100, rnd(lo,hi)]); return pts; }
+  const tears = [...document.querySelectorAll('.tear')].map(stage => {
+    const pin = document.createElement('div'); pin.className = 'pin';
+    stage.parentNode.insertBefore(pin, stage); pin.appendChild(stage);   /* the stage holds still while you scroll through it */
+    const tpl = stage.querySelector('template'), dir = stage.dataset.dir;
+    const line = jag(dir==='h'?34:26, 44, 56);
+    const make = side => {
+      const half = document.createElement('div'); half.className = 'half';
+      const piece = document.createElement('div'); piece.className = 'piece';
+      piece.appendChild(tpl.content.cloneNode(true));
+      let poly;
+      if (dir==='h'){
+        const edge = line.map(([x,y])=>`${x}% ${y}%`);              /* left to right */
+        poly = side ? ['0 0','100% 0',...edge.slice().reverse()] : [...edge,'100% 100%','0 100%'];
+      } else {
+        const edge = line.map(([y,x])=>`${x}% ${y}%`);              /* top to bottom */
+        poly = side ? ['0 0',...edge,'0 100%'] : ['100% 0',...edge,'100% 100%'];
+      }
+      piece.style.clipPath = `polygon(${poly.join(',')})`;
+      half.appendChild(piece); stage.appendChild(half); return half;
+    };
+    return {stage, pin, dir, a: make(true), b: make(false), tilt: rnd(2,5)};
+  });
+
+  /* ---- word peels ---- */
+  const passage = document.getElementById('home');
+  const peels = [...passage.querySelectorAll('.peel')].map(el => ({el, at:+el.dataset.at, w:el.querySelector('.w'), r:el.querySelector('.r'), dir: Math.random()<.5?-1:1}));
+
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const ease = t => 1 - Math.pow(1-t, 3);
+  function progress(el, start=.85, end=.25){
+    const r = el.getBoundingClientRect(), vh = innerHeight, mid = r.top + r.height/2;
+    return clamp((vh*start - mid) / (vh*(start-end)));
+  }
+
+  function frame(){
+    tears.forEach(t => {
+      const r = t.pin.getBoundingClientRect();
+      const p = reduce ? 1 : ease(clamp((-r.top - innerHeight*.08) / (r.height - innerHeight*1.35)));
+      if (t.dir==='h'){
+        t.a.style.transform = `translateY(${-p*46}%) rotate(${-p*t.tilt}deg)`;
+        t.b.style.transform = `translateY(${p*52}%) rotate(${p*t.tilt*.7}deg)`;
+      } else {
+        t.a.style.transform = `translateX(${-p*58}%) rotate(${-p*t.tilt}deg)`;
+        t.b.style.transform = `translateX(${p*58}%) rotate(${p*t.tilt}deg)`;
+      }
+    });
+    const pp = reduce ? 1 : progress(passage, 1.0, -.1);
+    peels.forEach(o => {
+      const q = reduce ? 1 : ease(clamp((pp - o.at) / .18));
+      o.w.style.transform = `translate(${o.dir*q*30}px, ${q*q*160}px) rotate(${o.dir*q*28}deg)`;
+      o.w.style.opacity = 1 - q*q;
+      o.r.style.setProperty('--s', q < .35 ? 0 : Math.min(1, (q-.35)/.35*1.15));
+    });
+    document.querySelectorAll('[data-splash]').forEach(el => {
+      const p = reduce ? 1 : ease(progress(el, 1.05, .45));
+      el.style.transform = `scale(${.2 + p*.8}) rotate(${+el.dataset.base + p*12}deg)`;
+      el.style.opacity = p;
+    });
+  }
+  let ticking = false;
+  addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(() => { frame(); ticking = false; }); } }, {passive:true});
+  addEventListener('resize', frame);
+  frame();
+})();
+</script>
