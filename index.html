@@ -124,7 +124,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   for (let i = 0; i < modType.length; i++) if (Math.random() < .14) modType[i] = (Math.random() * PATTERNS.length) | 0;
 
   // the opening question, set into the field like a selected phrase
-  const Q = flipRuns('////צחי שמש?////');
+  const Q = 'צחי שמש )?(';            // drawn one letter per cell, right to left, so the brackets are written mirrored
   let qRow = 0, qCol0 = 0;
   const qGone = Array.from(Q, () => .004 + Math.random() * .05);   // each letter falls back into the stream at its own moment
 
@@ -164,7 +164,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const mk = () => { const c = document.createElement('canvas'); c.width = Math.ceil(COLS * FW); c.height = ROWS * FH; return c; };
   function renderRows(r0, r1, t){
     const l = farL.getContext('2d'), d = farD.getContext('2d');
-    for (const g of [l, d]) { g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`; g.clearRect(0, r0 * FH, farL.width, (r1 - r0) * FH); }
+    for (const g of [l, d]) { g.direction = 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`; g.clearRect(0, r0 * FH, farL.width, (r1 - r0) * FH); }
     for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
       const [ch, isR, isP] = charAt(r, sc, t), L = lum[r * COLS + sc];
       const aL = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0)), aD = Math.min(1, 0.1 + 0.9 * (1 - L) + (isP ? .1 : 0));
@@ -192,7 +192,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   function size(){
     DPR = Math.min(2, devicePixelRatio || 1);
     W = stage.clientWidth; H = stage.clientHeight;
-    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
   }
 
   const clamp = v => Math.max(0, Math.min(1, v));
