@@ -33,6 +33,7 @@ body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
+#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
 .hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
 .hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
@@ -94,6 +95,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <canvas id="c" aria-hidden="true"></canvas>
     <div id="ghosts" aria-hidden="true"></div>
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
+    <canvas id="ink" aria-hidden="true"></canvas>
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span></div>
     <div class="hud gut"><span>גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
   </section>
@@ -198,6 +200,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   }
 
   const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const ink = document.getElementById('ink'), ix = ink.getContext('2d');   // version 19: my hand, above everything, the photo too
   const photo = document.getElementById('photo');
   const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
   const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
@@ -269,6 +272,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     DPR = Math.min(2, devicePixelRatio || 1);
     W = stage.clientWidth; H = stage.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
+    ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
   }
 
   const clamp = v => Math.max(0, Math.min(1, v));
@@ -382,8 +386,85 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
     photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
     photo.style.opacity = fadeIn;
+    drawInk(p, ox, oy, cw, cell, fadeIn);
     hudC.textContent = Math.round(Math.min(N, (W / cw) * (H / cell))).toLocaleString('en') + ' / ' + N.toLocaleString('en');
     hudD.textContent = (startCell / cell).toFixed(2) + 'x';
+  }
+
+  /* ---------- version 19: the route through my five homes, and the (?) crossed out at the end ----------
+     The lines are temporary, drawn by code, until I draw them by hand (raw/handwriting/). */
+  // [module from the left, module from the top, label]: in the order I lived in them
+  const HOMES = [[23, 8, '1 חולון'], [16, 6, '2 חולון'], [6, 4, '3 להבים'], [8, 13, '4 חולון'], [19, 16, '5 ראשון לציון']];
+  const node = h => [h[0] * MOD + MOD / 2, h[1] * MOD + MOD / 2];   // in cells
+  const jit = () => (Math.random() - .5) * .9;
+  const ROUTE = [];                                     // a plan-like route: along, then down, the way a corridor turns
+  for (let i = 0; i < HOMES.length; i++) {
+    const [c, r] = node(HOMES[i]);
+    if (i) { const [pc] = node(HOMES[i - 1]); ROUTE.push({c: c + jit(), r: ROUTE[ROUTE.length - 1].r + jit(), n: -1}); }
+    ROUTE.push({c: c + jit(), r: r + jit(), n: i});
+  }
+  for (let i = ROUTE.length - 1; i > 0; i--) {         // a hand does not draw straight: small wobbles along each piece
+    const a = ROUTE[i - 1], b = ROUTE[i], n = 5;
+    for (let j = n - 1; j > 0; j--) ROUTE.splice(i, 0, {c: lerp(a.c, b.c, j / n) + jit() * .5, r: lerp(a.r, b.r, j / n) + jit() * .5, n: -1});
+  }
+  let routeLen = 0; ROUTE.forEach((q, i) => { q.d = i ? routeLen += Math.hypot(q.c - ROUTE[i - 1].c, (q.r - ROUTE[i - 1].r) / AR) : 0; });
+  const STRIKE = Array.from({length: 7}, (_, i) => ({u: i / 6, v: .5 + (Math.random() - .5) * .25 + (i / 6 - .5) * .18}));
+
+  function stroke(g, pts, w){                           // a crayon line: three thin passes, slightly apart
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (let k = 0; k < 3; k++) {
+      g.strokeStyle = `rgba(236,233,226,${k ? .45 : .8})`; g.lineWidth = w * (k ? .55 : 1);
+      g.beginPath(); pts.forEach(([x, y], i) => { const dx = k ? (k - 1.5) * w * .35 : 0; i ? g.lineTo(x + dx, y + dx * .6) : g.moveTo(x + dx, y + dx * .6); }); g.stroke();
+    }
+  }
+  function handWord(g, word, xr, y, hpx){               // a word in my letters, right to left from xr
+    const w = hpx * .62;
+    Array.from(word).forEach((ch, i) => { if (ch !== ' ') handAt(g, gIdx(ch), xr - (i + 1) * w, y, w, hpx, 1.25); });
+  }
+  function drawInk(p, ox, oy, cw, cell, photoIn){
+    ix.clearRect(0, 0, W, H);
+    if (!hand.ready) return;
+    const X = c => ox + c * cw, Y = r => oy + r * cell;
+    // the route draws itself between p .3 and .84
+    const k = clamp((p - .3) / .54) * routeLen;
+    if (k > 0) {
+      ix.globalAlpha = 1 - photoIn * .7;
+      const pts = [];
+      for (let i = 0; i < ROUTE.length; i++) {
+        const q = ROUTE[i];
+        if (q.d <= k) pts.push([X(q.c), Y(q.r)]);
+        else { const a = ROUTE[i - 1], t = (k - a.d) / (q.d - a.d); pts.push([X(lerp(a.c, q.c, t)), Y(lerp(a.r, q.r, t))]); break; }
+      }
+      stroke(ix, pts, Math.max(1.6, cell * .3));
+      const hpx = Math.max(26, cell * 4);
+      ROUTE.forEach(q => {
+        if (q.n < 0 || q.d > k) return;
+        const x = X(q.c), y = Y(q.r);
+        ix.fillStyle = '#ece9e2'; ix.beginPath(); ix.arc(x, y, Math.max(2.5, cell * .45), 0, 7); ix.fill();
+        handWord(ix, HOMES[q.n][2], x + hpx * .2, y - hpx * 1.1, hpx);
+      });
+      ix.globalAlpha = 1;
+    }
+    // the opening question comes back over the photo, and my hand crosses out the (?)
+    const back = clamp((p - .9) / .03);
+    if (back > 0) {
+      const sz = Math.max(cell, Math.min(W, H) / 26), sw = sz * AR;
+      const xr = X(COLS - MOD * 2), y0 = Y(MOD * 2);      // top right of the photo, off the faces
+      ix.globalAlpha = back;
+      ix.font = `${sz * .92}px "IBM Plex Sans Hebrew", Arial`; ix.textAlign = 'center'; ix.textBaseline = 'middle';
+      QL.forEach((wd, l) => Array.from(wd).forEach((ch, i) => {
+        const x = xr - (i + 1) * sw, y = y0 + l * sz;
+        ix.fillStyle = '#e0322b'; ix.fillRect(x, y, sw + .5, sz + .5);
+        ix.fillStyle = '#fff'; ix.fillText(ch, x + sw / 2, y + sz / 2);
+      }));
+      const s = clamp((p - .94) / .04);
+      if (s > 0) {
+        const x0 = xr + sw * .5, x1 = xr - 3.5 * sw, y = y0 + 2 * sz;
+        const pts = STRIKE.filter(q => q.u <= s).map(q => [lerp(x0, x1, q.u), y + q.v * sz]);
+        if (pts.length > 1) { stroke(ix, pts, Math.max(3, sz * .24)); stroke(ix, pts.map(([x, y]) => [x, y + sz * .12]), Math.max(2, sz * .14)); }
+      }
+      ix.globalAlpha = 1;
+    }
   }
 
   /* ---------- the model's images, one at a time as you step back, never more than four ---------- */

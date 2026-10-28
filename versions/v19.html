@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>תעודת זהות משבשת</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="צחי שמש? מקרוב רעש של אותיות על מסך. מרחוק, דף מודפס ותמונה משפחתית.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=IBM+Plex+Mono:wght@400&family=Rubik:wght@400;500;700&display=swap">
+<style>
+/* One field of characters on a strict, visible grid (the order). Up close it streams and flickers like
+   running code on a black screen, and some modules turn into patterns (the break). Every letter belongs to
+   a sentence about me. Pulling back, the screen turns into paper: the machine's black gives way to a printed
+   page, and the field becomes a faded family photograph. */
+:root{
+  --screen:#0d0d0c;       /* the machine */
+  --paper:#ebe7dd;        /* the page, the colour of the paper I tore */
+  --ink:#1b1a17;
+  --light:#ece9e2;
+  --red:#e0322b;          /* what the model guessed about me */
+  --f:"IBM Plex Sans Hebrew","Arial Hebrew",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --fg:var(--light); --fg-dim:rgba(236,233,226,.55); --panel:rgba(13,13,12,.8);   /* updated while scrolling */
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--screen)}
+body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height:1.65;overflow-x:hidden}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pin{position:relative;height:820vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
+#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
+.hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
+.hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
+.key{position:absolute;top:max(14px,env(safe-area-inset-top,0px));inset-inline-start:max(16px,env(safe-area-inset-left,0px));font-size:12px;color:var(--fg-dim);display:flex;gap:16px;flex-wrap:wrap;pointer-events:none;background:var(--panel);padding:4px 8px}
+.key b{font-weight:400;color:var(--fg)} .key i{font-style:normal;color:var(--red)}
+.after{max-width:760px;margin-inline:auto;padding-block:16svh 10svh;display:grid;gap:28px}
+.after h1{margin:0;font-weight:700;font-size:clamp(44px,8vw,96px);line-height:.95;letter-spacing:-.01em}
+.after p{margin:0;max-width:36em;font-weight:300;font-size:clamp(17px,1.9vw,20px)}
+.after .draft{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#7d7a72;border-top:1px dashed #7d7a72;padding-top:4px;justify-self:start}
+footer{max-width:760px;margin-inline:auto;padding-block:20px 40px;border-top:1px solid #2a2a28;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:#7d7a72}
+footer a{color:var(--light)}
+a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+/* ---------- the opening: the site a model would build for me (the typology), before the field breaks through ---------- */
+#typo{position:absolute;inset:0;z-index:20;overflow:hidden}
+#typo .strip{position:absolute;left:0;right:0;overflow:hidden;will-change:transform,opacity}
+.t-in{position:absolute;left:0;right:0;font-family:"Rubik","Arial Hebrew",Arial,sans-serif;color:#fff;
+  background:radial-gradient(60% 50% at 70% 20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(135deg,#7b6cf6 0%,#5b8cf6 55%,#4fa3f7 100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 24px}
+.t-nav{align-self:stretch;display:flex;justify-content:space-between;align-items:center;padding:22px 8px;font-size:15px}
+.t-nav b{font-weight:700;font-size:20px}
+.t-nav span{display:flex;gap:22px;opacity:.9}
+.t-hero{margin-top:6vh;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:640px}
+.t-ava{width:118px;height:118px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 6px rgba(255,255,255,.35),0 18px 40px rgba(20,20,80,.35)}
+.t-hero h1{margin:0;font-weight:700;font-size:clamp(36px,5vw,56px);line-height:1.1}
+.t-hero p{margin:0;font-size:clamp(17px,1.8vw,21px);opacity:.9;line-height:1.5}
+.t-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.t-btns span{border-radius:999px;padding:12px 26px;font-weight:500;font-size:16px}
+.t-btns .a{background:#fff;color:#5b5fd6;box-shadow:0 10px 24px rgba(20,20,80,.25)} .t-btns .b{border:2px solid rgba(255,255,255,.8)}
+.t-cards{display:grid;grid-template-columns:repeat(3,minmax(0,200px));gap:18px;margin-top:6vh}
+.t-card{background:#fff;color:#2c2f48;border-radius:20px;padding:22px 18px;box-shadow:0 16px 40px rgba(20,20,80,.22);display:grid;gap:8px;justify-items:center}
+.t-card i{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#7b6cf6,#4fa3f7);display:block}
+.t-card b{font-weight:500} .t-card small{color:#7a7f99;font-size:13px}
+@media (max-width:640px){.t-cards{grid-template-columns:1fr 1fr}.t-card:last-child{display:none}.t-nav span{display:none}}
+</style>
+</head>
+<body>
+
+<div class="pin">
+  <section class="stage" aria-label="שדה של אותיות שמתרחק ונהיה צילום משפחתי">
+    <div id="typo" aria-label="האתר שמודל היה בונה לי">
+      <template id="typo-tpl">
+        <div class="t-in">
+          <div class="t-nav"><b>צחי.</b><span>בית · אודות · פרויקטים · צור קשר</span></div>
+          <div class="t-hero">
+            <img class="t-ava" src="../assets/ai-portrait-a.jpg" alt="">
+            <h1>היי, אני צחי שמש ✨</h1>
+            <p>מעצב פנים יצירתי ונלהב, שיוצר חללים על-זמניים המשלבים פונקציונליות, חום ואסתטיקה.</p>
+            <div class="t-btns"><span class="a">לתיק העבודות</span><span class="b">בואו נדבר</span></div>
+          </div>
+          <div class="t-cards">
+            <div class="t-card"><i></i><b>עיצוב מגורים</b><small>בתים שמספרים סיפור</small></div>
+            <div class="t-card"><i></i><b>חללים מסחריים</b><small>חוויה שמתחילה בכניסה</small></div>
+            <div class="t-card"><i></i><b>ייעוץ וליווי</b><small>מהקונספט ועד המפתח</small></div>
+          </div>
+        </div>
+      </template>
+    </div>
+    <canvas id="c" aria-hidden="true"></canvas>
+    <div id="ghosts" aria-hidden="true"></div>
+    <img id="photo" src="../assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
+    <canvas id="ink" aria-hidden="true"></canvas>
+    <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span></div>
+    <div class="hud gut"><span>גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
+  </section>
+</div>
+
+<section class="after gut" aria-label="על העבודה">
+  <h1>צחי שמש?</h1>
+  <p>מקרוב אני רעש: אותיות שזורמות ומהבהבות על מסך שחור, כמו קוד רץ. אבל כל אות שייכת למשפט אמיתי: חמש כתובות לפני הגיוס, קומה מתחת לדודים, הרעש של הכביש, המדבר בלהבים, הסלון בשמונה בבוקר.</p>
+  <p>באדום, מה שמודל ניחש עליי כשביקשתי שידמיין אותי: בן 55, שיער אפור, בלייזר כהה, סלון עם שיש, ילדות בניו יורק. הניחושים האלה נבלעים בשדה, כמו שהם נבלעים בממוצע.</p>
+  <p>רק מרחוק, כשמוותרים על הקריאה, הרעש מתארגן לתמונה. הפנים של הילדים שלי נשארות רעש גם בסוף. אותן המכונה לא מקבלת.</p>
+  <span class="draft">טיוטה · טקסט העמדה הסופי ייכתב על ידי</span>
+</section>
+
+<footer class="gut">
+  <span>צחי שמש · עיצוב בעזרת בינה מלאכותית · HIT 2026</span>
+  <span><a href="https://github.com/zakyshemesh-sketch/task-01/tree/main/process">תיעוד התהליך</a> · <a href="https://github.com/zakyshemesh-sketch/task-01">הריפו</a></span>
+</footer>
+
+<script>
+(function(){
+  /* ---------- what the field is made of ---------- */
+  const MINE = [
+    'צחי שמש', '43', 'מעצב פנים', 'סטודיו עצמאי', 'מרצה במוסדות אקדמיים', 'סטודנט M.Des ב-HIT', 'נשוי לנועה', 'אבא',
+    'שדרות ירושלים, חולון: קומה מתחת לדודים',
+    'אלופי צה"ל, חולון: קומה ראשונה, על כביש סואן. הרעש',
+    'הסייפן, להבים: ילדות טהורה. משחקים ברחוב. יציאה למדבר',
+    'מכלף, חולון: חברים שמלווים אותי עד היום. שכונה שקטה. חדר משלי',
+    'ראשון לציון: רגע לפני הגיוס. לא היה חיבור לבית הזה, עד שחזרתי לגור בו עם הילדים שלי',
+    'אין לי תמונות מהילדות', 'יש לי חמש כתובות', 'קירח',
+    'הסלון בשמונה בבוקר: עגלת בובות, כיסא ילדים, צעצועים על הרצפה'
+  ];
+  // everything here is something an image model actually produced when asked to show me (process/01-03)
+  const GUESS = [
+    'בן 55?', 'שיער אפור?', 'זקן אפור?', 'שיער מלא?', 'בלייזר כהה?', 'חולצה שחורה?', 'ג\'ינס ושעון?', 'ידיים בכיסים?',
+    'חיוך בטוח?', 'מנורות פליז?', 'סלון עם שיש?', 'טלוויזיה ענקית?', 'ספה בז\'?', 'תאורה נסתרת?', 'כורסת עור?',
+    'סטודיו מסודר?', 'לוח השראה על הקיר?', 'דוגמאות חומרים?', 'תמיד לבד?', 'בלי ילדים?',
+    'ילד עם כביסה תלויה?', 'כיסאות פלסטיק בחצר?', 'עצי זית?', 'אבן ירושלמית?', 'ילד קירח?', 'ילדות בסנטרל פארק?',
+    'גדל בהארלם?', 'גדל בקווינס?', 'סמטה במזרח אסיה?', 'תיק כתום?', 'משקפיים על הראש?', 'אור זהוב?', 'עור חלק יותר?'
+  ];
+  // version 17: my hand answers the model. Each pair is a guess and what I wrote back, from the letters on my sheet
+  const ANSWER = {
+    'בן 55?': '43', 'שיער אפור?': 'קירח', 'שיער מלא?': 'קירח', 'בלי ילדים?': 'אבא', 'תמיד לבד?': 'נשוי לנועה',
+    'גדל בהארלם?': 'חולון', 'גדל בקווינס?': 'להבים', 'ילדות בסנטרל פארק?': 'להבים', 'סמטה במזרח אסיה?': 'חולון',
+    'ילד עם כביסה תלויה?': 'משחקים ברחוב', 'עצי זית?': 'מדבר', 'אבן ירושלמית?': 'חולון', 'סלון עם שיש?': 'עגלת בובות',
+    'טלוויזיה ענקית?': 'צעצועים על הרצפה', 'משקפיים על הראש?': 'משקפיים ישנים'
+  };
+  const NOISE = 'אבגדהוזחטיכלמנסעפצקרשת0123456789#%&*+=<>/\\|:;.,-_';
+  const flipRuns = s => s.replace(/[0-9A-Za-z.\-]{2,}/g, m => m.split('').reverse().join(''));   // cells fill right to left
+
+  // guesses land at random places and are drawn at random, so no two stretches of the field repeat
+  let stream = '', red = [], hw = [];
+  const mine = () => MINE[(Math.random() * MINE.length) | 0];
+  const push = (s, isR, isH) => { stream += s; for (let i = 0; i < s.length; i++) { red.push(isR); hw.push(isH && s[i] !== ' '); } };
+  while (stream.length < 62000) {
+    if (Math.random() < .17) {
+      const g = GUESS[(Math.random() * GUESS.length) | 0];
+      push(flipRuns(g), true, false);
+      if (ANSWER[g] && Math.random() < .75) push(' ' + flipRuns(ANSWER[g]), false, true);   // the hand writes back right after the guess
+    } else push(flipRuns(mine()), false, false);
+    push(' / ', false, false);
+  }
+
+  /* ---------- the grid ---------- */
+  const AR = 0.6;
+  const ROWS = 168, COLS = Math.round(ROWS * 0.75 / AR);
+  const MOD = 8, MC = Math.ceil(COLS / MOD), MR = Math.ceil(ROWS / MOD);
+  const N = COLS * ROWS;
+  const lum = new Float32Array(N);
+  // rows stream in the direction Hebrew is read: text enters on the left and moves right. Most rows stand still.
+  const speed = Array.from({length: ROWS}, () => { const x = Math.random(); return x < .5 ? 0 : x < .8 ? .5 : 1.1; });
+
+  const PATTERNS = [
+    (r, c, t) => '/',
+    (r, c, t) => ((r + c) % 2 ? '·' : ' '),
+    (r, c, t) => ((r % 2 === 0 && c % 2 === 0) ? '+' : ' '),
+    (r, c, t, L) => ' ░▒▓█'[Math.min(4, Math.floor(L * 5))],
+    (r, c, t) => ((Math.sin(r * 1.7 + c * 3.1 + Math.floor(t * 2)) > 0) ? '1' : '0'),
+    (r, c, t) => ((c + Math.floor(t * 1.5)) % 4 === 0 ? '|' : '-'),
+  ];
+  const modType = new Int8Array(MC * MR).fill(-1);
+  for (let i = 0; i < modType.length; i++) if (Math.random() < .14) modType[i] = (Math.random() * PATTERNS.length) | 0;
+
+  // the opening question, set into the field like a selected phrase
+  // set into module י12, from its top right corner: one word per row. Letters are drawn one per cell, right to left,
+  // so the brackets are written mirrored.
+  const QL = ['צחי', 'שמש', ')?('];
+  const Q_MC = MC - 1 - 9, Q_MR = 11;                  // module י12 (י is the 10th letter, counted from the right)
+  const Q_ROW = Q_MR * MOD + 1, Q_SC = Q_MC * MOD + MOD - 1;   // one row below the module label, at its right edge
+  const qGone = QL.map(w => Array.from(w, () => .004 + Math.random() * .05));   // each letter falls back into the stream at its own moment
+
+  // version 17: traces. A handwritten letter does not vanish at once, it fades over TRACE seconds
+  const TRACE = 26, tr = new Float32Array(COLS * ROWS).fill(-1e6), tg = new Uint8Array(COLS * ROWS);
+  const hash = (a, b, c) => { let h = a * 374761393 + b * 668265263 + c * 2147483647; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+
+  function charAt(r, sc, t){
+    const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
+    if (modType[m] >= 0) return [PATTERNS[modType[m]](r, sc, t, lum[r * COLS + sc]), false, true];
+    const c = COLS - 1 - sc;
+    const shift = Math.floor(t * speed[r]);
+    const k = r * COLS + (((c - shift) % COLS) + COLS) % COLS;
+    return [stream[k], red[k], false, hw[k]];
+  }
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const ink = document.getElementById('ink'), ix = ink.getContext('2d');   // version 19: my hand, above everything, the photo too
+  const photo = document.getElementById('photo');
+  const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
+  const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, DPR = 1, ready = false;
+
+  function readPhoto(img){
+    const t = document.createElement('canvas'); t.width = COLS; t.height = ROWS;
+    const x = t.getContext('2d'); x.drawImage(img, 0, 0, COLS, ROWS);
+    const d = x.getImageData(0, 0, COLS, ROWS).data;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const k = (r * COLS + c) * 4;
+      const L = (0.299 * d[k] + 0.587 * d[k+1] + 0.114 * d[k+2]) / 255;
+      const dx = c / COLS - .5, dy = r / ROWS - .5;
+      lum[r * COLS + c] = Math.pow(L, 1.2) * (1 - 0.4 * Math.min(1, (dx*dx + dy*dy) * 2.6));
+    }
+  }
+
+  /* ---------- far view: two pre-rendered versions (light on screen, ink on paper), refreshed row by row ---------- */
+  const FH = 16, FW = FH * AR;
+  let farL, farD, toneL, toneD;
+  const mk = () => { const c = document.createElement('canvas'); c.width = Math.ceil(COLS * FW); c.height = ROWS * FH; return c; };
+  /* ---------- my handwriting: 31 glyphs cut from a sheet I wrote in blue crayon (tools/handwriting.py) ---------- */
+  const hand = {img: new Image(), n: 31, cw: 120, ch: 160, ready: false};
+  hand.img.onload = () => { hand.ready = true; };
+  hand.img.src = '../assets/hand-glyphs.png';
+  const HCH = 'אבגדהוזחטיכלמנסעפצקרשת123456789', FIN = {'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ'};   // I did not write final letters
+  const gIdx = ch => HCH.indexOf(FIN[ch] || ch);
+  function handAt(g, i, x, y, w, h, k = 1.7){
+    if (i < 0) return;
+    // keep the letter's proportions inside the cell, a little larger than the type so the hand is felt
+    const s = Math.min(w / hand.cw, h / hand.ch) * k, dw = hand.cw * s, dh = hand.ch * s;
+    g.drawImage(hand.img, i * hand.cw, 0, hand.cw, hand.ch, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+
+  function renderRows(r0, r1, t){
+    const l = farL.getContext('2d'), d = farD.getContext('2d');
+    for (const g of [l, d]) { g.direction = 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`; g.clearRect(0, r0 * FH, farL.width, (r1 - r0) * FH); }
+    for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
+      const [ch, isR, isP, isH] = charAt(r, sc, t), L = lum[r * COLS + sc];
+      const aL = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0)), aD = Math.min(1, 0.1 + 0.9 * (1 - L) + (isP ? .1 : 0));
+      l.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aL + .3)})` : `rgba(236,233,226,${aL})`;
+      d.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aD + .3)})` : `rgba(27,26,23,${aD})`;
+      const x = sc * FW + FW / 2, y = r * FH + FH / 2;
+      if (isH && hand.ready) { l.globalAlpha = Math.min(1, aL + .4); handAt(l, gIdx(ch), x - FW / 2, y - FH / 2, FW, FH, 1.7); l.globalAlpha = 1; continue; }
+      if (!isR && !isP && hand.ready && Math.random() < .045) {   // far away, my handwriting keeps surfacing in the field
+        l.globalAlpha = aL; handAt(l, (Math.random() * hand.n) | 0, x - FW / 2, y - FH / 2, FW, FH); l.globalAlpha = 1;
+        continue;
+      }
+      l.fillText(ch, x, y); d.fillText(ch, x, y);
+    }
+  }
+  function buildFar(){
+    farL = mk(); farD = mk(); toneL = mk(); toneD = mk();
+    const a = toneL.getContext('2d'), b = toneD.getContext('2d');
+    for (let r = 0; r < ROWS; r++) for (let sc = 0; sc < COLS; sc++) {
+      const L = lum[r * COLS + sc];
+      a.fillStyle = `rgba(236,233,226,${Math.pow(L, 1.25)})`; a.fillRect(sc * FW, r * FH, FW + .5, FH + .5);
+      b.fillStyle = `rgba(27,26,23,${Math.pow(1 - L, 1.25) * .9})`; b.fillRect(sc * FW, r * FH, FW + .5, FH + .5);
+    }
+    renderRows(0, ROWS, 0);
+  }
+  let cursor = 0;
+  function refreshFar(t){                       // a few rows per frame: the far view keeps streaming
+    const n = 6; renderRows(cursor, Math.min(ROWS, cursor + n), t); cursor = (cursor + n) % ROWS;
+  }
+
+  function size(){
+    DPR = Math.min(2, devicePixelRatio || 1);
+    W = stage.clientWidth; H = stage.clientHeight;
+    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
+    ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
+  }
+
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smooth = t => t * t * (3 - 2 * t);
+  const mix = (a, b, s) => a.map((v, i) => Math.round(lerp(v, b[i], s)));
+  const progress = () => { const r = pin.getBoundingClientRect(); return clamp(-r.top / (r.height - innerHeight)); };
+  const SCREEN = [13, 13, 12], PAPER = [235, 231, 221], LIGHT = [236, 233, 226], INK = [27, 26, 23];
+
+  let lastSwap = 0;
+  function swapModules(t){
+    if (reduce || t - lastSwap < .45) return;
+    lastSwap = t;
+    for (let n = 0; n < 2; n++) {
+      const m = (Math.random() * modType.length) | 0;
+      modType[m] = modType[m] >= 0 ? -1 : (Math.random() < .55 ? (Math.random() * PATTERNS.length) | 0 : -1);
+    }
+  }
+
+  function grid(ox, oy, cw, ch, z, fg){
+    ctx.strokeStyle = `rgba(${fg},${0.10 + 0.10 * (1 - z)})`; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let mc = 0; mc <= MC; mc++) { const x = Math.round(ox + mc * MOD * cw) + .5; if (x > -1 && x < W + 1) { ctx.moveTo(x, Math.max(0, oy)); ctx.lineTo(x, Math.min(H, oy + ROWS * ch)); } }
+    for (let mr = 0; mr <= MR; mr++) { const y = Math.round(oy + mr * MOD * ch) + .5; if (y > -1 && y < H + 1) { ctx.moveTo(Math.max(0, ox), y); ctx.lineTo(Math.min(W, ox + COLS * cw), y); } }
+    ctx.stroke();
+    if (MOD * cw > 26) {
+      ctx.fillStyle = `rgba(${fg},.55)`; ctx.font = '10px "IBM Plex Mono", monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      for (let mc = 0; mc < MC; mc++) for (let mr = 0; mr < MR; mr++) {
+        const x = ox + (mc + 1) * MOD * cw, y = oy + mr * MOD * ch;      // labels sit in the top right corner, where a Hebrew page starts
+        if (x < 0 || x > W + 40 || y < -20 || y > H) continue;
+        ctx.fillText(String.fromCharCode(1488 + ((MC - 1 - mc) % 22)) + (mr + 1), x - 3, y + 2);   // א1, ב1... counted from the right
+      }
+    }
+  }
+
+  function draw(now){
+    if (!ready) return;
+    const t = reduce ? 0 : now / 1000, p = progress();
+    const z = clamp(p / 0.86), sz = smooth(z);
+    const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
+    const startCell = Math.max(40, Math.min(W, H) / 12);
+    const cell = startCell * Math.pow(fitCell / startCell, sz), cw = cell * AR;
+    const eye = {c: COLS * 0.64, r: ROWS * 0.54};
+    const cx = lerp(eye.c, COLS / 2, sz), cy = lerp(eye.r, ROWS / 2, sz);
+    const ox = W / 2 - cx * cw, oy = H / 2 - cy * cell;
+    // the screen stays black to the end (version 12: no paper)
+    const s = 0;
+    const bg = mix(SCREEN, PAPER, s), fg = mix(LIGHT, INK, s).join(',');
+    stage.style.setProperty('--fg', `rgb(${fg})`);
+    stage.style.setProperty('--fg-dim', `rgba(${fg},.6)`);
+    stage.style.setProperty('--panel', `rgba(${bg.join(',')},.82)`);
+    const toneA = 0.05 + 0.6 * sz;
+
+    swapModules(t);
+    ctx.globalAlpha = 1; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H);
+
+    if (cell <= 16) {
+      refreshFar(t);
+      ctx.imageSmoothingEnabled = true;
+      const fw = COLS * cw, fh = ROWS * cell;
+      if (s < 1) { ctx.globalAlpha = toneA * (1 - s); ctx.drawImage(toneL, ox, oy, fw, fh); ctx.globalAlpha = 1 - s; ctx.drawImage(farL, ox, oy, fw, fh); }
+      if (false) { ctx.globalAlpha = toneA * s; ctx.drawImage(toneD, ox, oy, fw, fh); ctx.globalAlpha = s; ctx.drawImage(farD, ox, oy, fw, fh); }
+      ctx.globalAlpha = 1;
+    } else {
+      const c0 = Math.max(0, Math.floor(-ox / cw)), c1 = Math.min(COLS - 1, Math.ceil((W - ox) / cw));
+      const r0 = Math.max(0, Math.floor(-oy / cell)), r1 = Math.min(ROWS - 1, Math.ceil((H - oy) / cell));
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `${cell * 0.92}px "IBM Plex Sans Hebrew", Arial`;
+      const chaos = reduce ? 0 : 0.05 * (1 - sz) + .015;
+      const tick = Math.floor(t * 3);                    // flicker changes three times a second, not every frame
+      for (let r = r0; r <= r1; r++) for (let sc = c0; sc <= c1; sc++) {
+        const k = r * COLS + sc, L = lum[k];
+        let [ch, isR, isP, isH] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
+        const x = ox + sc * cw, y = oy + r * cell;
+        // the opening question
+        const ql = r - Q_ROW, qi = Q_SC - sc;
+        if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
+          // version 18: back to the red box (the handwritten name in 17 was not clear enough)
+          ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
+          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
+          continue;
+        }
+        ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
+        ctx.fillRect(x, y, cw + .5, cell + .5);
+        if (isH && hand.ready) {                          // my answer to the guess before it
+          if (ch !== ' ') handAt(ctx, gIdx(ch), x, y, cw, cell, 1.9);
+          continue;
+        }
+        if (!isR && hash(r, sc, tick) < chaos && hand.ready) {   // the flicker is my handwriting
+          const gi = (hash(sc, r, tick + 7) * hand.n) | 0;
+          if (hash(r, sc, tick + 3) < .07) { tr[k] = tick / 3; tg[k] = gi; }   // some letters stay behind as traces
+          ctx.globalAlpha = Math.min(1, a + .35);
+          handAt(ctx, gi, x, y, cw, cell);
+          ctx.globalAlpha = 1;
+          continue;
+        }
+        const age = t - tr[k];
+        if (!reduce && age > .33 && age < TRACE && hand.ready) {   // a trace: fades slowly, the type keeps running over it
+          ctx.globalAlpha = age < 2 ? lerp(.85, .2, (age - .33) / 1.67) : .2 * (1 - (age - 2) / (TRACE - 2));
+          handAt(ctx, tg[k], x, y, cw, cell);
+          ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .25)})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : a})`;
+        ctx.fillText(ch, x + cw / 2, y + cell / 2);
+      }
+    }
+    grid(ox, oy, cw, cell, sz, fg);
+    drawGhosts(z, p, ox, oy, cw, cell);
+
+    const fadeIn = clamp((p - 0.88) / 0.1);
+    photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
+    photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
+    photo.style.opacity = fadeIn;
+    drawInk(p, ox, oy, cw, cell, fadeIn);
+    hudC.textContent = Math.round(Math.min(N, (W / cw) * (H / cell))).toLocaleString('en') + ' / ' + N.toLocaleString('en');
+    hudD.textContent = (startCell / cell).toFixed(2) + 'x';
+  }
+
+  /* ---------- version 19: the route through my five homes, and the (?) crossed out at the end ----------
+     The lines are temporary, drawn by code, until I draw them by hand (raw/handwriting/). */
+  // [module from the left, module from the top, label]: in the order I lived in them
+  const HOMES = [[23, 8, '1 חולון'], [16, 6, '2 חולון'], [6, 4, '3 להבים'], [8, 13, '4 חולון'], [19, 16, '5 ראשון לציון']];
+  const node = h => [h[0] * MOD + MOD / 2, h[1] * MOD + MOD / 2];   // in cells
+  const jit = () => (Math.random() - .5) * .9;
+  const ROUTE = [];                                     // a plan-like route: along, then down, the way a corridor turns
+  for (let i = 0; i < HOMES.length; i++) {
+    const [c, r] = node(HOMES[i]);
+    if (i) { const [pc] = node(HOMES[i - 1]); ROUTE.push({c: c + jit(), r: ROUTE[ROUTE.length - 1].r + jit(), n: -1}); }
+    ROUTE.push({c: c + jit(), r: r + jit(), n: i});
+  }
+  for (let i = ROUTE.length - 1; i > 0; i--) {         // a hand does not draw straight: small wobbles along each piece
+    const a = ROUTE[i - 1], b = ROUTE[i], n = 5;
+    for (let j = n - 1; j > 0; j--) ROUTE.splice(i, 0, {c: lerp(a.c, b.c, j / n) + jit() * .5, r: lerp(a.r, b.r, j / n) + jit() * .5, n: -1});
+  }
+  let routeLen = 0; ROUTE.forEach((q, i) => { q.d = i ? routeLen += Math.hypot(q.c - ROUTE[i - 1].c, (q.r - ROUTE[i - 1].r) / AR) : 0; });
+  const STRIKE = Array.from({length: 7}, (_, i) => ({u: i / 6, v: .5 + (Math.random() - .5) * .25 + (i / 6 - .5) * .18}));
+
+  function stroke(g, pts, w){                           // a crayon line: three thin passes, slightly apart
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (let k = 0; k < 3; k++) {
+      g.strokeStyle = `rgba(236,233,226,${k ? .45 : .8})`; g.lineWidth = w * (k ? .55 : 1);
+      g.beginPath(); pts.forEach(([x, y], i) => { const dx = k ? (k - 1.5) * w * .35 : 0; i ? g.lineTo(x + dx, y + dx * .6) : g.moveTo(x + dx, y + dx * .6); }); g.stroke();
+    }
+  }
+  function handWord(g, word, xr, y, hpx){               // a word in my letters, right to left from xr
+    const w = hpx * .62;
+    Array.from(word).forEach((ch, i) => { if (ch !== ' ') handAt(g, gIdx(ch), xr - (i + 1) * w, y, w, hpx, 1.25); });
+  }
+  function drawInk(p, ox, oy, cw, cell, photoIn){
+    ix.clearRect(0, 0, W, H);
+    if (!hand.ready) return;
+    const X = c => ox + c * cw, Y = r => oy + r * cell;
+    // the route draws itself between p .3 and .84
+    const k = clamp((p - .3) / .54) * routeLen;
+    if (k > 0) {
+      ix.globalAlpha = 1 - photoIn * .7;
+      const pts = [];
+      for (let i = 0; i < ROUTE.length; i++) {
+        const q = ROUTE[i];
+        if (q.d <= k) pts.push([X(q.c), Y(q.r)]);
+        else { const a = ROUTE[i - 1], t = (k - a.d) / (q.d - a.d); pts.push([X(lerp(a.c, q.c, t)), Y(lerp(a.r, q.r, t))]); break; }
+      }
+      stroke(ix, pts, Math.max(1.6, cell * .3));
+      const hpx = Math.max(26, cell * 4);
+      ROUTE.forEach(q => {
+        if (q.n < 0 || q.d > k) return;
+        const x = X(q.c), y = Y(q.r);
+        ix.fillStyle = '#ece9e2'; ix.beginPath(); ix.arc(x, y, Math.max(2.5, cell * .45), 0, 7); ix.fill();
+        handWord(ix, HOMES[q.n][2], x + hpx * .2, y - hpx * 1.1, hpx);
+      });
+      ix.globalAlpha = 1;
+    }
+    // the opening question comes back over the photo, and my hand crosses out the (?)
+    const back = clamp((p - .9) / .03);
+    if (back > 0) {
+      const sz = Math.max(cell, Math.min(W, H) / 26), sw = sz * AR;
+      const xr = X(COLS - MOD * 2), y0 = Y(MOD * 2);      // top right of the photo, off the faces
+      ix.globalAlpha = back;
+      ix.font = `${sz * .92}px "IBM Plex Sans Hebrew", Arial`; ix.textAlign = 'center'; ix.textBaseline = 'middle';
+      QL.forEach((wd, l) => Array.from(wd).forEach((ch, i) => {
+        const x = xr - (i + 1) * sw, y = y0 + l * sz;
+        ix.fillStyle = '#e0322b'; ix.fillRect(x, y, sw + .5, sz + .5);
+        ix.fillStyle = '#fff'; ix.fillText(ch, x + sw / 2, y + sz / 2);
+      }));
+      const s = clamp((p - .94) / .04);
+      if (s > 0) {
+        const x0 = xr + sw * .5, x1 = xr - 3.5 * sw, y = y0 + 2 * sz;
+        const pts = STRIKE.filter(q => q.u <= s).map(q => [lerp(x0, x1, q.u), y + q.v * sz]);
+        if (pts.length > 1) { stroke(ix, pts, Math.max(3, sz * .24)); stroke(ix, pts.map(([x, y]) => [x, y + sz * .12]), Math.max(2, sz * .14)); }
+      }
+      ix.globalAlpha = 1;
+    }
+  }
+
+  /* ---------- the model's images, one at a time as you step back, never more than four ---------- */
+  const GHOSTS = ['ai-portrait-a.jpg', 'ai-home.jpg', 'ai-street-a.jpg', 'ai-portrait-b.jpg', 'ai-portrait-c.jpg', 'ai-street-b.jpg', 'ai-street-c.jpg', 'ai-portrait-d.jpg'];   // no childhood images
+  const ghostBox = document.getElementById('ghosts');
+  let ghosts = [];
+  function camAt(z){
+    const sz = smooth(z);
+    const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
+    const startCell = Math.max(40, Math.min(W, H) / 12);
+    const cell = startCell * Math.pow(fitCell / startCell, sz), cw = cell * AR;
+    return {cell, cw, cx: lerp(COLS * 0.64, COLS / 2, sz), cy: lerp(ROWS * 0.54, ROWS / 2, sz)};
+  }
+  function placeGhosts(){
+    ghostBox.innerHTML = ''; ghosts = [];
+    const corners = [[.5, -.45], [-.55, .4], [-.5, -.5], [.55, .45], [.05, -.55], [-.6, 0], [.6, .05], [0, .55]];
+    GHOSTS.forEach((src, i) => {
+      const z0 = .24 + i * .075;                              // when it appears
+      const c = camAt(z0);
+      const el = document.createElement('img'); el.src = '../assets/' + src; el.alt = ''; el.decoding = 'async';
+      el.onload = () => {
+        const asp = el.naturalWidth / el.naturalHeight;
+        const mw = MOD * c.cw, mh = MOD * c.cell;           // one module on screen, at that moment
+        const wM = Math.max(1, Math.round(W * .2 / mw));
+        const hM = Math.max(1, Math.round(wM * mw / asp / mh));
+        // a spot away from the centre, snapped to the module grid, inside the field
+        const vw = W / c.cw, vh = H / c.cell;                // view size in cells
+        const [qx, qy] = corners[i % corners.length];
+        let mc = Math.round((c.cx + qx * vw * .5 - wM * MOD / 2) / MOD), mr = Math.round((c.cy + qy * vh * .5 - hM * MOD / 2) / MOD);
+        mc = Math.max(0, Math.min(MC - wM, mc)); mr = Math.max(0, Math.min(MR - hM, mr));
+        Object.assign(ghosts[i], {mc, mr, wM, hM, ok: true});
+      };
+      ghostBox.appendChild(el);
+      ghosts.push({el, z0, ok: false});
+    });
+  }
+  function drawGhosts(z, p, ox, oy, cw, cell){
+    const shown = ghosts.filter(g => g.ok && z >= g.z0);
+    const keep = new Set(shown.slice(-4));                 // the four most recent stay
+    const end = 1 - clamp((p - .86) / .06);                 // they leave before the photo arrives
+    ghosts.forEach(g => {
+      if (!g.ok) return;
+      const inA = clamp((z - g.z0) / .03);
+      const target = keep.has(g) ? inA * .72 * end : 0;
+      g.o = g.o === undefined ? target : g.o + (target - g.o) * .12;   // ease in and out
+      const st = g.el.style;
+      st.opacity = g.o.toFixed(3);
+      if (g.o < .005) return;
+      st.left = (ox + g.mc * MOD * cw) + 'px'; st.top = (oy + g.mr * MOD * cell) + 'px';
+      st.width = (g.wM * MOD * cw) + 'px'; st.height = (g.hM * MOD * cell) + 'px';
+    });
+  }
+
+
+  /* ---------- the opening: the template breaks into the field's rows ---------- */
+  function breakTypology(){
+    const box = document.getElementById('typo'), tpl = document.getElementById('typo-tpl');
+    const h = Math.max(40, Math.min(W, H) / 12);            // one row of the field at the opening distance
+    const n = Math.ceil(H / h);
+    const strips = [];
+    for (let i = 0; i < n; i++) {
+      const st = document.createElement('div'); st.className = 'strip';
+      st.style.top = (i * h) + 'px'; st.style.height = (h + 1) + 'px';
+      const inner = tpl.content.firstElementChild.cloneNode(true);
+      inner.style.top = (-i * h) + 'px'; inner.style.height = H + 'px';
+      st.appendChild(inner); box.appendChild(st); strips.push(st);
+    }
+    let gone = false;
+    const go = () => {
+      if (gone) return; gone = true;
+      if (reduce) { box.animate([{opacity: 1}, {opacity: 0}], {duration: 500, fill: 'forwards'}).onfinish = () => box.remove(); return; }
+      let left = strips.length;
+      strips.forEach(st => {
+        const d = Math.random() * 900, dx = (Math.random() < .5 ? -1 : 1) * (20 + Math.random() * 90);
+        st.animate([
+          {transform: 'translateX(0)', opacity: 1, filter: 'none'},
+          {transform: `translateX(${dx * .3}px)`, opacity: 1, filter: 'hue-rotate(40deg) saturate(1.6)', offset: .35},
+          {transform: `translateX(${-dx * .2}px)`, opacity: 1, filter: 'invert(1)', offset: .5},
+          {transform: `translateX(${dx}px)`, opacity: 0, filter: 'none'}
+        ], {duration: 420, delay: d, easing: 'steps(6, end)', fill: 'forwards'}).onfinish = () => { st.remove(); if (--left === 0) box.remove(); };
+      });
+    };
+    setTimeout(go, 1600);                                      // a moment to read it, then it breaks
+    addEventListener('scroll', go, {once: true, passive: true});
+  }
+
+  let visible = true;
+  new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(stage);
+  function loop(now){ if (visible) draw(now); requestAnimationFrame(loop); }
+
+  const img = new Image();
+  img.onload = async () => {
+    try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
+    readPhoto(img); size(); buildFar(); placeGhosts(); breakTypology(); ready = true; requestAnimationFrame(loop);
+  };
+  img.src = '../assets/family-bw.jpg';
+  addEventListener('resize', () => { size(); placeGhosts(); });
+})();
+</script>
+</body>
+</html>
