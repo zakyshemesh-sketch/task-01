@@ -93,6 +93,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const s = flipRuns((isGuess ? GUESS[gi++ % GUESS.length] : MINE[mi++ % MINE.length]) + ' / ');
     stream += s; for (let i = 0; i < s.length; i++) red.push(isGuess && i < s.length - 3);
   }
+  stream = stream.split('');                            // editable, so two questions can be set into the opening screen
 
   /* ---------- the grid ---------- */
   const AR = 0.6;                                     // narrow cells, like a terminal
@@ -120,10 +121,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   function charAt(r, sc, t){                           // r row, sc screen column, t seconds
     const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
     const L = lum[r * COLS + sc];
-    if (modType[m] >= 0) return [PATTERNS[modType[m]](r, sc, t, L), false, true];
     const c = COLS - 1 - sc;                           // grid column, counted from the right
     const shift = Math.floor(t * speed[r]);
     const k = r * COLS + (((c + shift) % COLS) + COLS) % COLS;
+    if (modType[m] >= 0 && !red[k]) return [PATTERNS[modType[m]](r, sc, t, L), false, true];   // the model's questions break through the patterns
     return [stream[k], red[k], false];
   }
 
@@ -168,6 +169,26 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       tctx.fillRect(sc * FW, r * FH, FW + .5, FH + .5);
     }
     for (let mr = 0; mr < MR; mr++) for (let mc = 0; mc < MC; mc++) renderModule(mr, mc, 0);
+  }
+
+  // two red questions on the opening screen, each on its own row, running from right to left
+  function seedQuestions(){
+    const cell = Math.max(40, Math.min(W, H) / 12), cw = cell * AR;
+    const ox = W / 2 - COLS * 0.64 * cw, oy = H / 2 - ROWS * 0.54 * cell;           // the opening camera
+    const c0 = Math.ceil(-ox / cw), c1 = Math.floor((W - ox) / cw) - 1;
+    const r0 = Math.ceil(-oy / cell) + 1, r1 = Math.floor((H - oy) / cell) - 2;
+    const rows = [r0 + Math.round((r1 - r0) * .3), r0 + Math.round((r1 - r0) * .7)];
+    const qs = GUESS.slice().sort(() => Math.random() - .5).slice(0, 2);
+    rows.forEach((r, i) => {
+      speed[r] = -1.6;                                   // negative: the row moves right to left
+      const text = ' ' + flipRuns(qs[i]) + ' ';
+      const sc0 = Math.min(c1, Math.round(c1 - (c1 - c0) * (i ? .15 : .45)));    // start inside the screen, near its right side
+      for (let j = 0; j < text.length; j++) {
+        const sc = sc0 - j; if (sc < 0) break;
+        const k = r * COLS + (COLS - 1 - sc);
+        stream[k] = text[j]; red[k] = text[j] !== ' ';
+      }
+    });
   }
 
   function size(){
@@ -283,7 +304,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const img = new Image();
   img.onload = async () => {
     try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
-    readPhoto(img); size(); buildFar(); ready = true; requestAnimationFrame(loop);
+    readPhoto(img); size(); seedQuestions(); buildFar(); ready = true; requestAnimationFrame(loop);
   };
   img.src = 'assets/family-bw.jpg';
   addEventListener('resize', () => { size(); });
