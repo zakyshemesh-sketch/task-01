@@ -32,6 +32,7 @@ body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height
 .pin{position:relative;height:820vh}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
 #photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
 .hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
 .hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
@@ -51,6 +52,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 <div class="pin">
   <section class="stage" aria-label="שדה של אותיות שמתרחק ונהיה צילום משפחתי">
     <canvas id="c" aria-hidden="true"></canvas>
+    <div id="ghosts" aria-hidden="true"></div>
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span></div>
     <div class="hud gut"><span>גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
@@ -285,6 +287,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       }
     }
     grid(ox, oy, cw, cell, sz, fg);
+    drawGhosts(z, p, ox, oy, cw, cell);
 
     const fadeIn = clamp((p - 0.88) / 0.1);
     photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
@@ -294,6 +297,57 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     hudD.textContent = (startCell / cell).toFixed(2) + 'x';
   }
 
+  /* ---------- the model's images, one at a time as you step back, never more than four ---------- */
+  const GHOSTS = ['ai-portrait-a.jpg', 'ai-home.jpg', 'ai-child-b.jpg', 'ai-street-a.jpg', 'ai-portrait-c.jpg', 'ai-child-a.jpg', 'ai-street-c.jpg', 'ai-portrait-d.jpg'];
+  const ghostBox = document.getElementById('ghosts');
+  let ghosts = [];
+  function camAt(z){
+    const sz = smooth(z);
+    const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
+    const startCell = Math.max(40, Math.min(W, H) / 12);
+    const cell = startCell * Math.pow(fitCell / startCell, sz), cw = cell * AR;
+    return {cell, cw, cx: lerp(COLS * 0.64, COLS / 2, sz), cy: lerp(ROWS * 0.54, ROWS / 2, sz)};
+  }
+  function placeGhosts(){
+    ghostBox.innerHTML = ''; ghosts = [];
+    const corners = [[.5, -.45], [-.55, .4], [-.5, -.5], [.55, .45], [.05, -.55], [-.6, 0], [.6, .05], [0, .55]];
+    GHOSTS.forEach((src, i) => {
+      const z0 = .24 + i * .075;                              // when it appears
+      const c = camAt(z0);
+      const el = document.createElement('img'); el.src = 'assets/' + src; el.alt = ''; el.decoding = 'async';
+      el.onload = () => {
+        const asp = el.naturalWidth / el.naturalHeight;
+        const mw = MOD * c.cw, mh = MOD * c.cell;           // one module on screen, at that moment
+        const wM = Math.max(1, Math.round(W * .2 / mw));
+        const hM = Math.max(1, Math.round(wM * mw / asp / mh));
+        // a spot away from the centre, snapped to the module grid, inside the field
+        const vw = W / c.cw, vh = H / c.cell;                // view size in cells
+        const [qx, qy] = corners[i % corners.length];
+        let mc = Math.round((c.cx + qx * vw * .5 - wM * MOD / 2) / MOD), mr = Math.round((c.cy + qy * vh * .5 - hM * MOD / 2) / MOD);
+        mc = Math.max(0, Math.min(MC - wM, mc)); mr = Math.max(0, Math.min(MR - hM, mr));
+        Object.assign(ghosts[i], {mc, mr, wM, hM, ok: true});
+      };
+      ghostBox.appendChild(el);
+      ghosts.push({el, z0, ok: false});
+    });
+  }
+  function drawGhosts(z, p, ox, oy, cw, cell){
+    const shown = ghosts.filter(g => g.ok && z >= g.z0);
+    const keep = new Set(shown.slice(-4));                 // the four most recent stay
+    const end = 1 - clamp((p - .86) / .06);                 // they leave before the photo arrives
+    ghosts.forEach(g => {
+      if (!g.ok) return;
+      const inA = clamp((z - g.z0) / .03);
+      const target = keep.has(g) ? inA * .72 * end : 0;
+      g.o = g.o === undefined ? target : g.o + (target - g.o) * .12;   // ease in and out
+      const st = g.el.style;
+      st.opacity = g.o.toFixed(3);
+      if (g.o < .005) return;
+      st.left = (ox + g.mc * MOD * cw) + 'px'; st.top = (oy + g.mr * MOD * cell) + 'px';
+      st.width = (g.wM * MOD * cw) + 'px'; st.height = (g.hM * MOD * cell) + 'px';
+    });
+  }
+
   let visible = true;
   new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(stage);
   function loop(now){ if (visible) draw(now); requestAnimationFrame(loop); }
@@ -301,10 +355,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const img = new Image();
   img.onload = async () => {
     try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
-    readPhoto(img); size(); buildFar(); ready = true; requestAnimationFrame(loop);
+    readPhoto(img); size(); buildFar(); placeGhosts(); ready = true; requestAnimationFrame(loop);
   };
   img.src = 'assets/family-bw.jpg';
-  addEventListener('resize', () => { size(); });
+  addEventListener('resize', () => { size(); placeGhosts(); });
 })();
 </script>
 </body>
