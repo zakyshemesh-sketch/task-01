@@ -8,7 +8,7 @@
 <meta name="description" content="צחי שמש? מקרוב רעש של אותיות על מסך. מרחוק, דף מודפס ותמונה משפחתית.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=IBM+Plex+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=IBM+Plex+Mono:wght@400&family=Rubik:wght@400;500;700&display=swap">
 <style>
 /* One field of characters on a strict, visible grid (the order). Up close it streams and flickers like
    running code on a black screen, and some modules turn into patterns (the break). Every letter belongs to
@@ -45,12 +45,52 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 footer{max-width:760px;margin-inline:auto;padding-block:20px 40px;border-top:1px solid #2a2a28;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:#7d7a72}
 footer a{color:var(--light)}
 a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+/* ---------- the opening: the site a model would build for me (the typology), before the field breaks through ---------- */
+#typo{position:absolute;inset:0;z-index:20;overflow:hidden}
+#typo .strip{position:absolute;left:0;right:0;overflow:hidden;will-change:transform,opacity}
+.t-in{position:absolute;left:0;right:0;font-family:"Rubik","Arial Hebrew",Arial,sans-serif;color:#fff;
+  background:radial-gradient(60% 50% at 70% 20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(135deg,#7b6cf6 0%,#5b8cf6 55%,#4fa3f7 100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 24px}
+.t-nav{align-self:stretch;display:flex;justify-content:space-between;align-items:center;padding:22px 8px;font-size:15px}
+.t-nav b{font-weight:700;font-size:20px}
+.t-nav span{display:flex;gap:22px;opacity:.9}
+.t-hero{margin-top:6vh;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:640px}
+.t-ava{width:118px;height:118px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 6px rgba(255,255,255,.35),0 18px 40px rgba(20,20,80,.35)}
+.t-hero h1{margin:0;font-weight:700;font-size:clamp(36px,5vw,56px);line-height:1.1}
+.t-hero p{margin:0;font-size:clamp(17px,1.8vw,21px);opacity:.9;line-height:1.5}
+.t-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.t-btns span{border-radius:999px;padding:12px 26px;font-weight:500;font-size:16px}
+.t-btns .a{background:#fff;color:#5b5fd6;box-shadow:0 10px 24px rgba(20,20,80,.25)} .t-btns .b{border:2px solid rgba(255,255,255,.8)}
+.t-cards{display:grid;grid-template-columns:repeat(3,minmax(0,200px));gap:18px;margin-top:6vh}
+.t-card{background:#fff;color:#2c2f48;border-radius:20px;padding:22px 18px;box-shadow:0 16px 40px rgba(20,20,80,.22);display:grid;gap:8px;justify-items:center}
+.t-card i{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#7b6cf6,#4fa3f7);display:block}
+.t-card b{font-weight:500} .t-card small{color:#7a7f99;font-size:13px}
+@media (max-width:640px){.t-cards{grid-template-columns:1fr 1fr}.t-card:last-child{display:none}.t-nav span{display:none}}
 </style>
 </head>
 <body>
 
 <div class="pin">
   <section class="stage" aria-label="שדה של אותיות שמתרחק ונהיה צילום משפחתי">
+    <div id="typo" aria-label="האתר שמודל היה בונה לי">
+      <template id="typo-tpl">
+        <div class="t-in">
+          <div class="t-nav"><b>צחי.</b><span>בית · אודות · פרויקטים · צור קשר</span></div>
+          <div class="t-hero">
+            <img class="t-ava" src="assets/ai-portrait-a.jpg" alt="">
+            <h1>היי, אני צחי שמש ✨</h1>
+            <p>מעצב פנים יצירתי ונלהב, שיוצר חללים על-זמניים המשלבים פונקציונליות, חום ואסתטיקה.</p>
+            <div class="t-btns"><span class="a">לתיק העבודות</span><span class="b">בואו נדבר</span></div>
+          </div>
+          <div class="t-cards">
+            <div class="t-card"><i></i><b>עיצוב מגורים</b><small>בתים שמספרים סיפור</small></div>
+            <div class="t-card"><i></i><b>חללים מסחריים</b><small>חוויה שמתחילה בכניסה</small></div>
+            <div class="t-card"><i></i><b>ייעוץ וליווי</b><small>מהקונספט ועד המפתח</small></div>
+          </div>
+        </div>
+      </template>
+    </div>
     <canvas id="c" aria-hidden="true"></canvas>
     <div id="ghosts" aria-hidden="true"></div>
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
@@ -348,6 +388,39 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     });
   }
 
+
+  /* ---------- the opening: the template breaks into the field's rows ---------- */
+  function breakTypology(){
+    const box = document.getElementById('typo'), tpl = document.getElementById('typo-tpl');
+    const h = Math.max(40, Math.min(W, H) / 12);            // one row of the field at the opening distance
+    const n = Math.ceil(H / h);
+    const strips = [];
+    for (let i = 0; i < n; i++) {
+      const st = document.createElement('div'); st.className = 'strip';
+      st.style.top = (i * h) + 'px'; st.style.height = (h + 1) + 'px';
+      const inner = tpl.content.firstElementChild.cloneNode(true);
+      inner.style.top = (-i * h) + 'px'; inner.style.height = H + 'px';
+      st.appendChild(inner); box.appendChild(st); strips.push(st);
+    }
+    let gone = false;
+    const go = () => {
+      if (gone) return; gone = true;
+      if (reduce) { box.animate([{opacity: 1}, {opacity: 0}], {duration: 500, fill: 'forwards'}).onfinish = () => box.remove(); return; }
+      let left = strips.length;
+      strips.forEach(st => {
+        const d = Math.random() * 900, dx = (Math.random() < .5 ? -1 : 1) * (20 + Math.random() * 90);
+        st.animate([
+          {transform: 'translateX(0)', opacity: 1, filter: 'none'},
+          {transform: `translateX(${dx * .3}px)`, opacity: 1, filter: 'hue-rotate(40deg) saturate(1.6)', offset: .35},
+          {transform: `translateX(${-dx * .2}px)`, opacity: 1, filter: 'invert(1)', offset: .5},
+          {transform: `translateX(${dx}px)`, opacity: 0, filter: 'none'}
+        ], {duration: 420, delay: d, easing: 'steps(6, end)', fill: 'forwards'}).onfinish = () => { st.remove(); if (--left === 0) box.remove(); };
+      });
+    };
+    setTimeout(go, 1600);                                      // a moment to read it, then it breaks
+    addEventListener('scroll', go, {once: true, passive: true});
+  }
+
   let visible = true;
   new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(stage);
   function loop(now){ if (visible) draw(now); requestAnimationFrame(loop); }
@@ -355,7 +428,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const img = new Image();
   img.onload = async () => {
     try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
-    readPhoto(img); size(); buildFar(); placeGhosts(); ready = true; requestAnimationFrame(loop);
+    readPhoto(img); size(); buildFar(); placeGhosts(); breakTypology(); ready = true; requestAnimationFrame(loop);
   };
   img.src = 'assets/family-bw.jpg';
   addEventListener('resize', () => { size(); placeGhosts(); });
