@@ -346,9 +346,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
         // the opening question
         const ql = r - Q_ROW, qi = Q_SC - sc;
         if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
-          // version 17: my name in my own hand. The (?) stays the machine's, in red type
-          if (ql < 2 && hand.ready) handAt(ctx, gIdx(QL[ql][qi]), x, y, cw, cell, 2.3);
-          else { ctx.fillStyle = '#e0322b'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2); }
+          // version 18: back to the red box (the handwritten name in 17 was not clear enough)
+          ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
+          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
           continue;
         }
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
