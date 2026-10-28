@@ -122,7 +122,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     (r, c, t) => ((c + Math.floor(t * 4)) % 4 === 0 ? '|' : '-'),
   ];
   const modType = new Int8Array(MC * MR).fill(-1);
-  const keep = new Uint8Array(MC * MR);                // modules that hold the name or an opening guess stay text
+  const keep = new Uint8Array(MC * MR);                // modules that hold the name stay text
+  for (let i = 0; i < modType.length; i++) if (Math.random() < .14) modType[i] = (Math.random() * PATTERNS.length) | 0;
 
   function charAt(r, sc, t){
     const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
@@ -134,14 +135,13 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   }
 
   // write a phrase into the field, on a still row, starting at a screen column and running leftwards
-  function place(text, r, sc0){
-    speed[r] = 0;
+  function place(text, r, sc0, still){
+    if (still) speed[r] = 0;                          // the name stays put; the guesses ride their row like everything else
     for (let j = 0; j < text.length; j++) {
       const sc = sc0 - j; if (sc < 0) break;
       const k = r * COLS + (COLS - 1 - sc);
       stream[k] = text[j]; red[k] = true;
-      const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
-      modType[m] = -1; keep[m] = 1;
+      const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0); modType[m] = -1; if (still) keep[m] = 1;   // visible on the opening screen
     }
   }
 
@@ -189,7 +189,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     // name: on a module line, in the upper right part of the screen (where a Hebrew page starts)
     const nr = Math.max(r0, Math.min(r1, Math.round((r0 + rows * .22) / MOD) * MOD));
     const nsc = Math.min(c1, Math.ceil((c0 + cols * .78) / MOD) * MOD - 1);
-    place(NAME, nr, nsc);
+    place(NAME, nr, nsc, true);
     const used = new Set([nr]);
     for (let g = 0; g < 4; g++) {
       let r; do { r = r0 + ((Math.random() * Math.max(1, rows)) | 0); } while (used.has(r) && used.size < rows);
@@ -234,7 +234,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
   let lastSwap = 0;
   function swapModules(t){
-    return;                                          // no pattern modules in the simple version
+    if (reduce || t - lastSwap < .18) return;
     lastSwap = t;
     for (let n = 0; n < 3; n++) {
       const m = (Math.random() * modType.length) | 0;
