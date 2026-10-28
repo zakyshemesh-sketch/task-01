@@ -133,16 +133,27 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     'ילד עם כביסה תלויה?', 'כיסאות פלסטיק בחצר?', 'עצי זית?', 'אבן ירושלמית?', 'ילד קירח?', 'ילדות בסנטרל פארק?',
     'גדל בהארלם?', 'גדל בקווינס?', 'סמטה במזרח אסיה?', 'תיק כתום?', 'משקפיים על הראש?', 'אור זהוב?', 'עור חלק יותר?'
   ];
+  // version 17: my hand answers the model. Each pair is a guess and what I wrote back, from the letters on my sheet
+  const ANSWER = {
+    'בן 55?': '43', 'שיער אפור?': 'קירח', 'שיער מלא?': 'קירח', 'בלי ילדים?': 'אבא', 'תמיד לבד?': 'נשוי לנועה',
+    'גדל בהארלם?': 'חולון', 'גדל בקווינס?': 'להבים', 'ילדות בסנטרל פארק?': 'להבים', 'סמטה במזרח אסיה?': 'חולון',
+    'ילד עם כביסה תלויה?': 'משחקים ברחוב', 'עצי זית?': 'מדבר', 'אבן ירושלמית?': 'חולון', 'סלון עם שיש?': 'עגלת בובות',
+    'טלוויזיה ענקית?': 'צעצועים על הרצפה', 'משקפיים על הראש?': 'משקפיים ישנים'
+  };
   const NOISE = 'אבגדהוזחטיכלמנסעפצקרשת0123456789#%&*+=<>/\\|:;.,-_';
   const flipRuns = s => s.replace(/[0-9A-Za-z.\-]{2,}/g, m => m.split('').reverse().join(''));   // cells fill right to left
 
   // guesses land at random places and are drawn at random, so no two stretches of the field repeat
-  let stream = '', red = [];
+  let stream = '', red = [], hw = [];
   const mine = () => MINE[(Math.random() * MINE.length) | 0];
+  const push = (s, isR, isH) => { stream += s; for (let i = 0; i < s.length; i++) { red.push(isR); hw.push(isH && s[i] !== ' '); } };
   while (stream.length < 62000) {
-    const isGuess = Math.random() < .17;
-    const s = flipRuns((isGuess ? GUESS[(Math.random() * GUESS.length) | 0] : mine()) + ' / ');
-    stream += s; for (let i = 0; i < s.length; i++) red.push(isGuess && i < s.length - 3);
+    if (Math.random() < .17) {
+      const g = GUESS[(Math.random() * GUESS.length) | 0];
+      push(flipRuns(g), true, false);
+      if (ANSWER[g] && Math.random() < .75) push(' ' + flipRuns(ANSWER[g]), false, true);   // the hand writes back right after the guess
+    } else push(flipRuns(mine()), false, false);
+    push(' / ', false, false);
   }
 
   /* ---------- the grid ---------- */
@@ -173,6 +184,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const Q_ROW = Q_MR * MOD + 1, Q_SC = Q_MC * MOD + MOD - 1;   // one row below the module label, at its right edge
   const qGone = QL.map(w => Array.from(w, () => .004 + Math.random() * .05));   // each letter falls back into the stream at its own moment
 
+  // version 17: traces. A handwritten letter does not vanish at once, it fades over TRACE seconds
+  const TRACE = 26, tr = new Float32Array(COLS * ROWS).fill(-1e6), tg = new Uint8Array(COLS * ROWS);
   const hash = (a, b, c) => { let h = a * 374761393 + b * 668265263 + c * 2147483647; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
   function charAt(r, sc, t){
@@ -181,7 +194,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const c = COLS - 1 - sc;
     const shift = Math.floor(t * speed[r]);
     const k = r * COLS + (((c - shift) % COLS) + COLS) % COLS;
-    return [stream[k], red[k], false];
+    return [stream[k], red[k], false, hw[k]];
   }
 
   const cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -211,9 +224,12 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const hand = {img: new Image(), n: 31, cw: 120, ch: 160, ready: false};
   hand.img.onload = () => { hand.ready = true; };
   hand.img.src = 'assets/hand-glyphs.png';
-  function handAt(g, i, x, y, w, h){
+  const HCH = 'אבגדהוזחטיכלמנסעפצקרשת123456789', FIN = {'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ'};   // I did not write final letters
+  const gIdx = ch => HCH.indexOf(FIN[ch] || ch);
+  function handAt(g, i, x, y, w, h, k = 1.7){
+    if (i < 0) return;
     // keep the letter's proportions inside the cell, a little larger than the type so the hand is felt
-    const s = Math.min(w / hand.cw, h / hand.ch) * 1.7, dw = hand.cw * s, dh = hand.ch * s;
+    const s = Math.min(w / hand.cw, h / hand.ch) * k, dw = hand.cw * s, dh = hand.ch * s;
     g.drawImage(hand.img, i * hand.cw, 0, hand.cw, hand.ch, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
   }
 
@@ -221,11 +237,12 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const l = farL.getContext('2d'), d = farD.getContext('2d');
     for (const g of [l, d]) { g.direction = 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`; g.clearRect(0, r0 * FH, farL.width, (r1 - r0) * FH); }
     for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
-      const [ch, isR, isP] = charAt(r, sc, t), L = lum[r * COLS + sc];
+      const [ch, isR, isP, isH] = charAt(r, sc, t), L = lum[r * COLS + sc];
       const aL = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0)), aD = Math.min(1, 0.1 + 0.9 * (1 - L) + (isP ? .1 : 0));
       l.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aL + .3)})` : `rgba(236,233,226,${aL})`;
       d.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aD + .3)})` : `rgba(27,26,23,${aD})`;
       const x = sc * FW + FW / 2, y = r * FH + FH / 2;
+      if (isH && hand.ready) { l.globalAlpha = Math.min(1, aL + .4); handAt(l, gIdx(ch), x - FW / 2, y - FH / 2, FW, FH, 1.7); l.globalAlpha = 1; continue; }
       if (!isR && !isP && hand.ready && Math.random() < .045) {   // far away, my handwriting keeps surfacing in the field
         l.globalAlpha = aL; handAt(l, (Math.random() * hand.n) | 0, x - FW / 2, y - FH / 2, FW, FH); l.globalAlpha = 1;
         continue;
@@ -323,23 +340,36 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       const chaos = reduce ? 0 : 0.05 * (1 - sz) + .015;
       const tick = Math.floor(t * 3);                    // flicker changes three times a second, not every frame
       for (let r = r0; r <= r1; r++) for (let sc = c0; sc <= c1; sc++) {
-        const L = lum[r * COLS + sc];
-        let [ch, isR, isP] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
+        const k = r * COLS + sc, L = lum[k];
+        let [ch, isR, isP, isH] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
         const x = ox + sc * cw, y = oy + r * cell;
         // the opening question
         const ql = r - Q_ROW, qi = Q_SC - sc;
         if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
-          ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
-          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
+          // version 17: my name in my own hand. The (?) stays the machine's, in red type
+          if (ql < 2 && hand.ready) handAt(ctx, gIdx(QL[ql][qi]), x, y, cw, cell, 2.3);
+          else { ctx.fillStyle = '#e0322b'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2); }
           continue;
         }
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
         ctx.fillRect(x, y, cw + .5, cell + .5);
+        if (isH && hand.ready) {                          // my answer to the guess before it
+          if (ch !== ' ') handAt(ctx, gIdx(ch), x, y, cw, cell, 1.9);
+          continue;
+        }
         if (!isR && hash(r, sc, tick) < chaos && hand.ready) {   // the flicker is my handwriting
+          const gi = (hash(sc, r, tick + 7) * hand.n) | 0;
+          if (hash(r, sc, tick + 3) < .07) { tr[k] = tick / 3; tg[k] = gi; }   // some letters stay behind as traces
           ctx.globalAlpha = Math.min(1, a + .35);
-          handAt(ctx, (hash(sc, r, tick + 7) * hand.n) | 0, x, y, cw, cell);
+          handAt(ctx, gi, x, y, cw, cell);
           ctx.globalAlpha = 1;
           continue;
+        }
+        const age = t - tr[k];
+        if (!reduce && age > .33 && age < TRACE && hand.ready) {   // a trace: fades slowly, the type keeps running over it
+          ctx.globalAlpha = age < 2 ? lerp(.85, .2, (age - .33) / 1.67) : .2 * (1 - (age - 2) / (TRACE - 2));
+          handAt(ctx, tg[k], x, y, cw, cell);
+          ctx.globalAlpha = 1;
         }
         ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .25)})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : a})`;
         ctx.fillText(ch, x + cw / 2, y + cell / 2);
