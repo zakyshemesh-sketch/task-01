@@ -60,7 +60,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
 <section class="after gut" aria-label="על העבודה">
   <h1>צחי שמש <span>(?)</span></h1>
-  <p>מקרוב אני רעש: אותיות שזורמות ומהבהבות כמו קוד רץ. אבל כל אות שייכת למשפט אמיתי: חמש כתובות לפני הגיוס, קומה מתחת לדודים, הרעש של הכביש, המדבר בלהבים, הסלון בשמונה בבוקר.</p>
+  <p>מקרוב אני רעש: אותיות שמהבהבות כמו קוד רץ. אבל כל אות שייכת למשפט אמיתי: חמש כתובות לפני הגיוס, קומה מתחת לדודים, הרעש של הכביש, המדבר בלהבים, הסלון בשמונה בבוקר.</p>
   <p>באדום, מה שמודל ניחש עליי כשביקשתי שידמיין אותי: בן 55, שיער אפור, בלייזר כהה, סלון עם שיש, ילדות בניו יורק. הניחושים האלה נבלעים בשדה, כמו שהם נבלעים בממוצע.</p>
   <p>רק מרחוק, כשמוותרים על הקריאה, הרעש מתארגן לתמונה. הפנים של הילדים שלי נשארות רעש גם בסוף. אותן המכונה לא מקבלת.</p>
   <span class="draft">טיוטה · טקסט העמדה הסופי ייכתב על ידי</span>
@@ -110,8 +110,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const MOD = 8, MC = Math.ceil(COLS / MOD), MR = Math.ceil(ROWS / MOD);
   const N = COLS * ROWS;
   const lum = new Float32Array(N);
-  // rows stream the way Hebrew is read (in on the left, moving right); about half stand still
-  const speed = Array.from({length: ROWS}, () => { const x = Math.random(); return x < .5 ? 0 : x < .8 ? 1 : 2.5; });
+  const speed = new Float32Array(ROWS);              // the simple version: the text stays in place and only flickers
 
   const PATTERNS = [
     (r, c, t) => '/',
@@ -123,7 +122,6 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   ];
   const modType = new Int8Array(MC * MR).fill(-1);
   const keep = new Uint8Array(MC * MR);                // modules that hold the name or an opening guess stay text
-  for (let i = 0; i < modType.length; i++) if (Math.random() < .14) modType[i] = (Math.random() * PATTERNS.length) | 0;
 
   function charAt(r, sc, t){
     const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
@@ -206,7 +204,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   function renderRows(r0, r1, t){
     fctx.clearRect(0, r0 * FH, far.width, (r1 - r0) * FH);
     for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
-      const [ch, isR, isP] = charAt(r, sc, t), L = lum[r * COLS + sc], a = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0));
+      let [ch, isR, isP] = charAt(r, sc, t), L = lum[r * COLS + sc], a = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0));
+      if (!isR && !reduce && Math.random() < .05) ch = NOISE[(Math.random() * NOISE.length) | 0];   // the far view keeps flickering
       fctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .3)})` : `rgba(236,233,226,${a})`;
       fctx.fillText(ch, sc * FW + FW / 2, r * FH + FH / 2);
     }
@@ -234,7 +233,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
   let lastSwap = 0;
   function swapModules(t){
-    if (reduce || t - lastSwap < .18) return;
+    return;                                          // no pattern modules in the simple version
     lastSwap = t;
     for (let n = 0; n < 3; n++) {
       const m = (Math.random() * modType.length) | 0;
@@ -274,7 +273,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       ctx.globalAlpha = toneA; ctx.drawImage(tone, ox, oy, COLS * cw, ROWS * cell);
       ctx.globalAlpha = 1; ctx.drawImage(far, ox, oy, COLS * cw, ROWS * cell);
       // a scan band sweeps down the field: rows inside it are drawn live and flicker hard
-      if (!reduce) {
+      if (false) {
         const band = 7, top = Math.floor(((t * 22) % (ROWS + band * 2)) - band);
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${cell * .95}px "IBM Plex Sans Hebrew", Arial`;
         for (let r = Math.max(0, top); r < Math.min(ROWS, top + band); r++) {
