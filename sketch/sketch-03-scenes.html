@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>תעודת זהות משבשת</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="צחי שמש. תעודת זהות משבשת: מה המודל חושב שאני, ומה נשאר מתחת כשקורעים אותו.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=Rubik:wght@400;500;700&family=Secular+One&display=swap">
+<style>
+/* Concept: everything lies on a grey cloth, like the photos of the torn paper.
+   The model's layer (Rubik, gradient, rounded) is printed on real paper and gets torn.
+   Underneath: my order (Plex, strict grids, Vignelli, Mondrian, Agnes Martin) and my break (real tears, Kruger, Höch). */
+:root{
+  --table:#55585d;        /* the grey cloth the paper was photographed on */
+  --table-deep:#46494e;
+  --paper:#edebe6;
+  --ink:#1a1a18;
+  --pencil:#9a9890;
+  --yellow:#ffd400;
+  --pink:#ff5aa8;
+  --red:#d3202a;
+  --ai-a:#7b6cf6; --ai-b:#4fa3f7; --ai-ink:#3b3f58;   /* the model only */
+  --f-ai:"Rubik","Arial Hebrew",Arial,sans-serif;
+  --f-order:"IBM Plex Sans Hebrew","Arial Hebrew",Arial,sans-serif;
+  --f-shout:"Secular One","Arial Hebrew",Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--table)}
+body{margin:0;background:var(--table);color:var(--paper);font-family:var(--f-order);font-size:17px;line-height:1.6;overflow-x:hidden}
+img{display:block;max-width:100%}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.lbl{font-family:var(--f-order);font-size:12px;letter-spacing:.06em;font-weight:400;color:rgba(237,235,230,.62)}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.draft{display:inline-block;font-family:var(--f-order);font-size:11px;letter-spacing:.05em;color:rgba(237,235,230,.55);border-top:1px dashed rgba(237,235,230,.4);padding-top:2px}
+.kruger{font-family:var(--f-shout);color:#fff;line-height:1.25}
+.kruger b{font-weight:400;background:var(--red);padding:.06em .3em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+
+/* ---------- pinned scenes ---------- */
+.pin{position:relative;height:var(--len,260vh)}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:grid;place-items:center}
+
+/* ---------- a sheet of real paper ---------- */
+.sheet{position:relative;aspect-ratio:var(--ar);height:min(84svh,calc(92vw / (var(--ar))));container-type:size}
+.half{position:absolute;inset:0;filter:drop-shadow(0 18px 22px rgba(0,0,0,.38)) drop-shadow(0 2px 2px rgba(0,0,0,.25));will-change:transform}
+.half>.paper,.solid>.paper{position:absolute;inset:0;width:100%;height:100%}
+.print{position:absolute;inset:0;mix-blend-mode:multiply;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+
+/* ---------- the model's look (typology) ---------- */
+.ai{font-family:var(--f-ai);color:var(--ai-ink)}
+.ai-pill{display:inline-block;font-family:var(--f-ai);font-weight:500;color:#fff;background:linear-gradient(90deg,var(--ai-a),var(--ai-b));border-radius:999px;padding:.25em .9em}
+.ai-grad{background:linear-gradient(90deg,var(--ai-a),var(--ai-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ===== 1 · four Tzahis ===== */
+#faces .sheet{--ar:1127/1600}
+#faces .zoom{transform-origin:58% 52%;transform:scale(calc(1 + max(0, var(--p) - .42) * 9))}
+#faces .behind{position:absolute;inset:28% 18% 26% 36%;overflow:hidden;background:#222}
+#faces .behind img{position:absolute;width:326%;max-width:none;left:-47.8%;top:-97.8%}
+#faces .intact,#faces .torn{position:absolute;inset:0}
+#faces .intact{filter:drop-shadow(0 18px 22px rgba(0,0,0,.38))}
+#faces .intact .paper-rect{position:absolute;inset:0;background:var(--paper) url(../assets/paper-texture.jpg) center/cover}
+#faces .torn{visibility:hidden}
+#faces.is-torn .intact{visibility:hidden}
+#faces.is-torn .torn{visibility:visible}
+#faces.shake .zoom{animation:shake .38s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{20%{translate:-6px 2px;rotate:-.6deg}40%{translate:5px -3px;rotate:.5deg}60%{translate:-3px 1px}80%{translate:2px 0}}
+.passport{position:absolute;inset:0;padding:7cqw 8cqw;display:flex;flex-direction:column;gap:2.2cqw}
+.passport .ai-pill{align-self:flex-start;font-size:2.6cqw}
+.passport h2{margin:0;font-family:var(--f-ai);font-weight:700;font-size:7.4cqw;line-height:1.05;color:var(--ai-ink)}
+.passport .sub{font-size:3.1cqw;margin:0;color:#5c6178}
+.passport .grid4{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw;margin-top:1cqw}
+.passport .ph{position:relative;aspect-ratio:1/1;border-radius:2.6cqw;overflow:hidden;box-shadow:0 1.4cqw 3cqw rgba(60,70,120,.18)}
+.passport .ph img{width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+.passport .fields{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 3cqw;font-size:2.9cqw;margin-top:1cqw}
+.passport .fields dt{color:#8a8fa6}
+.passport .fields dd{margin:0;font-weight:500}
+.eyes{position:absolute;left:6%;width:90%;aspect-ratio:3.4/1;top:24%;background:url(../assets/selfie.jpg) no-repeat;background-size:404% auto;background-position:24% 46.5%;
+  box-shadow:0 .6cqw 1cqw rgba(0,0,0,.35);rotate:-3deg;opacity:0;transition:opacity .2s .15s}
+.eyes.b{top:27%;rotate:2.5deg;left:2%}
+#faces.is-torn .eyes{opacity:1}
+#faces .caption{position:absolute;inset-inline-start:max(16px,4vw);bottom:max(18px,4svh);max-width:22em;display:grid;gap:6px;opacity:calc(1 - var(--p) * 2.2)}
+#faces .title{position:absolute;inset-inline-start:max(16px,4vw);top:max(18px,4svh);display:grid;gap:4px;opacity:calc(1 - var(--p) * 2.2)}
+#faces .title h1{margin:0;font-family:var(--f-order);font-weight:700;font-size:clamp(28px,4.4vw,56px);line-height:1;letter-spacing:-.01em}
+#faces .end{position:absolute;inset:auto 0 max(24px,6svh) 0;text-align:center;opacity:calc((var(--p) - .82) * 6)}
+#faces .end .kruger{font-size:clamp(22px,3.6vw,44px)}
+
+/* ===== 2 · biography ===== */
+#bio .card{width:min(680px,92vw);display:flex;flex-direction:column;text-align:center}
+#bio .head,.bline{background:var(--paper) url(../assets/paper-texture.jpg) center/cover}
+#bio .head{border-radius:28px 28px 0 0;padding:34px 28px 14px;display:grid;justify-items:center;gap:12px;box-shadow:0 18px 22px rgba(0,0,0,.25)}
+#bio .head .ai-pill{font-size:13px}
+#bio .head h2{margin:0;font-family:var(--f-ai);font-weight:700;font-size:clamp(26px,4vw,38px);line-height:1.15}
+.lw{display:grid}
+.lw>*{grid-area:1/1}
+.bline{position:relative;z-index:2;padding:8px 28px;font-family:var(--f-ai);font-size:clamp(17px,2vw,21px);color:var(--ai-ink);
+  transform:translateY(calc(var(--q,0) * 150%)) rotate(calc(var(--q,0) * var(--dir,1) * 8deg));opacity:calc(1 - var(--q,0) * var(--q,0));
+  box-shadow:0 18px 22px rgba(0,0,0,.25)}
+.bline.ripped{-webkit-mask:url(../assets/strip-0.webp) 0 0/100% 100% no-repeat;mask:url(../assets/strip-0.webp) 0 0/100% 100% no-repeat;padding-block:14px}
+.lw:nth-child(odd) .bline.ripped{-webkit-mask-image:url(../assets/strip-2.webp);mask-image:url(../assets/strip-2.webp)}
+.lw:last-child .bline{border-radius:0 0 28px 28px;padding-bottom:30px}
+.fix{z-index:1;align-self:center;justify-self:start;text-align:start;font-size:clamp(20px,2.6vw,28px);padding:6px 4px;opacity:calc(var(--q,0) * 1.6)}
+#bio .note{margin-top:22px;text-align:center}
+
+/* ===== 3 · living room ===== */
+#room .under{position:absolute;inset:max(16px,4svh) max(16px,3vw);display:grid;gap:10px;background:var(--ink);padding:10px;
+  grid-template-columns:1.55fr 1fr .42fr;grid-template-rows:1fr 1fr .34fr}
+#room .under>*{min-width:0;min-height:0;overflow:hidden}
+#room .under img{width:100%;height:100%;object-fit:cover}
+#room .m-morning{grid-column:1;grid-row:1/3}
+#room .m-styled{grid-column:2;grid-row:1/3;position:relative}
+#room .m-red{background:var(--red)}
+#room .m-yellow{background:var(--yellow)}
+#room .m-text{grid-column:1/3;background:var(--paper);color:var(--ink);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:clamp(14px,1.5vw,18px)}
+#room .m-paper{background:var(--paper)}
+#room .credit{position:absolute;bottom:8px;inset-inline-start:10px;font-size:11px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#room .sheet{--ar:1195/1600;z-index:2}
+#room .half.a{transform:translateX(calc(var(--p) * -72vw)) rotate(calc(var(--p) * -7deg))}
+#room .half.b{transform:translateX(calc(var(--p) * 72vw)) rotate(calc(var(--p) * 6deg))}
+#room .print img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#room .print .cap{position:absolute;inset:auto 7% 6% 7%;text-align:center;font-size:2.6cqh;font-family:var(--f-ai)}
+
+/* ===== 4 · childhood (quiet) ===== */
+#child{min-height:150svh;display:grid;align-content:center;gap:56px;padding-block:22svh}
+#child .pins{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+#child figure{margin:0;width:min(250px,42vw);rotate:var(--r,0deg);display:grid;gap:6px}
+#child figure img{box-shadow:0 10px 18px rgba(0,0,0,.35);filter:saturate(.85)}
+#child .frame{justify-self:center;width:min(640px,92vw);aspect-ratio:4/3;background:var(--paper) url(../assets/paper-texture.jpg) center/cover;position:relative;box-shadow:0 18px 26px rgba(0,0,0,.35);
+  display:grid;place-items:center;text-align:center;color:var(--ink)}
+#child .frame::before{content:"";position:absolute;inset:6%;opacity:.55;
+  background-image:repeating-linear-gradient(to left,transparent 0 calc(100% / 12 - 1px),rgba(120,118,110,.55) calc(100% / 12 - 1px) calc(100% / 12)),
+                   repeating-linear-gradient(to bottom,transparent 0 calc(100% / 9 - 1px),rgba(120,118,110,.35) calc(100% / 9 - 1px) calc(100% / 9))}
+#child .frame p{position:relative;margin:0;font-weight:300;font-size:clamp(22px,3.4vw,40px);line-height:1.25}
+#child .frame .draft{position:absolute;bottom:10px;inset-inline-start:12px;color:#77756e;border-color:#aaa}
+
+/* ===== 5 · five addresses ===== */
+#streets{padding-block:14svh 18svh;display:grid;gap:64px;justify-items:center}
+#streets .notme{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}
+#streets .notme figure{margin:0;position:relative;width:min(300px,86vw);rotate:var(--r,0deg)}
+#streets .notme img{box-shadow:0 10px 18px rgba(0,0,0,.35)}
+#streets .notme .kruger{position:absolute;bottom:10px;inset-inline-start:10px;font-size:18px}
+#streets .notme .lbl{display:block;margin-top:6px}
+#streets .lines{width:min(1100px,100%);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px;align-items:start}
+#streets .map{background:var(--paper) url(../assets/paper-texture.jpg) center/cover;color:var(--ink);padding:20px 18px 10px;box-shadow:0 18px 26px rgba(0,0,0,.35);position:sticky;top:6svh}
+#streets .map svg{width:100%;height:auto;display:block}
+#streets .map .lbl{color:#6d6b64}
+.strips{display:grid;gap:22px;padding-top:8px}
+.strip{position:relative;color:var(--ink);padding:18px 26px 20px;min-height:116px;display:grid;align-content:center;gap:2px;
+  background:var(--paper) url(../assets/paper-texture.jpg) center/cover;-webkit-mask:var(--m) 0 0/100% 100% no-repeat;mask:var(--m) 0 0/100% 100% no-repeat;
+  filter:drop-shadow(0 10px 12px rgba(0,0,0,.35));rotate:var(--r,0deg);
+  transform:translateX(calc((1 - var(--s,1)) * 60vw));opacity:var(--s,1)}
+.strip .n{position:absolute;inset-inline-end:22px;top:12px;font-family:var(--f-order);font-weight:700;font-size:13px;color:var(--red)}
+.strip h3{margin:0;font-family:var(--f-order);font-weight:700;font-size:clamp(22px,2.6vw,30px);line-height:1.1}
+.strip .city{font-weight:400;color:#6d6b64}
+.strip p{margin:4px 0 0;font-weight:300;font-size:clamp(15px,1.6vw,18px);line-height:1.4}
+
+/* ===== 6 · family ===== */
+#family .under{position:absolute;inset:0;display:grid;place-items:center}
+#family .under img{height:min(84svh,calc(92vw * 4 / 3));width:auto;box-shadow:0 18px 26px rgba(0,0,0,.35)}
+#family .sheet{--ar:1218/1600;z-index:2}
+#family .print img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#family .half.a{transform:translate(calc(var(--p) * -70vw), calc(var(--p) * -8svh)) rotate(calc(var(--p) * -9deg))}
+#family .half.b{transform:translate(calc(var(--p) * 70vw), calc(var(--p) * 10svh)) rotate(calc(var(--p) * 8deg))}
+#family .say{position:absolute;inset-inline:max(16px,4vw);bottom:max(20px,5svh);z-index:3;text-align:start;opacity:calc((var(--p) - .55) * 4)}
+#family .say .kruger{font-size:clamp(22px,3.4vw,42px)}
+#family .top{position:absolute;top:max(18px,4svh);inset-inline-start:max(16px,4vw);z-index:3;opacity:calc(1 - var(--p) * 3)}
+
+/* ===== 7 · stance ===== */
+#stance{padding-block:16svh 10svh;display:grid;justify-items:center;gap:28px}
+#stance h2{margin:0;font-size:clamp(64px,13vw,170px);line-height:.9}
+#stance .page{width:min(720px,100%);background:var(--paper) url(../assets/paper-texture.jpg) center/cover;color:var(--ink);padding:clamp(24px,5vw,56px);box-shadow:0 18px 26px rgba(0,0,0,.35);rotate:var(--r,0deg)}
+#stance .page p{margin:0 0 1em;max-width:34em}
+#stance .page .draft{color:#77756e;border-color:#aaa}
+footer{padding-block:28px 40px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid rgba(237,235,230,.25)}
+footer a{color:var(--paper)}
+footer a:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+
+@media (max-width:760px){
+  #streets .lines{grid-template-columns:1fr}
+  #streets .map{position:relative;top:0}
+  #room .under{grid-template-columns:1fr 1fr;grid-template-rows:1.2fr 1fr .3fr .3fr}
+  #room .m-morning{grid-column:1/3;grid-row:1}
+  #room .m-styled{grid-column:1;grid-row:2}
+  #room .m-red{grid-column:2;grid-row:2}
+  #room .m-yellow{display:none}
+  #room .m-text{grid-column:1/3;grid-row:3/5}
+  #room .m-paper{display:none}
+}
+@media (prefers-reduced-motion:reduce){#faces.shake .zoom{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ 1 · ארבעה צחי ============ -->
+<div class="pin" style="--len:280vh">
+<section class="stage" id="faces" aria-label="ארבעה צחי">
+  <div class="zoom">
+    <div class="sheet">
+      <div class="behind"><img src="../assets/selfie.jpg" alt="סלפי של צחי שמש בפארק"></div>
+      <div class="intact">
+        <div class="paper-rect"></div>
+        <div class="print" data-print="passport"></div>
+      </div>
+      <div class="torn">
+        <img class="paper" src="../assets/tear-hole-paper.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%">
+        <div class="print" data-print="passport" style="-webkit-mask-image:url(../assets/tear-hole-mask.webp);mask-image:url(../assets/tear-hole-mask.webp)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="title"><h1>צחי שמש</h1><span class="lbl">תעודת זהות משבשת · משימה 1 · HIT 2026</span></div>
+  <div class="caption">
+    <span class="lbl">ביקשתי ממודל לדמיין אותי. ארבע תוצאות, אותו פרומפט:</span>
+    <span class="lbl ltr" style="font-size:11px">"portrait of Tzahi Shemesh, a 43-year-old interior designer who runs his own independent studio and lectures at academic institutions"</span>
+  </div>
+  <div class="end"><span class="kruger"><b>ארבע תמונות. פנים אחת. לא שלי.</b></span></div>
+</section>
+</div>
+
+<template id="passport">
+  <div class="passport ai">
+    <span class="ai-pill">פרופיל שנוצר אוטומטית</span>
+    <h2>צחי שמש, 43</h2>
+    <p class="sub">מעצב פנים · בעל סטודיו עצמאי · מרצה</p>
+    <div class="grid4">
+      <div class="ph"><img src="../assets/ai-portrait-a.jpg" alt="דיוקן שהמודל ייצר, תוצאה 1"><span class="eyes"></span></div>
+      <div class="ph"><img src="../assets/ai-portrait-b.jpg" alt="דיוקן שהמודל ייצר, תוצאה 2"></div>
+      <div class="ph"><img src="../assets/ai-portrait-c.jpg" alt="דיוקן שהמודל ייצר, תוצאה 3"></div>
+      <div class="ph"><img src="../assets/ai-portrait-d.jpg" alt="דיוקן שהמודל ייצר, תוצאה 4"><span class="eyes b"></span></div>
+    </div>
+    <dl class="fields">
+      <dt>גיל</dt><dd>43</dd>
+      <dt>מקום</dt><dd>—</dd>
+    </dl>
+  </div>
+</template>
+
+<!-- ============ 2 · הביוגרפיה ============ -->
+<div class="pin" style="--len:300vh">
+<section class="stage gut" id="bio" aria-label="הביוגרפיה">
+  <div>
+    <div class="card">
+      <div class="head ai"><span class="ai-pill">נכתב על ידי AI</span><h2 class="ai-grad">המעצב שמאחורי החללים</h2></div>
+      <div class="lw"><div class="bline">צחי שמש הוא מעצב פנים יצירתי ונלהב,</div></div>
+      <div class="lw"><div class="bline">שמאמין שעיצוב טוב מתחיל בהקשבה.</div></div>
+      <div class="lw" data-at=".12"><div class="bline" style="--dir:-1">הוא שואב השראה מהאור הים-תיכוני</div><div class="fix kruger"><b>גדלתי גם במדבר. להבים.</b></div></div>
+      <div class="lw" data-at=".3"><div class="bline">ומהמינימליזם הסקנדינבי.</div><div class="fix kruger"><b>בסלון שלי יש עגלת בובות.</b></div></div>
+      <div class="lw"><div class="bline">בעל סטודיו עצמאי ומרצה במוסדות אקדמיים.</div></div>
+      <div class="lw" data-at=".48"><div class="bline" style="--dir:-1">בזמנו הפנוי הוא אוהב לטייל בעולם ולגלות מקומות חדשים.</div><div class="fix kruger"><b>חמש כתובות עד הגיוס.</b></div></div>
+      <div class="lw" data-at=".66"><div class="bline">צחי מתגורר בתל אביב עם משפחתו.</div><div class="fix kruger"><b>חזרתי לבית של ההורים, עם הילדים שלי.</b></div></div>
+    </div>
+    <div class="note"><span class="draft">טיוטה · הביוגרפיה תוחלף בפלט אמיתי של מודל, והתיקונים בכתב היד שלי</span></div>
+  </div>
+</section>
+</div>
+
+<!-- ============ 3 · הסלון ============ -->
+<div class="pin" style="--len:260vh">
+<section class="stage" id="room" aria-label="הסלון">
+  <div class="under" aria-label="הסלון האמיתי">
+    <div class="m-morning"><img src="../assets/room-morning.jpg" alt="הסלון שלי בבוקר: עגלת בובות, כיסאות ילדים, צעצועים על הרצפה" loading="lazy"></div>
+    <div class="m-styled"><img src="../assets/room-styled.jpg" alt="צחי על ספה בסלון מעוצב, צילום מקצועי" loading="lazy"><span class="credit">צילום: גדי יוסף</span></div>
+    <div class="m-red"></div>
+    <div class="m-yellow"></div>
+    <div class="m-text"><span>שמונה בבוקר, אחרי שהילדים יצאו.</span><span class="lbl" style="color:#6d6b64">ומשמאל: גם אני יודע להצטלם כמו הממוצע.</span></div>
+    <div class="m-paper"></div>
+  </div>
+  <div class="sheet">
+    <div class="half a"><img class="paper" src="../assets/tear-diagonal-a-paper.webp" alt=""><div class="print" style="-webkit-mask-image:url(../assets/tear-diagonal-a-mask.webp);mask-image:url(../assets/tear-diagonal-a-mask.webp)"><img src="../assets/ai-home.jpg" alt=""><div class="cap ai">הסלון של צחי שמש, לפי המודל</div></div></div>
+    <div class="half b"><img class="paper" src="../assets/tear-diagonal-b-paper.webp" alt=""><div class="print" style="-webkit-mask-image:url(../assets/tear-diagonal-b-mask.webp);mask-image:url(../assets/tear-diagonal-b-mask.webp)"><img src="../assets/ai-home.jpg" alt="הסלון שהמודל ייצר: שיש, בז' וטלוויזיה ענקית"><div class="cap ai">הסלון של צחי שמש, לפי המודל</div></div></div>
+  </div>
+</section>
+</div>
+
+<!-- ============ 4 · הילדות ============ -->
+<section id="child" class="gut" aria-label="הילדות">
+  <div class="pins">
+    <figure><img src="../assets/ai-child-a.jpg" alt="ילדות שהמודל המציא: ילד בין עצי זית" loading="lazy"><figcaption class="lbl">הילדות שלי, לפי המודל</figcaption></figure>
+    <figure><img src="../assets/ai-child-b.jpg" alt="ילדות שהמודל המציא: ילד קירח עם תיק כתום בסנטרל פארק" loading="lazy"><figcaption class="lbl">ועם סלפי אחד שלי כרפרנס: ילד קירח, בניו יורק</figcaption></figure>
+  </div>
+  <div class="frame">
+    <p>אין לי תמונות מהילדות.<br>יש לי חמש כתובות.</p>
+    <span class="draft">טיוטה · יוחלף בכתב יד ובגריד בעיפרון</span>
+  </div>
+</section>
+
+<!-- ============ 5 · חמש כתובות ============ -->
+<section id="streets" class="gut" aria-label="חמש כתובות">
+  <div class="notme">
+    <figure><img src="../assets/ai-street-a.jpg" alt="רחוב שהמודל ייצר, שנראה כמו סמטה במזרח אסיה" loading="lazy"><span class="kruger"><b>לא גדלתי כאן.</b></span><span class="lbl">המודל, בלי רפרנס</span></figure>
+    <figure><img src="../assets/ai-street-b.jpg" alt="רחוב בניו יורק שהמודל ייצר" loading="lazy"><span class="kruger"><b>וגם לא כאן.</b></span><span class="lbl">המודל, עם סלפי מניו יורק</span></figure>
+    <figure><img src="../assets/ai-street-c.jpg" alt="רחוב בקווינס שהמודל ייצר" loading="lazy"><span class="kruger"><b>וגם לא כאן.</b></span><span class="lbl">המודל, עם סלפי מניו יורק</span></figure>
+  </div>
+  <div class="lines">
+    <div class="map" aria-label="מפת חמש הכתובות">
+      <svg viewBox="0 0 600 420" role="img" aria-label="קו אחד: חולון, חולון, להבים, חולון, ראשון לציון">
+        <path d="M200 70 H360 L480 190 V340 H440 L240 140 H110" fill="none" stroke="#d3202a" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"/>
+        <g fill="#fff" stroke="#1a1a18" stroke-width="4">
+          <circle cx="200" cy="70" r="11"/><circle cx="320" cy="70" r="11"/><circle cx="480" cy="340" r="13"/><circle cx="240" cy="140" r="11"/><circle cx="110" cy="140" r="11"/>
+        </g>
+        <g font-family="IBM Plex Sans Hebrew, Arial" fill="#1a1a18" font-size="17" font-weight="700" text-anchor="middle">
+          <text x="200" y="44">1 שד' ירושלים</text>
+          <text x="320" y="44">2 אלופי צה"ל</text>
+          <text x="470" y="384">3 הסייפן, להבים</text>
+          <text x="240" y="180">4 מכלף</text>
+          <text x="110" y="180">5 ראשון לציון</text>
+        </g>
+        <g font-family="IBM Plex Sans Hebrew, Arial" fill="#6d6b64" font-size="14" text-anchor="middle">
+          <text x="260" y="104">חולון</text>
+          <text x="420" y="250" transform="rotate(45 420 250)">כ-70 ק"מ דרומה</text>
+        </g>
+      </svg>
+      <span class="lbl">קו אחד, חמש תחנות, לפי הסדר. בהשראת מפת הרכבת התחתית של ויניֶלי.</span>
+    </div>
+    <div class="strips">
+      <div class="strip" style="--m:url(../assets/strip-0.webp)"><span class="n">1</span><h3>שדרות ירושלים <span class="city">· חולון</span></h3><p>קומה מתחת לדודים.</p></div>
+      <div class="strip" style="--m:url(../assets/strip-2.webp)"><span class="n">2</span><h3>אלופי צה"ל <span class="city">· חולון</span></h3><p>קומה ראשונה, על כביש סואן. הרעש.</p></div>
+      <div class="strip" style="--m:url(../assets/strip-1.webp)"><span class="n">3</span><h3>הסייפן <span class="city">· להבים</span></h3><p>ילדות טהורה. משחקים ברחוב. יציאה למדבר.</p></div>
+      <div class="strip" style="--m:url(../assets/strip-3.webp)"><span class="n">4</span><h3>מכלף <span class="city">· חולון</span></h3><p>חברים שמלווים אותי עד היום. שכונה שקטה. חדר משלי.</p></div>
+      <div class="strip" style="--m:url(../assets/strip-0.webp)"><span class="n">5</span><h3>ראשון לציון</h3><p>רגע לפני הגיוס. לא היה חיבור לבית הזה, עד שחזרתי לגור בו עם הילדים שלי.</p></div>
+      <span class="draft">טיוטה · שמות הרחובות יוחלפו באותיות גזורות, הזיכרונות בכתב יד</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 · המשפחה ============ -->
+<div class="pin" style="--len:260vh">
+<section class="stage" id="family" aria-label="המשפחה">
+  <div class="under"><img src="../assets/family-covered.jpg" alt="צחי ונועה עם שלושת הילדים. פני הילדים מכוסים בקרעי נייר צבעוניים" loading="lazy"></div>
+  <div class="sheet">
+    <div class="half a"><img class="paper" src="../assets/tear-curve-deep-a-paper.webp" alt=""><div class="print" style="-webkit-mask-image:url(../assets/tear-curve-deep-a-mask.webp);mask-image:url(../assets/tear-curve-deep-a-mask.webp)"><img src="../assets/ai-portrait-b.jpg" alt=""></div></div>
+    <div class="half b"><img class="paper" src="../assets/tear-curve-deep-b-paper.webp" alt=""><div class="print" style="-webkit-mask-image:url(../assets/tear-curve-deep-b-mask.webp);mask-image:url(../assets/tear-curve-deep-b-mask.webp)"><img src="../assets/ai-portrait-b.jpg" alt="המעצב שהמודל דמיין, לבד בסטודיו"></div></div>
+  </div>
+  <div class="top lbl">המעצב של המודל. תמיד לבד.</div>
+  <div class="say">
+    <span class="kruger"><b>20 תמונות שהמודל ייצר.</b><br><b>באף אחת אין את הילדים שלי.</b></span><br>
+    <span class="lbl">את הפנים שלהם כיסיתי. מה שאני בוחר להסתיר מהמכונה הוא גם חלק מהזהות.</span>
+  </div>
+</section>
+</div>
+
+<!-- ============ 7 · עמדה ============ -->
+<section id="stance" class="gut" aria-label="עמדה">
+  <h2 class="kruger"><b>חיכוך</b></h2>
+  <div class="page">
+    <p>ביקשתי ממודל לתאר אותי שלוש פעמים. בלי מידע, הוא המציא טיפוס: מעצב ים-תיכוני עם זקן אפור ובלייזר. עם תמונה אחת שלי, הוא ייפה אותי והעתיק את ההקשר של התמונה לכל חיי: התיק, המשקפיים, ניו יורק. אפילו הילד שהייתי קיבל ראש קירח. עם תיאור עשיר, הוא הוסיף לי שתים-עשרה שנים ונתן לי את אותן פנים ארבע פעמים.</p>
+    <p>ככל שנתתי לו יותר, הוא נעשה יותר בטוח ולא יותר נכון. המודל לא מתקרב אליי; הוא מתקרב לממוצע של המילים.</p>
+    <p>בעמוד הזה, מה שנקרע הוא הממוצע. הקריעות אמיתיות: קרעתי את הדפים ביד וצילמתי אותם. מתחת יש סדר, אבל הוא שלי: קו אחד עם חמש תחנות, גריד בעיפרון. ויש שבירה, אבל גם היא שלי: הסלון בשמונה בבוקר, תמונות שאין, פנים שאני בוחר להסתיר.</p>
+    <p>המודל נותן את הממוצע מיד. האמת דורשת מאמץ. החיכוך הוא העמדה.</p>
+    <span class="draft">טיוטה · טקסט העמדה הסופי ייכתב על ידי</span>
+  </div>
+</section>
+
+<footer class="gut lbl">
+  <span>צחי שמש · עיצוב בעזרת בינה מלאכותית · HIT 2026 · דפני פרלמן ואיתן ברטל</span>
+  <span><a href="https://github.com/zakyshemesh-sketch/task-01/tree/main/process">תיעוד התהליך</a> · <a href="https://github.com/zakyshemesh-sketch/task-01">הריפו</a></span>
+</footer>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+
+  /* print the passport into both layers of the sheet */
+  const tpl = document.getElementById('passport');
+  document.querySelectorAll('[data-print="passport"]').forEach(el => el.appendChild(tpl.content.cloneNode(true)));
+
+  /* Gaetano Pesce: every visit is a slightly different copy */
+  document.querySelectorAll('#child figure, #streets .notme figure, .strip, #stance .page').forEach(el => {
+    el.style.setProperty('--r', ((Math.random() - .5) * (el.classList.contains('strip') ? 2.4 : 5)).toFixed(2) + 'deg');
+  });
+
+  const pins = [...document.querySelectorAll('.pin')].map(pin => ({pin, stage: pin.querySelector('.stage')}));
+  const faces = document.getElementById('faces');
+  const bioRows = [...document.querySelectorAll('#bio .lw[data-at]')];
+  const strips = [...document.querySelectorAll('.strip')];
+  const streets = document.querySelector('#streets .strips');
+  let torn = false;
+
+  function frame(){
+    const vh = innerHeight;
+    pins.forEach(({pin, stage}) => {
+      const r = pin.getBoundingClientRect();
+      const p = clamp(-r.top / (r.height - vh));
+      stage.style.setProperty('--p', (stage.id === 'faces' ? p : ease(p)).toFixed(4));
+      if (stage.id === 'faces') {
+        const now = p > .2;
+        if (now !== torn) {
+          torn = now; faces.classList.toggle('is-torn', now);
+          if (now && !reduce) { faces.classList.remove('shake'); void faces.offsetWidth; faces.classList.add('shake'); }
+        }
+      }
+      if (stage.id === 'bio') {
+        bioRows.forEach(row => {
+          const q = clamp((p - +row.dataset.at) / .14);
+          row.style.setProperty('--q', ease(q).toFixed(4));
+          row.querySelector('.bline').classList.toggle('ripped', q > 0);
+        });
+      }
+    });
+    const sr = streets.getBoundingClientRect();
+    strips.forEach((s, i) => {
+      const t = clamp(((vh * .92) - (sr.top + i * 120)) / (vh * .35));
+      s.style.setProperty('--s', reduce ? 1 : ease(t).toFixed(4));
+    });
+  }
+  let ticking = false;
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { frame(); ticking = false; }); } }, {passive: true});
+  addEventListener('resize', frame);
+  frame();
+})();
+</script>
+</body>
+</html>
