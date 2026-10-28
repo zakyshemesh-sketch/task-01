@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>תעודת זהות משבשת</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="צחי שמש (?) מקרוב רעש של אותיות. מרחוק, משפחה.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* One field of characters on a strict, visible grid (the order). Up close it streams and flickers like running code,
+   some modules turn into patterns (the break), but every letter belongs to a sentence about me.
+   Scrolling pulls the camera back until the field becomes a faded family photograph. */
+:root{
+  --bg:#0d0d0c;
+  --ink:#ece9e2;
+  --dim:#7d7a72;
+  --red:#e0322b;          /* what the model guessed about me, and the question of who I am */
+  --f:"IBM Plex Sans Hebrew","Arial Hebrew",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:var(--f);font-size:17px;line-height:1.65;overflow-x:hidden}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pin{position:relative;height:800vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.92) brightness(.98)}
+.hint{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.hint span{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--ink);background:rgba(13,13,12,.85);padding:8px 14px;direction:ltr}
+.hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--dim);pointer-events:none}
+.hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
+.key{position:absolute;top:max(14px,env(safe-area-inset-top,0px));inset-inline-start:max(16px,env(safe-area-inset-left,0px));font-size:12px;color:var(--dim);display:flex;gap:16px;flex-wrap:wrap;pointer-events:none;background:rgba(13,13,12,.8);padding:4px 8px}
+.key b{font-weight:400;color:var(--ink)} .key i{font-style:normal;color:var(--red)}
+.after{max-width:760px;margin-inline:auto;padding-block:18svh 10svh;display:grid;gap:28px}
+.after h1{margin:0;font-weight:700;font-size:clamp(44px,8vw,96px);line-height:.95;letter-spacing:-.01em}
+.after h1 span{color:var(--red)}
+.after p{margin:0;max-width:36em;font-weight:300;font-size:clamp(17px,1.9vw,20px)}
+.after .draft{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);border-top:1px dashed var(--dim);padding-top:4px;justify-self:start}
+footer{max-width:760px;margin-inline:auto;padding-block:20px 40px;border-top:1px solid #2a2a28;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+footer a{color:var(--ink)}
+a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="pin">
+  <section class="stage" aria-label="שדה של אותיות שמתרחק ונהיה צילום משפחתי">
+    <canvas id="c" aria-hidden="true"></canvas>
+    <img id="photo" src="../assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
+    <div class="key"><span><b>לבן</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span></div>
+    <div class="hint"><span>SCROLL</span></div>
+    <div class="hud gut"><span>גללו כדי להתרחק</span><span style="display:flex;gap:18px"><span><span id="hud-cells" class="n">0</span> תאים</span><span>מרחק <span id="hud-dist" class="n">1.00x</span></span></span></div>
+  </section>
+</div>
+
+<section class="after gut" aria-label="על העבודה">
+  <h1>צחי שמש <span>(?)</span></h1>
+  <p>מקרוב אני רעש: אותיות שמהבהבות כמו קוד רץ. אבל כל אות שייכת למשפט אמיתי: חמש כתובות לפני הגיוס, קומה מתחת לדודים, הרעש של הכביש, המדבר בלהבים, הסלון בשמונה בבוקר.</p>
+  <p>באדום, מה שמודל ניחש עליי כשביקשתי שידמיין אותי: בן 55, שיער אפור, בלייזר כהה, סלון עם שיש, ילדות בניו יורק. הניחושים האלה נבלעים בשדה, כמו שהם נבלעים בממוצע.</p>
+  <p>רק מרחוק, כשמוותרים על הקריאה, הרעש מתארגן לתמונה. הפנים של הילדים שלי נשארות רעש גם בסוף. אותן המכונה לא מקבלת.</p>
+  <span class="draft">טיוטה · טקסט העמדה הסופי ייכתב על ידי</span>
+</section>
+
+<footer class="gut">
+  <span>צחי שמש · עיצוב בעזרת בינה מלאכותית · HIT 2026</span>
+  <span><a href="https://github.com/zakyshemesh-sketch/task-01/tree/main/process">תיעוד התהליך</a> · <a href="https://github.com/zakyshemesh-sketch/task-01">הריפו</a></span>
+</footer>
+
+<script>
+(function(){
+  /* ---------- what the field is made of ---------- */
+  const MINE = [
+    'צחי שמש', '43', 'מעצב פנים', 'סטודיו עצמאי', 'מרצה במוסדות אקדמיים', 'סטודנט M.Des ב-HIT', 'נשוי לנועה', 'אבא',
+    'שדרות ירושלים, חולון: קומה מתחת לדודים',
+    'אלופי צה"ל, חולון: קומה ראשונה, על כביש סואן. הרעש',
+    'הסייפן, להבים: ילדות טהורה. משחקים ברחוב. יציאה למדבר',
+    'מכלף, חולון: חברים שמלווים אותי עד היום. שכונה שקטה. חדר משלי',
+    'ראשון לציון: רגע לפני הגיוס. לא היה חיבור לבית הזה, עד שחזרתי לגור בו עם הילדים שלי',
+    'אין לי תמונות מהילדות', 'יש לי חמש כתובות', 'קירח',
+    'הסלון בשמונה בבוקר: עגלת בובות, כיסא ילדים, צעצועים על הרצפה'
+  ];
+  // everything here is something an image model actually produced when asked to show me (process/01-03)
+  const GUESS = [
+    'בן 55?', 'שיער אפור?', 'זקן אפור?', 'שיער מלא?', 'בלייזר כהה?', 'חולצה שחורה?', 'ג\'ינס ושעון?', 'ידיים בכיסים?',
+    'חיוך בטוח?', 'מנורות פליז?', 'סלון עם שיש?', 'טלוויזיה ענקית?', 'ספה בז\'?', 'תאורה נסתרת?', 'כורסת עור?',
+    'סטודיו מסודר?', 'לוח השראה על הקיר?', 'דוגמאות חומרים?', 'תמיד לבד?', 'בלי ילדים?',
+    'ילד עם כביסה תלויה?', 'כיסאות פלסטיק בחצר?', 'עצי זית?', 'אבן ירושלמית?', 'ילד קירח?', 'ילדות בסנטרל פארק?',
+    'גדל בהארלם?', 'גדל בקווינס?', 'סמטה במזרח אסיה?', 'תיק כתום?', 'משקפיים על הראש?', 'אור זהוב?', 'עור חלק יותר?'
+  ];
+  const NAME = ' צחי שמש )?( ';          // cells fill right to left and are drawn one by one, so the brackets are written mirrored
+  const NOISE = 'אבגדהוזחטיכלמנסעפצקרשת0123456789#%&*+=<>/\\|:;.,-_';
+  const flipRuns = s => s.replace(/[0-9A-Za-z.\-]{2,}/g, m => m.split('').reverse().join(''));
+  const pick = a => a[(Math.random() * a.length) | 0];
+
+  let stream = [], red = [];
+  while (stream.length < 62000) {
+    const isGuess = Math.random() < .17;
+    const s = flipRuns((isGuess ? pick(GUESS) : pick(MINE)) + ' / ');
+    for (let i = 0; i < s.length; i++) { stream.push(s[i]); red.push(isGuess && i < s.length - 3); }
+  }
+
+  /* ---------- the grid ---------- */
+  const AR = 0.6;
+  const ROWS = 168, COLS = Math.round(ROWS * 0.75 / AR);
+  const MOD = 8, MC = Math.ceil(COLS / MOD), MR = Math.ceil(ROWS / MOD);
+  const N = COLS * ROWS;
+  const lum = new Float32Array(N);
+  const speed = new Float32Array(ROWS);              // the simple version: the text stays in place and only flickers
+
+  const PATTERNS = [
+    (r, c, t) => '/',
+    (r, c, t) => ((r + c) % 2 ? '·' : ' '),
+    (r, c, t) => ((r % 2 === 0 && c % 2 === 0) ? '+' : ' '),
+    (r, c, t, L) => ' ░▒▓█'[Math.min(4, Math.floor(L * 5))],
+    (r, c, t) => ((Math.sin(r * 1.7 + c * 3.1 + Math.floor(t * 6)) > 0) ? '1' : '0'),
+    (r, c, t) => ((c + Math.floor(t * 4)) % 4 === 0 ? '|' : '-'),
+  ];
+  const modType = new Int8Array(MC * MR).fill(-1);
+  const keep = new Uint8Array(MC * MR);                // modules that hold the name or an opening guess stay text
+
+  function charAt(r, sc, t){
+    const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
+    if (modType[m] >= 0) return [PATTERNS[modType[m]](r, sc, t, lum[r * COLS + sc]), false, true];
+    const c = COLS - 1 - sc;
+    const shift = Math.floor(t * speed[r]);
+    const k = r * COLS + (((c - shift) % COLS) + COLS) % COLS;
+    return [stream[k], red[k], false];
+  }
+
+  // write a phrase into the field, on a still row, starting at a screen column and running leftwards
+  function place(text, r, sc0){
+    speed[r] = 0;
+    for (let j = 0; j < text.length; j++) {
+      const sc = sc0 - j; if (sc < 0) break;
+      const k = r * COLS + (COLS - 1 - sc);
+      stream[k] = text[j]; red[k] = true;
+      const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
+      modType[m] = -1; keep[m] = 1;
+    }
+  }
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const photo = document.getElementById('photo');
+  const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
+  const hint = document.querySelector('.hint');
+  const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, DPR = 1, ready = false;
+
+  function readPhoto(img){
+    const t = document.createElement('canvas'); t.width = COLS; t.height = ROWS;
+    const x = t.getContext('2d'); x.drawImage(img, 0, 0, COLS, ROWS);
+    const d = x.getImageData(0, 0, COLS, ROWS).data;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const k = (r * COLS + c) * 4;
+      const L = (0.299 * d[k] + 0.587 * d[k+1] + 0.114 * d[k+2]) / 255;
+      const dx = c / COLS - .5, dy = r / ROWS - .5;
+      lum[r * COLS + c] = Math.pow(L, 1.2) * (1 - 0.45 * Math.min(1, (dx*dx + dy*dy) * 2.6));
+    }
+  }
+
+  /* ---------- camera ---------- */
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smooth = t => t * t * (3 - 2 * t);
+  const progress = () => { const r = pin.getBoundingClientRect(); return clamp(-r.top / (r.height - innerHeight)); };
+  const EYE = {c: COLS * 0.64, r: ROWS * 0.54};
+  function camera(p){
+    const z = clamp(p / 0.86), sz = smooth(z);
+    const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.9 / ROWS);
+    const startCell = Math.max(40, Math.min(W, H) / 12);
+    const cell = startCell * Math.pow(fitCell / startCell, sz), cw = cell * AR;
+    const cx = lerp(EYE.c, COLS / 2, sz), cy = lerp(EYE.r, ROWS / 2, sz);
+    return {z, sz, cell, cw, startCell, ox: W / 2 - cx * cw, oy: H / 2 - cy * cell};
+  }
+
+  // the opening screen: the name sits in the grid at the start of a module, and a few guesses are within reach
+  function seedOpening(){
+    const v = camera(0);
+    const c0 = Math.ceil(-v.ox / v.cw), c1 = Math.floor((W - v.ox) / v.cw) - 1;
+    const r0 = Math.ceil(-v.oy / v.cell) + 1, r1 = Math.floor((H - v.oy) / v.cell) - 2;
+    const rows = r1 - r0, cols = c1 - c0;
+    // name: on a module line, in the upper right part of the screen (where a Hebrew page starts)
+    const nr = Math.max(r0, Math.min(r1, Math.round((r0 + rows * .22) / MOD) * MOD));
+    const nsc = Math.min(c1, Math.ceil((c0 + cols * .78) / MOD) * MOD - 1);
+    place(NAME, nr, nsc);
+    const used = new Set([nr]);
+    for (let g = 0; g < 4; g++) {
+      let r; do { r = r0 + ((Math.random() * Math.max(1, rows)) | 0); } while (used.has(r) && used.size < rows);
+      used.add(r);
+      const s = ' ' + flipRuns(pick(GUESS)) + ' ';
+      place(s, r, Math.min(c1, c0 + s.length + ((Math.random() * Math.max(1, cols - s.length)) | 0)));
+    }
+  }
+
+  /* ---------- far view: pre-rendered, refreshed a few rows every frame so it keeps moving ---------- */
+  const FH = 16, FW = FH * AR;
+  let far, tone, fctx;
+  function renderRows(r0, r1, t){
+    fctx.clearRect(0, r0 * FH, far.width, (r1 - r0) * FH);
+    for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
+      let [ch, isR, isP] = charAt(r, sc, t), L = lum[r * COLS + sc], a = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0));
+      if (!isR && !reduce && Math.random() < .05) ch = NOISE[(Math.random() * NOISE.length) | 0];   // the far view keeps flickering
+      fctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .3)})` : `rgba(236,233,226,${a})`;
+      fctx.fillText(ch, sc * FW + FW / 2, r * FH + FH / 2);
+    }
+  }
+  function buildFar(){
+    far = document.createElement('canvas'); far.width = Math.ceil(COLS * FW); far.height = ROWS * FH;
+    tone = document.createElement('canvas'); tone.width = far.width; tone.height = far.height;
+    fctx = far.getContext('2d'); fctx.direction = 'ltr';
+    fctx.textAlign = 'center'; fctx.textBaseline = 'middle'; fctx.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`;
+    const tc = tone.getContext('2d');
+    for (let r = 0; r < ROWS; r++) for (let sc = 0; sc < COLS; sc++) {
+      tc.fillStyle = `rgba(236,233,226,${Math.pow(lum[r * COLS + sc], 1.25)})`;
+      tc.fillRect(sc * FW, r * FH, FW + .5, FH + .5);
+    }
+    renderRows(0, ROWS, 0);
+  }
+  let cursor = 0;
+  function refreshFar(t){ const n = 8; renderRows(cursor, Math.min(ROWS, cursor + n), t); cursor = (cursor + n) % ROWS; }
+
+  function size(){
+    DPR = Math.min(2, devicePixelRatio || 1);
+    W = stage.clientWidth; H = stage.clientHeight;
+    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
+  }
+
+  let lastSwap = 0;
+  function swapModules(t){
+    return;                                          // no pattern modules in the simple version
+    lastSwap = t;
+    for (let n = 0; n < 3; n++) {
+      const m = (Math.random() * modType.length) | 0;
+      if (keep[m]) continue;
+      modType[m] = modType[m] >= 0 && Math.random() < .7 ? -1 : (Math.random() < .5 ? -1 : (Math.random() * PATTERNS.length) | 0);
+    }
+  }
+
+  function grid(ox, oy, cw, ch, z){
+    ctx.strokeStyle = `rgba(236,233,226,${0.10 + 0.12 * (1 - z)})`; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let mc = 0; mc <= MC; mc++) { const x = Math.round(ox + mc * MOD * cw) + .5; if (x > -1 && x < W + 1) { ctx.moveTo(x, Math.max(0, oy)); ctx.lineTo(x, Math.min(H, oy + ROWS * ch)); } }
+    for (let mr = 0; mr <= MR; mr++) { const y = Math.round(oy + mr * MOD * ch) + .5; if (y > -1 && y < H + 1) { ctx.moveTo(Math.max(0, ox), y); ctx.lineTo(Math.min(W, ox + COLS * cw), y); } }
+    ctx.stroke();
+    if (MOD * cw > 26) {
+      ctx.fillStyle = 'rgba(236,233,226,.55)'; ctx.font = '10px "IBM Plex Sans Hebrew", "IBM Plex Mono", monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      for (let mc = 0; mc < MC; mc++) for (let mr = 0; mr < MR; mr++) {
+        const x = ox + (mc + 1) * MOD * cw, y = oy + mr * MOD * ch;      // top right corner of each module: א1, ב1... counted from the right
+        if (x < 0 || x > W + 40 || y < -20 || y > H) continue;
+        ctx.fillText(String.fromCharCode(1488 + ((MC - 1 - mc) % 22)) + (mr + 1), x - 3, y + 2);
+      }
+    }
+  }
+
+  function draw(now){
+    if (!ready) return;
+    const t = reduce ? 0 : now / 1000, p = progress();
+    const {z, sz, cell, cw, startCell, ox, oy} = camera(p);
+    const toneA = 0.05 + 0.6 * sz;
+
+    swapModules(t);
+    ctx.fillStyle = '#0d0d0c'; ctx.fillRect(0, 0, W, H);
+
+    if (cell <= 16) {
+      refreshFar(t);
+      ctx.imageSmoothingEnabled = true;
+      ctx.globalAlpha = toneA; ctx.drawImage(tone, ox, oy, COLS * cw, ROWS * cell);
+      ctx.globalAlpha = 1; ctx.drawImage(far, ox, oy, COLS * cw, ROWS * cell);
+      // a scan band sweeps down the field: rows inside it are drawn live and flicker hard
+      if (false) {
+        const band = 7, top = Math.floor(((t * 22) % (ROWS + band * 2)) - band);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${cell * .95}px "IBM Plex Sans Hebrew", Arial`;
+        for (let r = Math.max(0, top); r < Math.min(ROWS, top + band); r++) {
+          const y = oy + r * cell;
+          ctx.fillStyle = '#0d0d0c'; ctx.fillRect(ox, y, COLS * cw, cell);
+          for (let sc = 0; sc < COLS; sc++) {
+            const L = lum[r * COLS + sc];
+            let [ch, isR] = charAt(r, sc, t), a = Math.min(1, 0.35 + L);
+            if (Math.random() < .25) ch = NOISE[(Math.random() * NOISE.length) | 0];
+            ctx.fillStyle = isR ? `rgba(224,50,43,${a})` : `rgba(236,233,226,${a})`;
+            ctx.fillText(ch, ox + sc * cw + cw / 2, y + cell / 2);
+          }
+        }
+      }
+    } else {
+      const c0 = Math.max(0, Math.floor(-ox / cw)), c1 = Math.min(COLS - 1, Math.ceil((W - ox) / cw));
+      const r0 = Math.max(0, Math.floor(-oy / cell)), r1 = Math.min(ROWS - 1, Math.ceil((H - oy) / cell));
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `${cell * 0.92}px "IBM Plex Sans Hebrew", Arial`;
+      const chaos = reduce ? 0 : 0.08 * (1 - sz) + .02;
+      for (let r = r0; r <= r1; r++) for (let sc = c0; sc <= c1; sc++) {
+        const L = lum[r * COLS + sc];
+        let [ch, isR, isP] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
+        const x = ox + sc * cw, y = oy + r * cell;
+        ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
+        ctx.fillRect(x, y, cw + .5, cell + .5);
+        if (!isR && Math.random() < chaos) { ch = NOISE[(Math.random() * NOISE.length) | 0]; a = Math.min(1, a + .35); }
+        ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .35)})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : a})`;
+        ctx.fillText(ch, x + cw / 2, y + cell / 2);
+      }
+    }
+    grid(ox, oy, cw, cell, sz);
+
+    const fadeIn = clamp((p - 0.88) / 0.1);
+    photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
+    photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
+    photo.style.opacity = fadeIn;
+    hint.style.opacity = 1 - clamp(p / 0.03);
+    hudC.textContent = Math.round(Math.min(N, (W / cw) * (H / cell))).toLocaleString('en') + ' / ' + N.toLocaleString('en');
+    hudD.textContent = (startCell / cell).toFixed(2) + 'x';
+  }
+
+  let visible = true;
+  new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(stage);
+  function loop(now){ if (visible) draw(now); requestAnimationFrame(loop); }
+
+  const img = new Image();
+  img.onload = async () => {
+    try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
+    readPhoto(img); size(); seedOpening(); buildFar(); ready = true; requestAnimationFrame(loop);
+  };
+  img.src = '../assets/family-bw.jpg';
+  addEventListener('resize', () => { size(); });
+})();
+</script>
+</body>
+</html>
