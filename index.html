@@ -124,9 +124,12 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   for (let i = 0; i < modType.length; i++) if (Math.random() < .14) modType[i] = (Math.random() * PATTERNS.length) | 0;
 
   // the opening question, set into the field like a selected phrase
-  const Q = 'צחי שמש )?(';            // drawn one letter per cell, right to left, so the brackets are written mirrored
-  let qRow = 0, qCol0 = 0;
-  const qGone = Array.from(Q, () => .004 + Math.random() * .05);   // each letter falls back into the stream at its own moment
+  // set into module י12, from its top right corner: one word per row. Letters are drawn one per cell, right to left,
+  // so the brackets are written mirrored.
+  const QL = ['צחי', 'שמש', ')?('];
+  const Q_MC = MC - 1 - 9, Q_MR = 11;                  // module י12 (י is the 10th letter, counted from the right)
+  const Q_ROW = Q_MR * MOD + 1, Q_SC = Q_MC * MOD + MOD - 1;   // one row below the module label, at its right edge
+  const qGone = QL.map(w => Array.from(w, () => .004 + Math.random() * .05));   // each letter falls back into the stream at its own moment
 
   const hash = (a, b, c) => { let h = a * 374761393 + b * 668265263 + c * 2147483647; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
@@ -263,16 +266,15 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       ctx.font = `${cell * 0.92}px "IBM Plex Sans Hebrew", Arial`;
       const chaos = reduce ? 0 : 0.05 * (1 - sz) + .015;
       const tick = Math.floor(t * 3);                    // flicker changes three times a second, not every frame
-      if (p < .002) { qRow = Math.round(cy); qCol0 = Math.round(cx - Q.length / 2); }
       for (let r = r0; r <= r1; r++) for (let sc = c0; sc <= c1; sc++) {
         const L = lum[r * COLS + sc];
         let [ch, isR, isP] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
         const x = ox + sc * cw, y = oy + r * cell;
         // the opening question
-        const qi = r === qRow ? (qCol0 + Q.length - 1 - sc) : -1;
-        if (qi >= 0 && qi < Q.length && p < qGone[qi]) {
+        const ql = r - Q_ROW, qi = Q_SC - sc;
+        if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
           ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
-          ctx.fillStyle = '#fff'; ctx.fillText(Q[qi], x + cw / 2, y + cell / 2);
+          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
           continue;
         }
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
