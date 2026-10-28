@@ -207,6 +207,16 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const FH = 16, FW = FH * AR;
   let farL, farD, toneL, toneD;
   const mk = () => { const c = document.createElement('canvas'); c.width = Math.ceil(COLS * FW); c.height = ROWS * FH; return c; };
+  /* ---------- my handwriting: 31 glyphs cut from a sheet I wrote in blue crayon (tools/handwriting.py) ---------- */
+  const hand = {img: new Image(), n: 31, cw: 120, ch: 160, ready: false};
+  hand.img.onload = () => { hand.ready = true; };
+  hand.img.src = 'assets/hand-glyphs.png';
+  function handAt(g, i, x, y, w, h){
+    // keep the letter's proportions inside the cell, a little larger than the type so the hand is felt
+    const s = Math.min(w / hand.cw, h / hand.ch) * 1.7, dw = hand.cw * s, dh = hand.ch * s;
+    g.drawImage(hand.img, i * hand.cw, 0, hand.cw, hand.ch, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+
   function renderRows(r0, r1, t){
     const l = farL.getContext('2d'), d = farD.getContext('2d');
     for (const g of [l, d]) { g.direction = 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`; g.clearRect(0, r0 * FH, farL.width, (r1 - r0) * FH); }
@@ -216,6 +226,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       l.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aL + .3)})` : `rgba(236,233,226,${aL})`;
       d.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aD + .3)})` : `rgba(27,26,23,${aD})`;
       const x = sc * FW + FW / 2, y = r * FH + FH / 2;
+      if (!isR && !isP && hand.ready && Math.random() < .045) {   // far away, my handwriting keeps surfacing in the field
+        l.globalAlpha = aL; handAt(l, (Math.random() * hand.n) | 0, x - FW / 2, y - FH / 2, FW, FH); l.globalAlpha = 1;
+        continue;
+      }
       l.fillText(ch, x, y); d.fillText(ch, x, y);
     }
   }
@@ -321,7 +335,12 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
         }
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
         ctx.fillRect(x, y, cw + .5, cell + .5);
-        if (hash(r, sc, tick) < chaos) { ch = NOISE[(hash(sc, r, tick + 7) * NOISE.length) | 0]; a = Math.min(1, a + .35); }
+        if (!isR && hash(r, sc, tick) < chaos && hand.ready) {   // the flicker is my handwriting
+          ctx.globalAlpha = Math.min(1, a + .35);
+          handAt(ctx, (hash(sc, r, tick + 7) * hand.n) | 0, x, y, cw, cell);
+          ctx.globalAlpha = 1;
+          continue;
+        }
         ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .25)})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : a})`;
         ctx.fillText(ch, x + cw / 2, y + cell / 2);
       }
