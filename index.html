@@ -60,7 +60,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
 <section class="after gut" aria-label="על העבודה">
   <h1>צחי שמש <span>(?)</span></h1>
-  <p>מקרוב אני רעש: אותיות שמהבהבות כמו קוד רץ. אבל כל אות שייכת למשפט אמיתי: חמש כתובות לפני הגיוס, קומה מתחת לדודים, הרעש של הכביש, המדבר בלהבים, הסלון בשמונה בבוקר.</p>
+  <p>מקרוב אני רעש: אותיות שזורמות ומהבהבות כמו קוד רץ. אבל כל אות שייכת למשפט אמיתי: חמש כתובות לפני הגיוס, קומה מתחת לדודים, הרעש של הכביש, המדבר בלהבים, הסלון בשמונה בבוקר.</p>
   <p>באדום, מה שמודל ניחש עליי כשביקשתי שידמיין אותי: בן 55, שיער אפור, בלייזר כהה, סלון עם שיש, ילדות בניו יורק. הניחושים האלה נבלעים בשדה, כמו שהם נבלעים בממוצע.</p>
   <p>רק מרחוק, כשמוותרים על הקריאה, הרעש מתארגן לתמונה. הפנים של הילדים שלי נשארות רעש גם בסוף. אותן המכונה לא מקבלת.</p>
   <span class="draft">טיוטה · טקסט העמדה הסופי ייכתב על ידי</span>
@@ -110,7 +110,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const MOD = 8, MC = Math.ceil(COLS / MOD), MR = Math.ceil(ROWS / MOD);
   const N = COLS * ROWS;
   const lum = new Float32Array(N);
-  const speed = new Float32Array(ROWS);              // the simple version: the text stays in place and only flickers
+  // rows stream the way Hebrew is read (in on the left, moving right); about half stand still
+  const speed = Array.from({length: ROWS}, () => { const x = Math.random(); return x < .5 ? 0 : x < .8 ? 1 : 2.5; });
 
   const PATTERNS = [
     (r, c, t) => '/',
@@ -267,26 +268,32 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     swapModules(t);
     ctx.fillStyle = '#0d0d0c'; ctx.fillRect(0, 0, W, H);
 
+    // two scanners: one sweeps down the rows (Y), one sweeps across the columns from right to left (X).
+    // cells under a scanner are drawn live, brighter, and flicker hard.
+    const B = 6;
+    const bandR = reduce ? -99 : Math.floor((t * 20) % (ROWS + 2 * B)) - B;
+    const bandC = reduce ? -99 : COLS - 1 - (Math.floor((t * 26) % (COLS + 2 * B)) - B);
+    const inBand = (r, sc) => (r >= bandR && r < bandR + B) || (sc <= bandC && sc > bandC - B);
+    function live(r, sc, x, y, cw, ch){
+      const L = lum[r * COLS + sc];
+      let [g, isR] = charAt(r, sc, t), a = Math.min(1, 0.4 + L);
+      if (!isR && Math.random() < .3) g = NOISE[(Math.random() * NOISE.length) | 0];
+      ctx.fillStyle = '#0d0d0c'; ctx.fillRect(x, y, cw + .5, ch + .5);
+      ctx.fillStyle = isR ? `rgba(224,50,43,${a})` : `rgba(236,233,226,${a})`;
+      ctx.fillText(g, x + cw / 2, y + ch / 2);
+    }
+
     if (cell <= 16) {
       refreshFar(t);
       ctx.imageSmoothingEnabled = true;
       ctx.globalAlpha = toneA; ctx.drawImage(tone, ox, oy, COLS * cw, ROWS * cell);
       ctx.globalAlpha = 1; ctx.drawImage(far, ox, oy, COLS * cw, ROWS * cell);
-      // a scan band sweeps down the field: rows inside it are drawn live and flicker hard
-      if (false) {
-        const band = 7, top = Math.floor(((t * 22) % (ROWS + band * 2)) - band);
+      if (!reduce) {
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${cell * .95}px "IBM Plex Sans Hebrew", Arial`;
-        for (let r = Math.max(0, top); r < Math.min(ROWS, top + band); r++) {
-          const y = oy + r * cell;
-          ctx.fillStyle = '#0d0d0c'; ctx.fillRect(ox, y, COLS * cw, cell);
-          for (let sc = 0; sc < COLS; sc++) {
-            const L = lum[r * COLS + sc];
-            let [ch, isR] = charAt(r, sc, t), a = Math.min(1, 0.35 + L);
-            if (Math.random() < .25) ch = NOISE[(Math.random() * NOISE.length) | 0];
-            ctx.fillStyle = isR ? `rgba(224,50,43,${a})` : `rgba(236,233,226,${a})`;
-            ctx.fillText(ch, ox + sc * cw + cw / 2, y + cell / 2);
-          }
-        }
+        for (let r = Math.max(0, bandR); r < Math.min(ROWS, bandR + B); r++)
+          for (let sc = 0; sc < COLS; sc++) live(r, sc, ox + sc * cw, oy + r * cell, cw, cell);
+        for (let sc = Math.max(0, bandC - B + 1); sc <= Math.min(COLS - 1, bandC); sc++)
+          for (let r = 0; r < ROWS; r++) if (!(r >= bandR && r < bandR + B)) live(r, sc, ox + sc * cw, oy + r * cell, cw, cell);
       }
     } else {
       const c0 = Math.max(0, Math.floor(-ox / cw)), c1 = Math.min(COLS - 1, Math.ceil((W - ox) / cw));
@@ -295,9 +302,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       ctx.font = `${cell * 0.92}px "IBM Plex Sans Hebrew", Arial`;
       const chaos = reduce ? 0 : 0.08 * (1 - sz) + .02;
       for (let r = r0; r <= r1; r++) for (let sc = c0; sc <= c1; sc++) {
+        const x = ox + sc * cw, y = oy + r * cell;
+        if (inBand(r, sc)) { live(r, sc, x, y, cw, cell); continue; }
         const L = lum[r * COLS + sc];
         let [ch, isR, isP] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
-        const x = ox + sc * cw, y = oy + r * cell;
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
         ctx.fillRect(x, y, cw + .5, cell + .5);
         if (!isR && Math.random() < chaos) { ch = NOISE[(Math.random() * NOISE.length) | 0]; a = Math.min(1, a + .35); }
