@@ -347,14 +347,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
         const k = r * COLS + sc, L = lum[k];
         let [ch, isR, isP, isH] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
         const x = ox + sc * cw, y = oy + r * cell;
-        // the opening question
-        const ql = r - Q_ROW, qi = Q_SC - sc;
-        if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
-          // version 18: back to the red box (the handwritten name in 17 was not clear enough)
-          ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
-          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
-          continue;
-        }
+        // version 20: no name box. The field opens without a title
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
         ctx.fillRect(x, y, cw + .5, cell + .5);
         if (isH && hand.ready) {                          // my answer to the guess before it
@@ -445,26 +438,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       });
       ix.globalAlpha = 1;
     }
-    // the opening question comes back over the photo, and my hand crosses out the (?)
-    const back = clamp((p - .9) / .03);
-    if (back > 0) {
-      const sz = Math.max(cell, Math.min(W, H) / 26), sw = sz * AR;
-      const xr = X(COLS - MOD * 2), y0 = Y(MOD * 2);      // top right of the photo, off the faces
-      ix.globalAlpha = back;
-      ix.font = `${sz * .92}px "IBM Plex Sans Hebrew", Arial`; ix.textAlign = 'center'; ix.textBaseline = 'middle';
-      QL.forEach((wd, l) => Array.from(wd).forEach((ch, i) => {
-        const x = xr - (i + 1) * sw, y = y0 + l * sz;
-        ix.fillStyle = '#e0322b'; ix.fillRect(x, y, sw + .5, sz + .5);
-        ix.fillStyle = '#fff'; ix.fillText(ch, x + sw / 2, y + sz / 2);
-      }));
-      const s = clamp((p - .94) / .04);
-      if (s > 0) {
-        const x0 = xr + sw * .5, x1 = xr - 3.5 * sw, y = y0 + 2 * sz;
-        const pts = STRIKE.filter(q => q.u <= s).map(q => [lerp(x0, x1, q.u), y + q.v * sz]);
-        if (pts.length > 1) { stroke(ix, pts, Math.max(3, sz * .24)); stroke(ix, pts.map(([x, y]) => [x, y + sz * .12]), Math.max(2, sz * .14)); }
-      }
-      ix.globalAlpha = 1;
-    }
+    // version 20: the name and its (?) are gone, at the end too
   }
 
   /* ---------- the model's images, one at a time as you step back, never more than four ---------- */
