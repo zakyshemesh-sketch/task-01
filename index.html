@@ -633,17 +633,20 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       if (reduce) { box.animate([{opacity: 1}, {opacity: 0}], {duration: 500, fill: 'forwards'}).onfinish = () => box.remove(); return; }
       let left = strips.length;
       strips.forEach(st => {
-        const d = Math.random() * 900, dx = (Math.random() < .5 ? -1 : 1) * (20 + Math.random() * 90);
+        const d = Math.random() * 1400, dx = (Math.random() < .5 ? -1 : 1) * (20 + Math.random() * 90);
         st.animate([
           {transform: 'translateX(0)', opacity: 1, filter: 'none'},
           {transform: `translateX(${dx * .3}px)`, opacity: 1, filter: 'hue-rotate(40deg) saturate(1.6)', offset: .35},
           {transform: `translateX(${-dx * .2}px)`, opacity: 1, filter: 'invert(1)', offset: .5},
           {transform: `translateX(${dx}px)`, opacity: 0, filter: 'none'}
-        ], {duration: 420, delay: d, easing: 'steps(6, end)', fill: 'forwards'}).onfinish = () => { st.remove(); if (--left === 0) box.remove(); };
+        ], {duration: 700, delay: d, easing: 'steps(6, end)', fill: 'forwards'}).onfinish = () => { st.remove(); if (--left === 0) box.remove(); };
       });
     };
-    setTimeout(go, 1600);                                      // a moment to read it, then it breaks
-    addEventListener('scroll', go, {once: true, passive: true});
+    // version 29: time to take it in. It breaks by itself after 5s; scrolling breaks it only after 2.5s
+    const t0 = performance.now();
+    setTimeout(go, 5000);
+    const onScroll = () => { if (performance.now() - t0 > 2500) { removeEventListener('scroll', onScroll); go(); } };
+    addEventListener('scroll', onScroll, {passive: true});
   }
 
   let visible = true;
