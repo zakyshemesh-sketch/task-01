@@ -125,7 +125,11 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     'מכלף, חולון: חברים שמלווים אותי עד היום. שכונה שקטה. חדר משלי',
     'ראשון לציון: רגע לפני הגיוס. לא היה חיבור לבית הזה, עד שחזרתי לגור בו עם הילדים שלי',
     'אין לי תמונות מהילדות', 'יש לי חמש כתובות', 'קירח',
-    'הסלון בשמונה בבוקר: עגלת בובות, כיסא ילדים, צעצועים על הרצפה'
+    'הסלון בשמונה בבוקר: עגלת בובות, כיסא ילדים, צעצועים על הרצפה',
+    // version 27: from my sheets
+    'אבוש', 'אבובו', 'ריח של קפה מעורר אותי', 'ריח של חול מזכיר לי את להבים', 'אבא היה אומר: אל תהיה צודק, תהיה חכם',
+    'אור יום', 'קני שמש', 'אני ונועה הכרנו בעבודה, בפתח תקווה', 'אני משחק עם הילדים שלי', 'אני לא סנטימנטלי',
+    'לא שומר חפצים', 'להבים: מדבר, רחוב', 'מה שמזכיר לי את אבא', 'אבא שלי מת מסרטן', 'אחותי נהרגה בתאונה'
   ];
   // everything here is something an image model actually produced when asked to show me (process/01-03)
   const GUESS = [
@@ -426,7 +430,16 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   hl.img.src = 'assets/hand-lines.png';
   fetch('assets/hand-lines.json').then(r => r.json()).then(j => { hl.box = j; layoutLines(); }).catch(() => {});
   // which line is tied to which home, by a line in my hand: [line, home]
-  const TIES = [[5, 2], [20, 4]];        // the smell of sand -> Lehavim; playing with my kids -> the home I live in now
+  // version 27: ties between a line and a home ({h}), a place that is not a home ({p}), or another line ({l})
+  const PLACES = [[11, 1, 'פתח תקווה', 'circle-s']];   // where Noa and I met, at work
+  const TIES = [
+    [{l: 0}, {h: 4}], [{l: 1}, {h: 4}],                                   // אבוש, אבובו: what my kids call me, at home now
+    [{l: 12}, {h: 4}], [{l: 13}, {h: 4}], [{l: 14}, {h: 4}], [{l: 20}, {h: 4}],   // ארבל, נבו, תבור; playing with them
+    [{l: 5}, {h: 2}], [{l: 23}, {h: 2}],                                  // the smell of sand; desert, street -> Lehavim
+    [{l: 19}, {p: 0}],                                                    // Noa and I met at work -> Petah Tikva
+    [{l: 15}, {l: 16}], [{l: 16}, {l: 2}],                                // daylight, sunlight, the smell of coffee: what makes me feel good
+    [{l: 11}, {l: 7}], [{l: 7}, {l: 8}]                                   // my father's sentence, what reminds me of him, his death
+  ];
   const lineH = (b, cell) => Math.max(24, cell * 5.5) * b[3] / 95;   // one scale for all: short words stay as small as I wrote them
   function layoutLines(){
     if (!hl.box || !W) return;
@@ -434,17 +447,33 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const busy = new Uint8Array(COLS * ROWS);
     const block = (c0, r0, c1, r1) => { for (let r = Math.max(0, r0 | 0); r < Math.min(ROWS, r1); r++) for (let c = Math.max(0, c0 | 0); c < Math.min(COLS, c1); c++) busy[r * COLS + c] = 1; };
     const free = (c0, r0, c1, r1) => { if (c0 < 1 || r0 < 1 || c1 > COLS - 1 || r1 > ROWS - 1) return false; for (let r = r0 | 0; r < r1; r++) for (let c = c0 | 0; c < c1; c++) if (busy[r * COLS + c]) return false; return true; };
-    HOMES.forEach(h => {                                  // a home's circle and its name
+    HOMES.concat(PLACES).forEach(h => {                  // a home's (or place's) circle and its name
       const [c, r] = node(h), hpx = Math.max(26, fit * 4), lw = (h[2].length * hpx * .62) / cwF;
       block(c - lw - 2, r - hpx * 1.2 / fit - 1, c + 5, r + 4);
     });
-    hl.pos = hl.box.map(b => {
-      const hc = lineH(b, fit) / fit, wc = (b[2] * lineH(b, fit) / b[3]) / cwF;
-      for (let tries = 0; tries < 900; tries++) {
-        const c1 = Math.round(COLS - 1 - Math.random() * (COLS - wc - 2)), r0 = Math.round(1 + Math.random() * (ROWS - hc - 2));
-        if (free(c1 - wc - 1, r0 - 1, c1 + 1, r0 + hc + 1)) { block(c1 - wc - 1, r0 - 1, c1 + 1, r0 + hc + 1); return [c1, r0]; }
+    hl.pos = [];
+    // a line tied to something already on the map settles near it, so the ties stay short (v27)
+    const anchorOf = i => {
+      for (const [A, B] of TIES) for (const [me, other] of [[A, B], [B, A]]) {
+        if (me.l !== i) continue;
+        if (other.h !== undefined) return node(HOMES[other.h]);
+        if (other.p !== undefined) return node(PLACES[other.p]);
+        if (hl.pos[other.l]) return hl.pos[other.l];
       }
-      return null;                                         // no room: this line sits out
+      return null;
+    };
+    hl.box.forEach((b, i) => {
+      const hc = lineH(b, fit) / fit, wc = (b[2] * lineH(b, fit) / b[3]) / cwF, an = anchorOf(i);
+      let best = null, bd = 1e9, found = 0;
+      for (let tries = 0; tries < 1500 && found < (an ? 40 : 1); tries++) {
+        const c1 = Math.round(COLS - 1 - Math.random() * (COLS - wc - 2)), r0 = Math.round(1 + Math.random() * (ROWS - hc - 2));
+        if (!free(c1 - wc - 1, r0 - 1, c1 + 1, r0 + hc + 1)) continue;
+        found++;
+        const d = an ? Math.hypot((c1 - wc / 2 - an[0]) * AR, r0 + hc / 2 - an[1]) : 0;
+        if (d < bd) { bd = d; best = [c1, r0]; }
+      }
+      if (best) block(best[0] - wc - 1, best[1] - 1, best[0] + 1, best[1] + hc + 1);
+      hl.pos[i] = best;                                    // null: no room, this line sits out
     });
   }
   function mark(g, key, x, y, size){
@@ -487,14 +516,34 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
       ix.globalAlpha = a * (1 - photoIn * .45);
       ix.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
-      // a tie to a home, drawn after the line arrives
-      TIES.forEach(([li, hi], k) => {
-        if (li !== i) return;
-        const t = clamp((z - (.28 + i * .023) - .02) / .04), [nc, nr] = node(HOMES[hi]);
-        const fromLeft = X(nc) < xr - w / 2, x0 = fromLeft ? xr - w - 4 : xr + 4;
-        ix.globalAlpha = .75 * a * (1 - photoIn * .45);
-        markLine(ix, ['short-1', 'short-2', 'short-3'][k % 3], x0, y + h / 2, X(nc), Y(nr), Math.max(4, cell * .8), t);
+      ix.globalAlpha = 1;
+    });
+    // places that are not homes: they show when the line tied to them arrives
+    const zz = p / .86, lineAt = i => .28 + i * .023;
+    PLACES.forEach((pl, j) => {
+      const tie = TIES.find(t => t[1].p === j), a = tie ? clamp((zz - lineAt(tie[0].l) - .04) / .03) : 0;
+      if (a <= 0) return;
+      const [c, r] = node(pl), hpx = Math.max(26, cell * 4);
+      ix.globalAlpha = a * (1 - photoIn * .6);
+      mark(ix, pl[3], X(c), Y(r), Math.max(22, cell * 4.5));
+      handWord(ix, pl[2], X(c) + hpx * .2, Y(r) - hpx * 1.1, hpx);
+      ix.globalAlpha = 1;
+    });
+    // the ties, drawn once both ends are there
+    if (hl.box && hl.pos) TIES.forEach((tie, k) => {
+      const ends = tie.map(e => {
+        if (e.h !== undefined) { const [c, r] = node(HOMES[e.h]); return {x: X(c), y: Y(r), t: 0}; }
+        if (e.p !== undefined) { const [c, r] = node(PLACES[e.p]); return {x: X(c), y: Y(r), t: 0}; }
+        const b = hl.box[e.l], q = hl.pos[e.l]; if (!b || !q) return null;
+        const h = lineH(b, cell), w = b[2] * h / b[3];
+        return {x: X(q[0]), y: Y(q[1]) + h / 2, w, t: lineAt(e.l), line: true};
       });
+      if (ends.some(e => !e)) return;
+      const [A, B] = ends, t0 = Math.max(A.t, B.t) + .02, t = clamp((zz - t0) / .04);
+      if (t <= 0) return;
+      const side = (E, O) => E.line ? (O.x < E.x - E.w / 2 ? E.x - E.w - 4 : E.x + 4) : E.x;   // leave a line from its nearer end
+      ix.globalAlpha = .7 * (1 - photoIn * .5);
+      markLine(ix, ['short-1', 'short-2', 'short-3', 'line-2', 'line-3'][k % 5], side(A, B), A.y, side(B, A), B.y, Math.max(4, cell * .8), t);
       ix.globalAlpha = 1;
     });
     // the X over the model's images
