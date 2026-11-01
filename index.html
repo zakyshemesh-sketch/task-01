@@ -224,10 +224,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   let farL, farD, toneL, toneD;
   const mk = () => { const c = document.createElement('canvas'); c.width = Math.ceil(COLS * FW); c.height = ROWS * FH; return c; };
   /* ---------- my handwriting: 31 glyphs cut from a sheet I wrote in blue crayon (tools/handwriting.py) ---------- */
-  const hand = {img: new Image(), n: 31, cw: 120, ch: 160, ready: false};
+  const hand = {img: new Image(), n: 34, cw: 120, ch: 160, ready: false};
   hand.img.onload = () => { hand.ready = true; };
   hand.img.src = 'assets/hand-glyphs.png';
-  const HCH = 'אבגדהוזחטיכלמנסעפצקרשת123456789', FIN = {'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ'};   // I did not write final letters
+  const HCH = 'אבגדהוזחטיכלמנסעפצקרשת123456789ךםן', FIN = {'ף': 'פ', 'ץ': 'צ'};   // ך ם ן from the second sheet (v21); ף ץ I never wrote
   const gIdx = ch => HCH.indexOf(FIN[ch] || ch);
   function handAt(g, i, x, y, w, h, k = 1.7){
     if (i < 0) return;
@@ -384,31 +384,34 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     hudD.textContent = (startCell / cell).toFixed(2) + 'x';
   }
 
-  /* ---------- version 19: the route through my five homes, and the (?) crossed out at the end ----------
-     The lines are temporary, drawn by code, until I draw them by hand (raw/handwriting/). */
-  // [module from the left, module from the top, label]: in the order I lived in them
-  const HOMES = [[23, 8, '1 חולון'], [16, 6, '2 חולון'], [6, 4, '3 להבים'], [8, 13, '4 חולון'], [19, 16, '5 ראשון לציון']];
+  /* ---------- the route through my five homes (v19). Since v21 the lines and circles are mine:
+     red crayon on paper, cut by tools/marks.py into assets/hand-marks.png ---------- */
+  // [module from the left, module from the top, label, mark]: in the order I lived in them. The home I live in now is a square
+  const HOMES = [[23, 8, '1 חולון', 'circle'], [16, 6, '2 חולון', 'circle-m'], [6, 4, '3 להבים', 'circle-l'], [8, 13, '4 חולון', 'circle'], [19, 16, '5 ראשון לציון', 'square']];
   const node = h => [h[0] * MOD + MOD / 2, h[1] * MOD + MOD / 2];   // in cells
-  const jit = () => (Math.random() - .5) * .9;
   const ROUTE = [];                                     // a plan-like route: along, then down, the way a corridor turns
   for (let i = 0; i < HOMES.length; i++) {
     const [c, r] = node(HOMES[i]);
-    if (i) { const [pc] = node(HOMES[i - 1]); ROUTE.push({c: c + jit(), r: ROUTE[ROUTE.length - 1].r + jit(), n: -1}); }
-    ROUTE.push({c: c + jit(), r: r + jit(), n: i});
+    if (i) ROUTE.push({c, r: ROUTE[ROUTE.length - 1].r, n: -1});
+    ROUTE.push({c, r, n: i});
   }
-  for (let i = ROUTE.length - 1; i > 0; i--) {         // a hand does not draw straight: small wobbles along each piece
-    const a = ROUTE[i - 1], b = ROUTE[i], n = 5;
-    for (let j = n - 1; j > 0; j--) ROUTE.splice(i, 0, {c: lerp(a.c, b.c, j / n) + jit() * .5, r: lerp(a.r, b.r, j / n) + jit() * .5, n: -1});
+  let routeLen = 0; ROUTE.forEach((q, i) => { q.d = i ? routeLen += Math.hypot((q.c - ROUTE[i - 1].c) * AR, q.r - ROUTE[i - 1].r) : 0; });
+  const LINES = ['line-1', 'line-2', 'line-3', 'line-4', 'short-1', 'short-2', 'short-3'];
+  ROUTE.forEach((q, i) => { q.line = LINES[i % LINES.length]; });   // each piece of the route is a different line I drew
+  const marks = {img: new Image(), box: null};
+  marks.img.src = 'assets/hand-marks.png';
+  fetch('assets/hand-marks.json').then(r => r.json()).then(j => { marks.box = j; }).catch(() => {});
+  function markLine(g, key, x0, y0, x1, y1, thick, t){   // one of my lines, laid from (x0,y0) toward (x1,y1), drawn up to t
+    const b = marks.box && marks.box[key]; if (!b || t <= 0) return;
+    const len = Math.hypot(x1 - x0, y1 - y0); if (len < 1) return;
+    g.save(); g.translate(x0, y0); g.rotate(Math.atan2(y1 - y0, x1 - x0));
+    g.drawImage(marks.img, b[0], b[1], b[2] * t, b[3], 0, -thick / 2, len * t, thick);
+    g.restore();
   }
-  let routeLen = 0; ROUTE.forEach((q, i) => { q.d = i ? routeLen += Math.hypot(q.c - ROUTE[i - 1].c, (q.r - ROUTE[i - 1].r) / AR) : 0; });
-  const STRIKE = Array.from({length: 7}, (_, i) => ({u: i / 6, v: .5 + (Math.random() - .5) * .25 + (i / 6 - .5) * .18}));
-
-  function stroke(g, pts, w){                           // a crayon line: three thin passes, slightly apart
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    for (let k = 0; k < 3; k++) {
-      g.strokeStyle = `rgba(236,233,226,${k ? .45 : .8})`; g.lineWidth = w * (k ? .55 : 1);
-      g.beginPath(); pts.forEach(([x, y], i) => { const dx = k ? (k - 1.5) * w * .35 : 0; i ? g.lineTo(x + dx, y + dx * .6) : g.moveTo(x + dx, y + dx * .6); }); g.stroke();
-    }
+  function mark(g, key, x, y, size){
+    const b = marks.box && marks.box[key]; if (!b) return;
+    const s = size / Math.max(b[2], b[3]);
+    g.drawImage(marks.img, b[0], b[1], b[2], b[3], x - b[2] * s / 2, y - b[3] * s / 2, b[2] * s, b[3] * s);
   }
   function handWord(g, word, xr, y, hpx){               // a word in my letters, right to left from xr
     const w = hpx * .62;
@@ -422,18 +425,17 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const k = clamp((p - .3) / .54) * routeLen;
     if (k > 0) {
       ix.globalAlpha = 1 - photoIn * .7;
-      const pts = [];
-      for (let i = 0; i < ROUTE.length; i++) {
-        const q = ROUTE[i];
-        if (q.d <= k) pts.push([X(q.c), Y(q.r)]);
-        else { const a = ROUTE[i - 1], t = (k - a.d) / (q.d - a.d); pts.push([X(lerp(a.c, q.c, t)), Y(lerp(a.r, q.r, t))]); break; }
+      const thick = Math.max(5, cell * 1.1);
+      for (let i = 1; i < ROUTE.length; i++) {
+        const a = ROUTE[i - 1], q = ROUTE[i];
+        if (a.d >= k) break;
+        markLine(ix, q.line, X(a.c), Y(a.r), X(q.c), Y(q.r), thick, clamp((k - a.d) / (q.d - a.d)));
       }
-      stroke(ix, pts, Math.max(1.6, cell * .3));
       const hpx = Math.max(26, cell * 4);
       ROUTE.forEach(q => {
         if (q.n < 0 || q.d > k) return;
         const x = X(q.c), y = Y(q.r);
-        ix.fillStyle = '#ece9e2'; ix.beginPath(); ix.arc(x, y, Math.max(2.5, cell * .45), 0, 7); ix.fill();
+        mark(ix, HOMES[q.n][3], x, y, Math.max(30, cell * 6.5));
         handWord(ix, HOMES[q.n][2], x + hpx * .2, y - hpx * 1.1, hpx);
       });
       ix.globalAlpha = 1;
