@@ -4,26 +4,31 @@ Run from the repo root."""
 import json, numpy as np
 from PIL import Image, ImageOps, ImageFilter
 from scipy import ndimage as ndi
-im = ImageOps.exif_transpose(Image.open("raw/handwriting/sentences-photo.jpg")).convert("RGB")
-a = np.asarray(im).astype(np.int16); R, G, B = a[..., 0], a[..., 1], a[..., 2]
-ink = ndi.binary_opening((R - G > 45) & (R - B > 25), iterations=1)
-ink[:330, :900] = False                                  # the jar in the corner
-ink[:, 1700:] = False                                    # the dashes I put before each answer
-soft = np.clip((R - G - 25) / 55.0, 0, 1)
-k = 1932 / 1500                                          # centres measured on the preview, in full-size pixels
-CENTRES = [205, 325, 525, 665, 745, 885, 1020, 1160, 1280, 1400, 1545, 1660, 1770, 1880]
-GROUP = [0, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11]    # two-line answers stay together
-cy = np.array(CENTRES) * k
-lab, n = ndi.label(ndi.binary_dilation(ink, iterations=3))
-masks = [np.zeros(ink.shape, bool) for _ in range(max(GROUP) + 1)]
-for i, sl in enumerate(ndi.find_objects(lab)):
-    comp = lab[sl] == i + 1
-    if comp.sum() < 60: continue
-    ys = np.nonzero(comp)[0] + sl[0].start
-    g = GROUP[int(np.argmin(abs(cy - ys.mean())))]
-    masks[g][sl] |= comp
+SHEETS = [   # (photo, centres of the lines measured on a 1500px-wide preview, which answer each line belongs to, jar box)
+    ("raw/handwriting/sentences-photo.jpg", [205, 325, 525, 665, 745, 885, 1020, 1160, 1280, 1400, 1545, 1660, 1770, 1880],
+     [0, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11], (330, 900)),
+    ("raw/handwriting/sentences-2-photo.jpg", [140, 280, 380, 545, 665, 830, 985, 1150, 1265, 1360, 1475, 1590, 1705],
+     [0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10, 11], (0, 0)),   # the crossed-out words stay: they are part of what I wrote
+]
+masks_all = []
+for path, CENTRES, GROUP, jar in SHEETS:
+    im = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+    a = np.asarray(im).astype(np.int16); R, G, B = a[..., 0], a[..., 1], a[..., 2]
+    ink = ndi.binary_opening((R - G > 45) & (R - B > 25), iterations=1)
+    ink[:jar[0], :jar[1]] = False                        # a jar in the corner of the first photo
+    ink[:, 1700:] = False                                # the dashes I put before each answer
+    soft = np.clip((R - G - 25) / 55.0, 0, 1)
+    cy = np.array(CENTRES) * (im.width / 1500)
+    lab, n = ndi.label(ndi.binary_dilation(ink, iterations=3))
+    masks = [np.zeros(ink.shape, bool) for _ in range(max(GROUP) + 1)]
+    for i, sl in enumerate(ndi.find_objects(lab)):
+        comp = lab[sl] == i + 1
+        if comp.sum() < 300: continue                 # crumbs of crayon
+        ys = np.nonzero(comp)[0] + sl[0].start
+        masks[GROUP[int(np.argmin(abs(cy - np.percentile(ys, 20))))]][sl] |= comp   # by its upper part: long descenders belong to the line above
+    masks_all += [(m, soft) for m in masks]
 items, out = [], []
-for g, m in enumerate(masks):
+for g, (m, soft) in enumerate(masks_all):
     ys, xs = np.nonzero(m)
     y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
     alpha = (soft * ndi.binary_dilation(m, iterations=2))[y0:y1, x0:x1]

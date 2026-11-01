@@ -273,6 +273,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     W = stage.clientWidth; H = stage.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
     ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
+    if (typeof layoutLines === 'function' && hl && hl.box) layoutLines();
   }
 
   const clamp = v => Math.max(0, Math.min(1, v));
@@ -420,10 +421,32 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   }
   // version 25: whole lines I wrote about myself, cut from the sheet as written (tools/sentences.py).
   // They appear one by one as you step back and stay: the far view fills with my hand. [module right edge, module row]
-  const HLPOS = [[26, .6], [26, 1.6], [13, .6], [13, 9.5], [26, 10.5], [13, 12], [26, 13.5], [13, 15], [26, 17], [13, 17.6], [26, 19], [13, 19.8]];
-  const hl = {img: new Image(), box: null};
+  // Since v26 they are laid out by the page: each finds a free place in the grid, away from the route and the other lines.
+  const hl = {img: new Image(), box: null, pos: null};
   hl.img.src = 'assets/hand-lines.png';
-  fetch('assets/hand-lines.json').then(r => r.json()).then(j => { hl.box = j; }).catch(() => {});
+  fetch('assets/hand-lines.json').then(r => r.json()).then(j => { hl.box = j; layoutLines(); }).catch(() => {});
+  // which line is tied to which home, by a line in my hand: [line, home]
+  const TIES = [[5, 2], [20, 4]];        // the smell of sand -> Lehavim; playing with my kids -> the home I live in now
+  const lineH = (b, cell) => Math.max(24, cell * 5.5) * b[3] / 95;   // one scale for all: short words stay as small as I wrote them
+  function layoutLines(){
+    if (!hl.box || !W) return;
+    const fit = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS), cwF = fit * AR;
+    const busy = new Uint8Array(COLS * ROWS);
+    const block = (c0, r0, c1, r1) => { for (let r = Math.max(0, r0 | 0); r < Math.min(ROWS, r1); r++) for (let c = Math.max(0, c0 | 0); c < Math.min(COLS, c1); c++) busy[r * COLS + c] = 1; };
+    const free = (c0, r0, c1, r1) => { if (c0 < 1 || r0 < 1 || c1 > COLS - 1 || r1 > ROWS - 1) return false; for (let r = r0 | 0; r < r1; r++) for (let c = c0 | 0; c < c1; c++) if (busy[r * COLS + c]) return false; return true; };
+    HOMES.forEach(h => {                                  // a home's circle and its name
+      const [c, r] = node(h), hpx = Math.max(26, fit * 4), lw = (h[2].length * hpx * .62) / cwF;
+      block(c - lw - 2, r - hpx * 1.2 / fit - 1, c + 5, r + 4);
+    });
+    hl.pos = hl.box.map(b => {
+      const hc = lineH(b, fit) / fit, wc = (b[2] * lineH(b, fit) / b[3]) / cwF;
+      for (let tries = 0; tries < 900; tries++) {
+        const c1 = Math.round(COLS - 1 - Math.random() * (COLS - wc - 2)), r0 = Math.round(1 + Math.random() * (ROWS - hc - 2));
+        if (free(c1 - wc - 1, r0 - 1, c1 + 1, r0 + hc + 1)) { block(c1 - wc - 1, r0 - 1, c1 + 1, r0 + hc + 1); return [c1, r0]; }
+      }
+      return null;                                         // no room: this line sits out
+    });
+  }
   function mark(g, key, x, y, size){
     const b = marks.box && marks.box[key]; if (!b) return;
     const s = size / Math.max(b[2], b[3]);
@@ -458,12 +481,20 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     }
     // my lines
     if (hl.box) hl.box.forEach((b, i) => {
-      const z = p / .86, a = clamp((z - (.3 + i * .045)) / .03);
-      if (a <= 0 || !HLPOS[i]) return;
-      const h = Math.max(24, cell * 5.5) * (b[3] > 120 ? 1.6 : 1), w = b[2] * h / b[3];   // two-line answers keep their size per line
-      const xr = X(Math.min(COLS - 3, (HLPOS[i][0] + 1) * MOD - 1)), y = Y(HLPOS[i][1] * MOD);
+      const z = p / .86, a = clamp((z - (.28 + i * .023)) / .03);
+      if (a <= 0 || !hl.pos || !hl.pos[i]) return;
+      const h = lineH(b, cell), w = b[2] * h / b[3];
+      const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
       ix.globalAlpha = a * (1 - photoIn * .45);
       ix.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
+      // a tie to a home, drawn after the line arrives
+      TIES.forEach(([li, hi], k) => {
+        if (li !== i) return;
+        const t = clamp((z - (.28 + i * .023) - .02) / .04), [nc, nr] = node(HOMES[hi]);
+        const fromLeft = X(nc) < xr - w / 2, x0 = fromLeft ? xr - w - 4 : xr + 4;
+        ix.globalAlpha = .75 * a * (1 - photoIn * .45);
+        markLine(ix, ['short-1', 'short-2', 'short-3'][k % 3], x0, y + h / 2, X(nc), Y(nr), Math.max(4, cell * .8), t);
+      });
       ix.globalAlpha = 1;
     });
     // the X over the model's images
