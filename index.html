@@ -279,7 +279,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const lerp = (a, b, t) => a + (b - a) * t;
   const smooth = t => t * t * (3 - 2 * t);
   const mix = (a, b, s) => a.map((v, i) => Math.round(lerp(v, b[i], s)));
-  const progress = () => { const r = pin.getBoundingClientRect(); return clamp(-r.top / (r.height - innerHeight)); };
+  const progress = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; return d > 50 ? clamp(-r.top / d) : 0; };
   const SCREEN = [13, 13, 12], PAPER = [235, 231, 221], LIGHT = [236, 233, 226], INK = [27, 26, 23];
 
   let lastSwap = 0;
@@ -347,7 +347,13 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
         const k = r * COLS + sc, L = lum[k];
         let [ch, isR, isP, isH] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
         const x = ox + sc * cw, y = oy + r * cell;
-        // version 20: no name box. The field opens without a title
+        // the opening question, back in module י12 (v22). It falls apart letter by letter as you start to scroll
+        const ql = r - Q_ROW, qi = Q_SC - sc;
+        if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
+          ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
+          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
+          continue;
+        }
         ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
         ctx.fillRect(x, y, cw + .5, cell + .5);
         if (isH && hand.ready) {                          // my answer to the guess before it
@@ -531,6 +537,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(stage);
   function loop(now){ if (visible) draw(now); requestAnimationFrame(loop); }
 
+  // always start at the top, zoomed in: the browser should not bring back the last scroll position (v22)
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0); addEventListener('pageshow', () => scrollTo(0, 0));
   const img = new Image();
   img.onload = async () => {
     try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
