@@ -242,7 +242,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
       const [ch, isR, isP, isH] = charAt(r, sc, t), L = lum[r * COLS + sc];
       const aL = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0)), aD = Math.min(1, 0.1 + 0.9 * (1 - L) + (isP ? .1 : 0));
-      l.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aL + .3)})` : `rgba(236,233,226,${aL})`;
+      l.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aL + .3) * redK})` : `rgba(236,233,226,${Math.min(1, aL * (1 + mineK))})`;
       d.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aD + .3)})` : `rgba(27,26,23,${aD})`;
       const x = sc * FW + FW / 2, y = r * FH + FH / 2;
       if (isH && hand.ready) { l.globalAlpha = Math.min(1, aL + .4); handAt(l, gIdx(ch), x - FW / 2, y - FH / 2, FW, FH, 1.7); l.globalAlpha = 1; continue; }
@@ -282,6 +282,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const progress = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; return d > 50 ? clamp(-r.top / d) : 0; };
   const SCREEN = [13, 13, 12], PAPER = [235, 231, 221], LIGHT = [236, 233, 226], INK = [27, 26, 23];
 
+  // version 24: as you step back the machine's voice recedes. redK goes 1 -> .08, mineK lifts my own lines
+  let redK = 1, mineK = 0;
   let lastSwap = 0;
   function swapModules(t){
     if (reduce || t - lastSwap < .45) return;
@@ -325,6 +327,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     stage.style.setProperty('--fg-dim', `rgba(${fg},.6)`);
     stage.style.setProperty('--panel', `rgba(${bg.join(',')},.82)`);
     const toneA = 0.05 + 0.6 * sz;
+    const recede = smooth(clamp((z - .3) / .5));
+    redK = 1 - .92 * recede; mineK = .45 * recede;
 
     swapModules(t);
     ctx.globalAlpha = 1; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H);
@@ -374,7 +378,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
           handAt(ctx, tg[k], x, y, cw, cell);
           ctx.globalAlpha = 1;
         }
-        ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .25)})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : a})`;
+        ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .25) * redK})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : Math.min(1, a * (1 + mineK))})`;
         ctx.fillText(ch, x + cw / 2, y + cell / 2);
       }
     }
@@ -446,7 +450,12 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       });
       ix.globalAlpha = 1;
     }
-    // version 20: the name and its (?) are gone, at the end too
+    // the X over the model's images
+    ghosts.forEach(g => {
+      if (!g.rect || !g.xs || g.o < .01) return;
+      const [x, y, w, h] = g.rect, sz = Math.min(w, h) * (.75 + .2 * g.xs);
+      ix.globalAlpha = Math.min(1, g.o / .5) * g.xs; mark(ix, 'x', x + w / 2, y + h / 2, sz); ix.globalAlpha = 1;
+    });
   }
 
   /* ---------- the model's images, one at a time as you step back, never more than four ---------- */
@@ -490,13 +499,18 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     ghosts.forEach(g => {
       if (!g.ok) return;
       const inA = clamp((z - g.z0) / .03);
-      const target = keep.has(g) ? inA * .72 * end : 0;
+      // version 24: a while after it arrives, my hand crosses it out (the X from my sheet), and then it goes
+      g.xT = Math.min(g.z0 + .11, .8);
+      g.xs = clamp((z - g.xT) / .025);
+      const crossed = 1 - clamp((z - g.xT - .04) / .05);
+      const target = keep.has(g) ? inA * .72 * end * crossed : 0;
       g.o = g.o === undefined ? target : g.o + (target - g.o) * .12;   // ease in and out
       const st = g.el.style;
       st.opacity = g.o.toFixed(3);
       if (g.o < .005) return;
       st.left = (ox + g.mc * MOD * cw) + 'px'; st.top = (oy + g.mr * MOD * cell) + 'px';
       st.width = (g.wM * MOD * cw) + 'px'; st.height = (g.hM * MOD * cell) + 'px';
+      g.rect = [ox + g.mc * MOD * cw, oy + g.mr * MOD * cell, g.wM * MOD * cw, g.hM * MOD * cell];
     });
   }
 
