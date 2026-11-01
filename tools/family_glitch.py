@@ -5,7 +5,8 @@ Run from the repo root. The source stays in raw/private (not in the repo)."""
 import random
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter
-faces = [(620, 820, 1050, 1380), (300, 1350, 810, 2020), (670, 1410, 1165, 2090)]   # baby, boy, toddler, with margin
+faces = [(620, 820, 1050, 1380), (300, 1350, 810, 2020), (670, 1410, 1125, 2090)]   # baby, boy, toddler, with margin
+RIGHT = 1135   # my face starts just right of the toddler: no band may run past this line (v23)
 
 def destroy(region):
     w, h = region.size
@@ -26,7 +27,7 @@ def glitch(src, seed):
             bh = random.choice([3, 5, 8, 12, 18, 26, 40, 60])
             ya, yb = y, min(y1, y + bh); y = yb
             # this band covers the face, and sometimes runs past it
-            a = max(X0, x0 - random.randint(0, pad)); b = min(X1, x1 + random.randint(0, pad))
+            a = max(X0, x0 - random.randint(0, pad)); b = min(X1, RIGHT, x1 + random.randint(0, pad))
             shift = int(rng.normal(0, 40)); split = random.choice([0, 4, 8, 14, 22])
             band = base[ya - y0:yb - y0]
             out = np.empty_like(band)
@@ -38,7 +39,8 @@ def glitch(src, seed):
             seg = out[:, a - X0:b - X0]
             # soft ends, so the band fades into the photo instead of ending in a hard edge
             ramp = np.ones(b - a, np.float32); f = min(24, (b - a) // 4)
-            ramp[:f] = np.linspace(0, 1, f); ramp[-f:] = np.linspace(1, 0, f)
+            ramp[:f] = np.linspace(0, 1, f)
+            if b < RIGHT: ramp[-f:] = np.linspace(1, 0, f)
             m = ramp[None, :, None]
             # the face itself is always fully covered
             core = np.zeros(b - a, bool); core[max(0, x0 - a):max(0, x1 - a)] = True
