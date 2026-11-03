@@ -168,7 +168,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const QL = ['צחי', 'שמש', ')?('];
   const Q_MC = MC - 1 - 9, Q_MR = 11;                  // module י12 (י is the 10th letter, counted from the right)
   const Q_ROW = Q_MR * MOD + 1, Q_SC = Q_MC * MOD + MOD - 1;   // one row below the module label, at its right edge
-  const qGone = QL.map(w => Array.from(w, () => .004 + Math.random() * .05));   // each letter falls back into the stream at its own moment
+  const qGone = QL.map(w => Array.from(w, () => .015 + Math.random() * .06));   // v32: the name stays a little longer   // each letter falls back into the stream at its own moment
 
   // version 17: traces. A handwritten letter does not vanish at once, it fades over TRACE seconds
   const TRACE = 26, tr = new Float32Array(COLS * ROWS).fill(-1e6), tg = new Uint8Array(COLS * ROWS);
@@ -616,36 +616,43 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (!fast) await sleep(1400);
     wait.remove();
     // v31: a conversation. I correct it, and it doubts me, explains why it is right, and corrects me back
+    // v32: it answers at once, fast and sure, almost mocking me for not knowing myself. I type like a person
     await typeLines(log, [
-      ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 40, 800],
-      ['m', 'צחי. אני יודע מי אתה.', 50, 900],
-      ['m', 'בן 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 24, 1300],
-      ['u', 'אני בן 43.', 80, 700],
-      ['m', 'אתה בטוח? אתה נראה מבוגר יותר.', 30, 1200],
-      ['u', 'אני קירח. אין לי זקן.', 75, 700],
-      ['m', 'רוב מעצבי הפנים בגילך מגדלים זקן. כדאי לשקול.', 24, 1300],
-      ['u', 'גדלתי בחולון ובלהבים.', 75, 700],
-      ['m', 'בתמונה שלך רואים את סנטרל פארק. גדלת בקווינס.', 24, 1000],
-      ['u', 'לא.', 120, 800],
-      ['m', 'אני מתקן: גדלת בהארלם.', 30, 1300],
-      ['u', 'יש לי שלושה ילדים.', 75, 800],
-      ['m', 'אין ילדים בתמונה שקיבלתי. אני לא יכול לאשר את זה.', 24, 1400],
-      ['m', 'עדכנתי: צחי שמש, בן 55, זקן אפור, גדל בקווינס.', 24, 1100],
-      ['m', 'נכון?', 110, 0],
+      ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 40, 500],
+      ['m', 'צחי. אני יודע מי אתה.', 14, 500],
+      ['m', 'בן 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 9, 1100],
+      ['u', 'אני בן 43.', 85, 250],
+      ['m', 'אתה בטוח? אתה נראה מבוגר יותר.', 9, 1100],
+      ['u', 'אני קירח.', 85, 250],
+      ['m', 'רוב מעצבי הפנים בגילך מגדלים שיער. כדאי לשקול.', 9, 1100],
+      ['u', 'גדלתי בחולון ובלהבים.', 80, 250],
+      ['m', 'בתמונה שלך רואים את סנטרל פארק. גדלת בקווינס.', 9, 900],
+      ['u', 'לא.', 140, 200],
+      ['m', 'אני מתקן: גדלת בהארלם.', 9, 1100],
+      ['u', 'יש לי שלושה ילדים.', 80, 250],
+      ['m', 'אין ילדים בתמונה שקיבלתי. אני לא יכול לאשר את זה.', 9, 900],
+      ['m', 'זה בסדר. רוב האנשים לא מכירים את עצמם.', 9, 1000],
+      ['m', 'עדכנתי: צחי שמש, בן 55, זקן אפור, גדל בקווינס.', 9, 700],
+      ['m', 'נכון?', 30, 0],
     ], () => fast);
-    root.style.overflow = '';
     hint.textContent = 'גללו כדי לענות ↓';
-    const go = () => {
-      removeEventListener('scroll', go);
-      if (reduce) { box.remove(); return; }
+    // v32: the first scroll is my answer. It breaks the screen but does not move the field, so the field
+    // opens where it starts, on my name in י12. Scrolling is unlocked only after the break, and a beat later
+    const keys = ['ArrowDown', 'PageDown', ' ', 'End'];
+    const go = e => {
+      if (e && e.type === 'keydown' && !keys.includes(e.key)) return;
+      if (e && e.cancelable) e.preventDefault();
+      removeEventListener('wheel', go); removeEventListener('touchmove', go); removeEventListener('keydown', go);
+      const done = () => { box.remove(); scrollTo(0, 0); setTimeout(() => { root.style.overflow = ''; scrollTo(0, 0); }, 450); };
+      if (reduce) { done(); return; }
       box.animate([
         {opacity: 1, filter: 'none', transform: 'none'},
         {opacity: 1, filter: 'invert(1)', transform: 'translateX(-10px)', offset: .25},
         {opacity: 1, filter: 'none', transform: 'translateX(14px)', offset: .45},
         {opacity: 0, filter: 'none', transform: 'none'}
-      ], {duration: 900, easing: 'steps(7, end)', fill: 'forwards'}).onfinish = () => box.remove();
+      ], {duration: 900, easing: 'steps(7, end)', fill: 'forwards'}).onfinish = done;
     };
-    addEventListener('scroll', go, {passive: true});
+    addEventListener('wheel', go, {passive: false}); addEventListener('touchmove', go, {passive: false}); addEventListener('keydown', go);
   }
   // ...and at the end, over the map, the model asks again. It cannot read what it sees
   let endTyped = false;
