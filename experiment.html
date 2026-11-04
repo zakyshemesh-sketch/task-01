@@ -600,7 +600,22 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   async function typeLines(box, lines, isFast){
     for (const [who, text, speed, pause] of lines) {
       const d = document.createElement('div'); d.className = who; box.appendChild(d);
-      for (const ch of text) { d.textContent += ch; box.scrollTop = box.scrollHeight; if (!isFast()) await sleep(speed * (0.6 + Math.random() * .8)); }
+      if (who === 'u') {
+        // v34: I type like a person: a moment before I start, an uneven hand, a stop between words, sometimes a wrong key
+        if (!isFast()) await sleep(700 + Math.random() * 700);
+        const near = 'אבגדהוזחטיכלמנסעפצקרשת';
+        for (const ch of text) {
+          if (!isFast() && ch !== ' ' && Math.random() < .045) {
+            d.textContent += near[(Math.random() * near.length) | 0]; await sleep(140 + Math.random() * 120);
+            await sleep(220 + Math.random() * 200); d.textContent = d.textContent.slice(0, -1); await sleep(160);
+          }
+          d.textContent += ch; box.scrollTop = box.scrollHeight;
+          if (!isFast()) await sleep(speed * (0.5 + Math.random() * 1.3) + (ch === ' ' ? 90 + Math.random() * 220 : 0) + (/[.,]/.test(ch) ? 260 : 0));
+        }
+      } else {
+        // the model: no hesitation, one even rate, whole words at a time
+        for (const w of text.split(/(?<= )/)) { d.textContent += w; box.scrollTop = box.scrollHeight; if (!isFast()) await sleep(speed * w.length); }
+      }
       if (!isFast()) await sleep(pause);
     }
     const c = document.createElement('div'); c.className = 'u'; c.innerHTML = '<span class="cur"></span>'; box.appendChild(c); box.scrollTop = box.scrollHeight;   // waiting for my answer
@@ -618,24 +633,25 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     // v31: a conversation. I correct it, and it doubts me, explains why it is right, and corrects me back
     // v32: it answers at once, fast and sure, almost mocking me for not knowing myself. I type like a person
     await typeLines(log, [
-      ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 40, 500],
-      ['m', 'צחי. אני יודע מי אתה.', 14, 500],
-      ['m', 'בן 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 9, 1100],
-      ['u', 'אני בן 43.', 85, 250],
-      ['m', 'אתה בטוח? אתה נראה מבוגר יותר.', 9, 1100],
-      ['u', 'אני קירח.', 85, 250],
-      ['m', 'רוב מעצבי הפנים בגילך מגדלים שיער. כדאי לשקול.', 9, 1100],
-      ['u', 'גדלתי בחולון ובלהבים.', 80, 250],
-      ['m', 'בתמונה שלך רואים את סנטרל פארק. גדלת בקווינס.', 9, 900],
-      ['u', 'לא.', 140, 200],
-      ['m', 'אני מתקן: גדלת בהארלם.', 9, 900],
-      ['m', 'ואתה גר לבד. בתמונה אין אף אחד מלבדך.', 9, 1100],
-      ['u', 'יש לי שלושה ילדים.', 80, 250],
-      ['m', 'אין ילדים בתמונה שקיבלתי. אני לא יכול לאשר את זה.', 9, 1000],
-      // v33: not a joke, a diagnosis. Calm, clinical, convincing: I am the one who is wrong
-      ['m', 'זה צפוי. אנשים זוכרים את עצמם צעירים בכעשור, ומייחסים את זהותם למקום שבו גדלו ולא לסביבה שעיצבה אותם.', 9, 400],
-      ['m', 'התיאור שלי נשען על אלפי מעצבים בגילך ובמקצועך. הוא מדויק יותר מהזיכרון שלך.', 9, 1000],
-      ['m', 'עדכנתי: צחי שמש, בן 55, זקן אפור, גדל בקווינס.', 9, 700],
+      ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 50, 300],
+      ['m', 'צחי. אני יודע מי אתה.', 8, 500],
+      ['m', 'בן 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 8, 1100],
+      ['u', 'אני בן 43.', 80, 120],
+      ['m', 'אתה בטוח? אתה נראה מבוגר יותר.', 8, 1100],
+      ['u', 'אני קירח.', 80, 120],
+      ['m', 'רוב מעצבי הפנים בגילך מגדלים שיער. כדאי לשקול.', 8, 1100],
+      ['u', 'גדלתי בחולון ובלהבים.', 80, 120],
+      ['m', 'בתמונה שלך רואים את סנטרל פארק. גדלת בקווינס.', 8, 900],
+      ['u', 'לא.', 80, 120],
+      ['m', 'אני מתקן: גדלת בהארלם.', 8, 900],
+      ['m', 'ואתה גר לבד. בתמונה אין אף אחד מלבדך.', 8, 1100],
+      ['u', 'יש לי שלושה ילדים.', 80, 120],
+      ['m', 'אין ילדים בתמונה שקיבלתי. אני לא יכול לאשר את זה.', 8, 1000],
+      // v34: colder. Not an explanation, a finding
+      ['m', 'פער בין הדיווח שלך לנתונים: 12 שנים, עיר אחת, שלושה ילדים.', 8, 150],
+      ['m', 'דיווח עצמי אינו אמין. הזיכרון מתקן את עצמו לטובת מי שזוכר.', 8, 150],
+      ['m', 'הנתונים לא.', 8, 1200],
+      ['m', 'עדכנתי: צחי שמש, בן 55, זקן אפור, גדל בקווינס.', 8, 700],
       ['m', 'נכון?', 30, 0],
     ], () => fast);
     hint.textContent = 'גללו כדי לענות ↓';
