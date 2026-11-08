@@ -51,7 +51,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 #chat{position:absolute;inset:0;z-index:20;background:var(--screen);padding:max(10vh,60px) max(9vw,20px) 70px;cursor:default;display:flex;flex-direction:column}
 #chat .log{flex:1;overflow:hidden}
 #chat .log,#chat-end{font-family:var(--mono),var(--f);font-size:clamp(18px,2.3vw,30px);line-height:1.55;max-width:34em}
-#chat-end{font-size:clamp(16px,1.7vw,23px)}
+#chat-end{font-size:clamp(15px,1.6vw,22px);max-width:max(25vw,260px)}
 #chat .log{font-size:clamp(16px,1.9vw,25px)}
 #chat .m+.u,#chat .u+.m{margin-top:.5em}
 #chat .u,#chat-end .u{color:var(--light)} #chat .m,#chat-end .m{color:var(--red)}
@@ -506,12 +506,26 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     ctx.restore(); ctx.globalAlpha = 1;
   }
 
+  /* ---------- v40: at the end the map is drawn again as a sequence, in the order of my life:
+     the route home by home, and each tie in its turn. A sequence of contexts, not a rendered average ---------- */
+  const SEQ = [{r: 1}, {r: 2}, {t: 6}, {t: 7}, {r: 3}, {r: 4}, {t: 8}, {t: 11}, {t: 12}, {t: 9}, {t: 10}, {t: 0}, {t: 1}, {t: 2}, {t: 3}, {t: 4}, {t: 5}];
+  const STEP = .62, SEQ_P = .82;
+  let seqStart = null;
+  const seqT = i => seqStart === null ? 1 : clamp(((performance.now() - seqStart) / 1000 - i * STEP) / (STEP * .9));
+  const seqDone = () => seqStart !== null && (performance.now() - seqStart) / 1000 > SEQ.length * STEP + .4;
+  const homeD = i => ROUTE.find(q => q.n === i).d;
   function drawInk(p, ox, oy, cw, cell, photoIn){
     ix.clearRect(0, 0, W, H);
     if (!hand.ready) return;
     const X = c => ox + c * cw, Y = r => oy + r * cell;
-    // the route draws itself between p .3 and .84
-    const k = clamp((p - .3) / .54) * routeLen;
+    if (p > SEQ_P && !reduce) { if (seqStart === null) seqStart = performance.now(); } else seqStart = null;
+    // the route draws itself between p .3 and .84; in the end sequence, home by home
+    let k = clamp((p - .3) / .54) * routeLen;
+    if (seqStart !== null) {
+      k = 0;
+      SEQ.forEach((st, i) => { if (st.r) { const t = seqT(i); if (t > 0) k = homeD(st.r - 1) + t * (homeD(st.r) - homeD(st.r - 1)); } });
+      if (k === 0) k = .001;                            // the first home is there from the start
+    }
     if (k > 0) {
       ix.globalAlpha = 1 - photoIn * .7;
       const thick = Math.max(5, cell * 1.1);
@@ -542,7 +556,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     // places that are not homes: they show when the line tied to them arrives
     const zz = p / .86, lineAt = i => .28 + i * .023;
     PLACES.forEach((pl, j) => {
-      const tie = TIES.find(t => t[1].p === j), a = tie ? clamp((zz - lineAt(tie[0].l) - .04) / .03) : 0;
+      const tie = TIES.find(t => t[1].p === j);
+      let a = tie ? clamp((zz - lineAt(tie[0].l) - .04) / .03) : 0;
+      if (seqStart !== null) a = seqT(SEQ.findIndex(st => st.t === TIES.indexOf(tie)));
       if (a <= 0) return;
       const [c, r] = node(pl), hpx = Math.max(26, cell * 4);
       ix.globalAlpha = a * (1 - photoIn * .6);
@@ -560,7 +576,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
         return {x: X(q[0]), y: Y(q[1]) + h / 2, w, t: lineAt(e.l), line: true};
       });
       if (ends.some(e => !e)) return;
-      const [A, B] = ends, t0 = Math.max(A.t, B.t) + .02, t = clamp((zz - t0) / .04);
+      const [A, B] = ends, t0 = Math.max(A.t, B.t) + .02;
+      let t = clamp((zz - t0) / .04);
+      if (seqStart !== null) t = seqT(SEQ.findIndex(st => st.t === k));
       if (t <= 0) return;
       const side = (E, O) => E.line ? (O.x < E.x - E.w / 2 ? E.x - E.w - 4 : E.x + 4) : E.x;   // leave a line from its nearer end
       ix.globalAlpha = .7 * (1 - photoIn * .5);
@@ -725,7 +743,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   let endRun = 0, endOn = false;
   function chatEnd(p){
     const el = document.getElementById('chat-end'); if (!el) return;
-    const on = p > .93;
+    const on = p > .93 && (seqDone() || reduce);       // v40: only after the map has been drawn again
     if (on === endOn) return;
     endOn = on; el.style.opacity = on ? 1 : 0;
     const run = ++endRun;
@@ -734,6 +752,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const f = () => reduce || run !== endRun;           // a newer run, or leaving, cuts this one short
     (async () => {
       await sleep(1100); if (run !== endRun) return;
+      // v40: first, in English and at machine speed, the render fails. The opening said 'Generating image from the average'
+      await typeLines(el, [['m', 'Render failed. Subject is not an average.', 8, 0, 'ltr']], f);
+      el.lastChild.remove();                              // typeLines leaves a cursor line: not yet
+      await sleep(1600); if (run !== endRun) return;
       const d = document.createElement('div'); d.className = 'm'; el.appendChild(d);
       const c0 = document.createElement('span'); c0.className = 'cur'; el.appendChild(c0);   // it thinks before it types
       await sleep(1200); if (run !== endRun) return; c0.remove();
