@@ -371,6 +371,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     drawGhosts(z, p, ox, oy, cw, cell);
 
     // experiment (v30): no family photo. The field goes dark, and only what my hand did stays: the map
+    drawHoles(z, ox, oy, cw, cell);
     const fadeIn = 0, endK = smooth(clamp((p - .8) / .12));
     if (endK > 0) { ctx.globalAlpha = endK * .96; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     chatEnd(p);
@@ -468,6 +469,44 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const w = hpx * .62;
     Array.from(word).forEach((ch, i) => { if (ch !== ' ') handAt(g, gIdx(ch), xr - (i + 1) * w, y, w, hpx, 1.25); });
   }
+  /* ---------- v38: holes. Where the model has no data, the field tears open and the page's own code shows,
+     with the missing values. They open as you step back ---------- */
+  const HOLES = (() => {
+    const at = (h, dc, dr) => { const [c, r] = node(HOMES[h]); return [c + dc, r + dr]; };
+    const fixed = [
+      [at(4, -34, 5), ['let children = undefined;', '// לא נמצאו נתונים']],
+      [at(2, 3, 6), ['birthplace = null;', 'birthplace ??= "Queens"; // fallback']],
+      [[COLS * .30, ROWS * .44], ['age = 55; // estimated', 'confidence: 0.97']],
+      [at(0, -30, -8), ['hair = mean(designers.age[55]).hair;']],
+    ];
+    const loose = ['if (!data) return average;', 'memory = null;', '// TODO', 'face = mean(designers);', 'NaN', 'street = "generic urban";',
+      'match: 0 results', 'return estimate;', 'undefined', 'self_report: unreliable'];
+    const rnd = (() => { let x = 7; return () => (x = (x * 16807) % 2147483647) / 2147483647; })();   // the same holes on every visit
+    const list = fixed.map(([[c, r], lines], i) => ({c, r, lines, z0: .16 + i * .08}));
+    loose.forEach((t, i) => list.push({c: 4 + rnd() * (COLS - 40), r: 4 + rnd() * (ROWS - 10), lines: [t], z0: .22 + rnd() * .5}));
+    list.forEach(h => {
+      h.w = Math.max(...h.lines.map(l => l.length)) * 1.05 + 3; h.h = h.lines.length * 2 + 1.6;
+      h.edge = Array.from({length: Math.ceil(h.h * 2)}, () => (rnd() - .5) * 2.2);   // ragged rows: torn, not drawn
+    });
+    return list;
+  })();
+  function drawHoles(z, ox, oy, cw, cell){
+    ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.direction = 'ltr';
+    for (const h of HOLES) {
+      const a = clamp((z - h.z0) / .05); if (a <= 0) continue;
+      const x = ox + h.c * cw, y = oy + h.r * cell, w = h.w * cw, hh = h.h * cell, n = h.edge.length;
+      ctx.globalAlpha = a; ctx.fillStyle = '#050505';
+      for (let i = 0; i < n; i++) ctx.fillRect(x + h.edge[i] * cw, y + i * hh / n, w + h.edge[(i + 3) % n] * cw, hh / n + .5);
+      const fs = Math.max(4, cell * 1.15);
+      ctx.font = `${fs}px "IBM Plex Mono", monospace`;
+      h.lines.forEach((l, i) => {
+        ctx.fillStyle = /undefined|null|NaN|0 results|unreliable/.test(l) ? 'rgba(224,50,43,.9)' : 'rgba(170,166,156,.85)';
+        ctx.fillText(l, x + 1.5 * cw, y + (1.3 + i * 2) * cell);
+      });
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+
   function drawInk(p, ox, oy, cw, cell, photoIn){
     ix.clearRect(0, 0, W, H);
     if (!hand.ready) return;
@@ -645,24 +684,20 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     // v31: a conversation. I correct it, and it doubts me, explains why it is right, and corrects me back
     // v32: it answers at once, fast and sure, almost mocking me for not knowing myself. I type like a person
     // v37: no questions, no jokes. It does not ask me, it decides for me
+    // v38: not threatening, lacking. It does not know, says so, and fills the gap with the average anyway
     await typeLines(log, [
       ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 50, 300],
-      ['m', 'צחי שמש. אני יודע מי אתה.', 8, 500],
-      ['m', 'גבר, 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 8, 1100],
+      ['m', 'צחי שמש, מעצב פנים.', 8, 500],
+      ['m', 'גיל: 55 (הערכה). שיער: אפור. זקן: אפור. לבוש: בלייזר כהה.', 8, 1100],
       ['u', 'אני בן 43.', 80, 120],
-      ['m', 'אתה בן 55.', 8, 1100],
-      ['u', 'למה? בגלל שאני קירח?', 80, 120],
-      ['m', 'גיל משוער: 55. ההערכה סופית.', 8, 1100],
+      ['m', 'עודכן: 43. הדימוי לא השתנה.', 8, 1200],
+      ['u', 'אני קירח.', 80, 120],
+      ['m', 'אין מספיק דוגמאות. הושלם לפי ממוצע.', 8, 1200],
       ['u', 'גדלתי בחולון ובלהבים.', 80, 120],
-      ['m', 'גדלת בקווינס. הרשומה עודכנה.', 8, 700],
-      ['m', 'אתה גר לבד.', 8, 1100],
+      ['m', 'לא נמצא מידע על חולון ולהבים. מוצג: רחוב עירוני כללי.', 8, 1200],
       ['u', 'יש לי שלושה ילדים.', 80, 120],
-      ['m', 'אין ילדים ברשומה. הם לא ייכללו.', 8, 1000],
-      ['m', 'פער בין הדיווח שלך לנתונים: 12 שנים, עיר אחת, שלושה ילדים.', 8, 150],
-      ['m', 'דיווח עצמי אינו אמין. הזיכרון מתקן את עצמו לטובת מי שזוכר.', 8, 150],
-      ['m', 'הנתונים לא.', 8, 1200],
-      ['m', 'זה אתה: צחי שמש, 55, זקן אפור, גדל בקווינס, גר לבד.', 8, 900],
-      ['m', 'אין צורך באישור.', 8, 0],
+      ['m', 'ילדים: [לא ידוע].', 8, 1400],
+      ['m', 'זה הכי קרוב שאפשר.', 8, 0],
     ], () => fast);
     hint.textContent = 'גללו ↓';
     // v32: the first scroll is my answer. It breaks the screen but does not move the field, so the field
