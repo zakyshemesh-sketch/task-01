@@ -755,7 +755,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   /* ---------- v43: my answer, line by line, as if I am writing it now: each line is uncovered from the right,
      at the pace of a hand, with stops between words (lines cut by tools/answer.py; my signature left out) ---------- */
   const ans = {box: null, el: document.getElementById('answer')};
-  fetch('../assets/hand-answer.json').then(r => r.json()).then(j => { ans.box = j; }).catch(() => {});
+  fetch('../assets/hand-answer.json').then(r => r.json()).then(j => { ans.box = j.lines || j; }).catch(() => {});
   async function writeAnswer(run){
     if (!ans.box) return;
     const sheet = ans.el.querySelector('.sheet'); sheet.textContent = '';
