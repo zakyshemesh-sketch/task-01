@@ -33,3 +33,49 @@ for img in out:
 sheet.save("assets/hand-answer.png", optimize=True)
 json.dump(items, open("assets/hand-answer.json", "w"))
 print(items)
+
+# ---- v44: a time map, so each line is written the way a hand writes it ----
+# For every line: strokes (connected pieces of ink) are taken from right to left; inside a stroke the pen
+# follows the stroke's skeleton from its rightmost end. Every ink pixel gets the moment the pen passes it.
+# Saved as assets/hand-answer-time.png, same layout as hand-answer.png: red = time (1..255), 0 = no ink.
+from skimage.morphology import skeletonize
+from collections import deque
+atlas = np.asarray(Image.open("assets/hand-answer.png").getchannel("A")).astype(float) / 255
+tmap = np.zeros(atlas.shape, np.uint8)
+meta = []
+for x0, y0, w, h in items:
+    al = atlas[y0:y0 + h, x0:x0 + w]
+    ink = al > .18
+    lab, n = ndi.label(ndi.binary_dilation(ink, iterations=2))   # crayon breaks: a stroke is what touches
+    comps = []
+    for i in range(1, n + 1):
+        m = (lab == i) & ink
+        if m.sum() < 4: continue
+        comps.append((np.nonzero(m)[1].max(), m))
+    comps.sort(key=lambda c: -c[0])                      # right to left, like I write
+    t_line = np.full(ink.shape, -1.0); t = 0.0
+    for _, m in comps:
+        sk = skeletonize(m)
+        if sk.sum() == 0: sk = m
+        ys, xs = np.nonzero(sk)
+        start = int(np.argmax(xs - .3 * ys))             # the pen goes in at the stroke's top right
+        dist = np.full(sk.shape, -1.0); q = deque([(ys[start], xs[start])]); dist[ys[start], xs[start]] = 0
+        while q:                                         # walk along the skeleton
+            y, x = q.popleft()
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    yy, xx = y + dy, x + dx
+                    if 0 <= yy < sk.shape[0] and 0 <= xx < sk.shape[1] and sk[yy, xx] and dist[yy, xx] < 0:
+                        dist[yy, xx] = dist[y, x] + (1.41 if dy and dx else 1); q.append((yy, xx))
+        dist[sk & (dist < 0)] = dist.max() + 1           # a broken skeleton: the rest comes right after
+        _, (iy, ix) = ndi.distance_transform_edt(~sk, return_indices=True)
+        local = dist[iy, ix]
+        t_line[m] = t + local[m]
+        t = t_line[m].max() + 14                         # lifting the pen costs a little
+    total = max(t, 1)
+    tm = np.where(ink, 1 + np.clip(t_line, 0, None) / total * 254, 0)
+    tmap[y0:y0 + h, x0:x0 + w] = tm.astype(np.uint8)
+    meta.append(round(total, 1))                         # the length the pen travels, in pixels
+Image.fromarray(np.dstack([tmap, tmap * 0, tmap * 0, (tmap > 0) * 255]).astype(np.uint8), "RGBA").save("assets/hand-answer-time.png", optimize=True)
+json.dump({"lines": items, "travel": meta}, open("assets/hand-answer.json", "w"))
+print("travel", meta)

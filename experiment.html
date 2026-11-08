@@ -61,10 +61,22 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 #chat .hint{position:absolute;bottom:max(18px,env(safe-area-inset-bottom,0px));inset-inline:0;text-align:center;font-size:12px;color:#7d7a72;opacity:0;transition:opacity .6s}
 #chat-end{position:absolute;z-index:15;left:max(2.5vw,16px);right:auto;bottom:max(12vh,64px);padding:10px 14px;background:rgba(13,13,12,.82);opacity:0;transition:opacity .8s;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.cur{animation:none}}
+/* v44: where am I. Chapters on the left edge, in the language of the grid */
+#chapters{position:absolute;z-index:14;left:max(14px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;font-family:var(--mono),var(--f);font-size:12px;line-height:1;direction:rtl;background:rgba(13,13,12,.86);padding:8px 12px 8px 14px}
+#chapters li{display:flex;align-items:center;gap:8px;padding:7px 0;color:#5d5a53;cursor:pointer;transition:color .4s}
+#chapters li::before{content:"";width:10px;height:1px;background:currentColor;transition:width .4s}
+#chapters li.past{color:#7d7a72}
+#chapters li.now{color:var(--light)} #chapters li.now::before{width:26px;background:var(--red)}
+#chapters li:focus-visible{outline:1px solid var(--red);outline-offset:3px}
+.hud .go{transition:opacity .4s;background:rgba(13,13,12,.86);padding:4px 8px;color:var(--light)} .hud .go.idle{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{opacity:.25;transform:translateY(3px)}}
+@media (max-width:640px){#chapters li:not(.now){display:none} #chapters{top:auto;bottom:44px;transform:none}}
+@media (prefers-reduced-motion:reduce){.hud .go.idle{animation:none}}
 /* v43: my answer to "מי אתה?", written out on the screen in my hand */
 #answer{position:absolute;inset:0;z-index:16;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .9s;background:rgba(13,13,12,.78)}
-#answer .sheet{display:flex;flex-direction:column;align-items:flex-start}   /* in a right-to-left page, start is the right edge, like my sheet */
-#answer .ln{background-repeat:no-repeat;clip-path:inset(0 0 0 100%)}
+#answer .sheet{display:flex;flex-direction:column;align-items:flex-start}
+#answer .sheet canvas{position:static;inset:auto;width:auto;height:auto}   /* in a right-to-left page, start is the right edge, like my sheet */
+
 </style>
 </head>
 <body>
@@ -79,7 +91,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <div id="chat-end" aria-live="polite"></div>
     <div id="answer" aria-label="מי אני? אני רצף של קשרים. אני כמה אנשים. אני שדה של מקומות. אני רעש של רחוב ושקט של מדבר. אני זכרונות ועתידים. ילדות ובגרות. אני מה שמחקתי ומה שעוד אכתוב. אני תוכנית שעוד לא נגמרה. צחי שמש"><div class="sheet"></div></div>
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span><span><b class="hk">כתב יד</b> מה שכתבתי</span></div>
-    <div class="hud gut"><span>גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
+    <ol id="chapters" aria-label="פרקים"></ol>
+    <div class="hud gut"><span class="go">גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
   </section>
 </div>
 
@@ -381,6 +394,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const fadeIn = 0, endK = smooth(clamp((p - .8) / .12));
     if (endK > 0) { ctx.globalAlpha = endK * .96; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     chatEnd(p);
+    chapters(p);
     photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
     photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
     photo.style.opacity = fadeIn;
@@ -754,32 +768,80 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   // ...and at the end, over the map, the model asks again. It cannot read what it sees
   /* ---------- v43: my answer, line by line, as if I am writing it now: each line is uncovered from the right,
      at the pace of a hand, with stops between words (lines cut by tools/answer.py; my signature left out) ---------- */
-  const ans = {box: null, el: document.getElementById('answer')};
-  fetch('assets/hand-answer.json').then(r => r.json()).then(j => { ans.box = j; }).catch(() => {});
+  const ans = {box: null, travel: null, A: null, T: null, aw: 0, el: document.getElementById('answer')};
+  // v44: the pen follows each stroke. tools/answer.py gives every ink pixel the moment the pen reaches it
+  // (strokes right to left, along each stroke's skeleton), saved as a second image beside the letters
+  (async () => {
+    try {
+      const j = await (await fetch('assets/hand-answer.json')).json();
+      const load = src => new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = src; });
+      const [ia, it] = await Promise.all([load('assets/hand-answer.png'), load('assets/hand-answer-time.png')]);
+      const px = im => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, im.width, im.height).data; };
+      ans.A = px(ia); ans.T = px(it); ans.aw = ia.width; ans.box = j.lines; ans.travel = j.travel;
+    } catch (e) {}
+  })();
   async function writeAnswer(run){
     if (!ans.box) return;
     const sheet = ans.el.querySelector('.sheet'); sheet.textContent = '';
     const tot = ans.box.reduce((t, b) => t + b[3] * 1.12, 0), maxW = Math.max(...ans.box.map(b => b[2]));
-    const sc = Math.min(1.25, H * .8 / tot, W * .86 / maxW), aw = maxW * sc;
-    const lines = ans.box.map(b => {
-      const d = document.createElement('div'); d.className = 'ln';
-      Object.assign(d.style, {width: b[2] * sc + 'px', height: b[3] * sc + 'px', marginBottom: b[3] * sc * .12 + 'px',
-        backgroundImage: 'url(assets/hand-answer.png)', backgroundSize: `${aw / maxW * maxW}px auto`,
-        backgroundPosition: `${-b[0] * sc}px ${-b[1] * sc}px`});
-      sheet.appendChild(d); return {d, b};
+    const sc = Math.min(1.25, H * .8 / tot, W * .86 / maxW);
+    const lines = ans.box.map(([x0, y0, w, h], i) => {
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      Object.assign(c.style, {width: w * sc + 'px', height: h * sc + 'px', marginBottom: h * sc * .12 + 'px', display: 'block'});
+      sheet.appendChild(c);
+      const g = c.getContext('2d'), img = g.createImageData(w, h), a = new Uint8ClampedArray(w * h), t = new Uint8Array(w * h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const k = ((y0 + y) * ans.aw + x0 + x) * 4, q = y * w + x; a[q] = ans.A[k + 3]; t[q] = ans.T[k]; }
+      for (let q = 0; q < w * h; q++) { img.data[q * 4] = img.data[q * 4 + 1] = img.data[q * 4 + 2] = 255; }
+      return {g, img, a, t, n: w * h, travel: ans.travel[i]};
     });
-    ans.el.style.opacity = 1;
+    const paint = (L, T) => {                          // everything the pen has reached by T, with a soft wet edge
+      const d = L.img.data;
+      for (let q = 0; q < L.n; q++) { const tt = L.t[q]; d[q * 4 + 3] = !tt ? 0 : tt <= T ? L.a[q] : tt <= T + 3 ? L.a[q] * (1 - (tt - T) / 4) : 0; }
+      L.g.putImageData(L.img, 0, 0);
+    };
+    ans.done = false; ans.el.style.opacity = 1;
     await sleep(900);
-    for (const {d, b} of lines) {
+    for (const L of lines) {
       if (run !== endRun) return;
-      if (reduce) { d.style.clipPath = 'none'; continue; }
-      // uneven keyframes: the hand speeds up, stops, goes on
-      const n = 5 + ((Math.random() * 4) | 0), kf = [{clipPath: 'inset(0 0 0 100%)', offset: 0}];
-      let at = 0; for (let i = 1; i < n; i++) { at += (1 - at) * (.25 + Math.random() * .3); kf.push({clipPath: `inset(0 0 0 ${100 - at * 100}%)`, offset: i / n}); }
-      kf.push({clipPath: 'inset(0 0 0 0%)', offset: 1});
-      await d.animate(kf, {duration: 450 + b[2] * 2.3, easing: 'linear', fill: 'forwards'}).finished.catch(() => {});
-      await sleep(260 + Math.random() * 340);
+      if (reduce) { paint(L, 256); continue; }
+      // the pen moves at about 330 px a second, a little faster and slower as it goes
+      const dur = L.travel / 330 * 1000, t0 = performance.now(), wob = Math.random() * 6;
+      await new Promise(done => {
+        const step = now => {
+          if (run !== endRun) return done();
+          const u = Math.min(1, (now - t0) / dur), e = u + .035 * Math.sin(u * 9 + wob) * (1 - u) * u * 4;
+          paint(L, 1 + Math.max(0, e) * 254);
+          u < 1 ? requestAnimationFrame(step) : done();
+        };
+        requestAnimationFrame(step);
+      });
+      await sleep(320 + Math.random() * 380);           // between lines the hand moves down and back to the right
     }
+    if (run === endRun) ans.done = true;
+  }
+
+  /* ---------- v44: chapters. Where you are, what has passed, and whether to keep scrolling ---------- */
+  const CHAPTERS = [['השם', 0], ['השדה', .05], ['הפנים של המודל', .3], ['המפה', .6], ['הרצף', .82], ['מי אני?', .93]];
+  const chapEl = document.getElementById('chapters'), goEl = document.querySelector('.hud .go');
+  CHAPTERS.forEach(([name, at], i) => {
+    const li = document.createElement('li'); li.tabIndex = 0;
+    li.textContent = String.fromCharCode(0x5D0 + i) + '  ' + name;   // א, ב, ג... like the module labels
+    const jump = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; scrollTo({top: pin.offsetTop + d * (at + .002), behavior: reduce ? 'auto' : 'smooth'}); };
+    li.addEventListener('click', jump); li.addEventListener('keydown', e => { if (e.key === 'Enter') jump(); });
+    chapEl.appendChild(li);
+  });
+  let chapNow = -1, lastMove = performance.now();
+  addEventListener('scroll', () => { lastMove = performance.now(); }, {passive: true});
+  function chapters(p){
+    let c = 0; CHAPTERS.forEach(([, at], i) => { if (p >= at) c = i; });
+    if (c !== chapNow) {
+      chapNow = c;
+      [...chapEl.children].forEach((li, i) => li.className = i < c ? 'past' : i === c ? 'now' : '');
+      goEl.textContent = c < CHAPTERS.length - 1 ? 'המשיכו לגלול ↓' : 'בסוף: הטקסט על העבודה ↓';
+    }
+    // standing still for a while, mid-way: the cue nudges. At the very end it waits for the answer to be written
+    const idle = performance.now() - lastMove > 2600 && (c < CHAPTERS.length - 1 || ans.done);
+    goEl.classList.toggle('idle', idle && !document.getElementById('chat'));
   }
 
   // v39: the hesitant ending is typed each time you arrive at the end, after the panel has faded in.
