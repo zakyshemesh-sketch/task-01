@@ -410,8 +410,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   // They appear one by one as you step back and stay: the far view fills with my hand. [module right edge, module row]
   // Since v26 they are laid out by the page: each finds a free place in the grid, away from the route and the other lines.
   const hl = {img: new Image(), box: null, pos: null};
-  hl.img.src = 'assets/hand-lines.png';
-  fetch('assets/hand-lines.json').then(r => r.json()).then(j => { hl.box = j; layoutLines(); }).catch(() => {});
+  hl.img.src = 'assets/hand-lines-2.png';
+  fetch('assets/hand-lines-2.json').then(r => r.json()).then(j => { hl.box = j; layoutLines(); }).catch(() => {});
   // which line is tied to which home, by a line in my hand: [line, home]
   // version 27: ties between a line and a home ({h}), a place that is not a home ({p}), or another line ({l})
   const PLACES = [[11, 1, 'פתח תקווה', 'circle-s'], [11, 19, 'המכללה למנהל', 'circle-s']];   // where Noa and I met, at work; where I became a designer (v41)

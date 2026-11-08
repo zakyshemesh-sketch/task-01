@@ -51,6 +51,6 @@ sheet = Image.new("RGBA", (W, sum(i.height + 6 for i in out)), (255, 255, 255, 0
 for img in out:
     white = Image.new("RGBA", img.size, (255, 255, 255, 255)); white.putalpha(img)
     sheet.paste(white, (0, y)); items.append([0, y, img.width, img.height]); y += img.height + 6
-sheet.save("assets/hand-lines.png", optimize=True)
-json.dump(items, open("assets/hand-lines.json", "w"))
+sheet.save("assets/hand-lines-2.png", optimize=True)
+json.dump(items, open("assets/hand-lines-2.json", "w"))
 print(len(items), sheet.size, [i[2:] for i in items])
