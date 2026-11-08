@@ -644,27 +644,27 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     wait.remove();
     // v31: a conversation. I correct it, and it doubts me, explains why it is right, and corrects me back
     // v32: it answers at once, fast and sure, almost mocking me for not knowing myself. I type like a person
+    // v37: no questions, no jokes. It does not ask me, it decides for me
     await typeLines(log, [
       ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 50, 300],
-      ['m', 'צחי. אני יודע מי אתה.', 8, 500],
-      ['m', 'בן 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 8, 1100],
+      ['m', 'צחי שמש. אני יודע מי אתה.', 8, 500],
+      ['m', 'גבר, 55. זקן אפור. בלייזר כהה. סלון עם שיש.', 8, 1100],
       ['u', 'אני בן 43.', 80, 120],
-      ['m', 'אתה בטוח? אתה נראה מבוגר יותר.', 8, 1100],
+      ['m', 'אתה בן 55.', 8, 1100],
       ['u', 'למה? בגלל שאני קירח?', 80, 120],
-      ['m', 'בין השאר. רוב מעצבי הפנים בגילך מגדלים שיער. כדאי לשקול.', 8, 1100],
+      ['m', 'גיל משוער: 55. ההערכה סופית.', 8, 1100],
       ['u', 'גדלתי בחולון ובלהבים.', 80, 120],
-      ['m', 'בתמונה שלך רואים את סנטרל פארק. גדלת בקווינס.', 8, 900],
-      ['m', 'ואתה גר לבד. בתמונה אין אף אחד מלבדך.', 8, 1100],
+      ['m', 'גדלת בקווינס. הרשומה עודכנה.', 8, 700],
+      ['m', 'אתה גר לבד.', 8, 1100],
       ['u', 'יש לי שלושה ילדים.', 80, 120],
-      ['m', 'אין ילדים בתמונה שקיבלתי. אני לא יכול לאשר את זה.', 8, 1000],
-      // v34: colder. Not an explanation, a finding
+      ['m', 'אין ילדים ברשומה. הם לא ייכללו.', 8, 1000],
       ['m', 'פער בין הדיווח שלך לנתונים: 12 שנים, עיר אחת, שלושה ילדים.', 8, 150],
       ['m', 'דיווח עצמי אינו אמין. הזיכרון מתקן את עצמו לטובת מי שזוכר.', 8, 150],
       ['m', 'הנתונים לא.', 8, 1200],
-      ['m', 'עדכנתי: צחי שמש, בן 55, זקן אפור, גדל בקווינס.', 8, 700],
-      ['m', 'נכון?', 30, 0],
+      ['m', 'זה אתה: צחי שמש, 55, זקן אפור, גדל בקווינס, גר לבד.', 8, 900],
+      ['m', 'אין צורך באישור.', 8, 0],
     ], () => fast);
-    hint.textContent = 'גללו כדי לענות ↓';
+    hint.textContent = 'גללו ↓';
     // v32: the first scroll is my answer. It breaks the screen but does not move the field, so the field
     // opens where it starts, on my name in י12. Scrolling is unlocked only after the break, and a beat later
     const keys = ['ArrowDown', 'PageDown', ' ', 'End'];
