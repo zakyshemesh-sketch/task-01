@@ -371,7 +371,6 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     drawGhosts(z, p, ox, oy, cw, cell);
 
     // experiment (v30): no family photo. The field goes dark, and only what my hand did stays: the map
-    drawHoles(z, ox, oy, cw, cell);
     const fadeIn = 0, endK = smooth(clamp((p - .8) / .12));
     if (endK > 0) { ctx.globalAlpha = endK * .96; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     chatEnd(p);
@@ -649,8 +648,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   }
   async function unType(d, n, isFast){ for (let i = 0; i < n; i++) { d.textContent = d.textContent.slice(0, -1); if (!isFast()) await sleep(55); } }
   async function typeLines(box, lines, isFast){
-    for (const [who, text, speed, pause] of lines) {
+    for (const [who, text, speed, pause, dir] of lines) {
       const d = document.createElement('div'); d.className = who; box.appendChild(d);
+      if (dir) { d.dir = dir; d.style.textAlign = 'right'; d.style.fontFamily = 'var(--mono)'; }
       if (who === 'u') {
         // v34: I type like a person: a moment before I start, an uneven hand, a stop between words, sometimes a wrong key
         if (!isFast()) await sleep(700 + Math.random() * 700);
@@ -697,7 +697,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       ['m', 'לא נמצא מידע על חולון ולהבים. מוצג: רחוב עירוני כללי.', 8, 1200],
       ['u', 'יש לי שלושה ילדים.', 80, 120],
       ['m', 'ילדים: [לא ידוע].', 8, 1400],
-      ['m', 'זה הכי קרוב שאפשר.', 8, 0],
+      ['m', 'זה הכי קרוב שאפשר.', 8, 900],
+      ['m', 'Generating image from the average of available data...', 8, 0, 'ltr'],
     ], () => fast);
     hint.textContent = 'גללו ↓';
     // v32: the first scroll is my answer. It breaks the screen but does not move the field, so the field
@@ -719,25 +720,33 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     addEventListener('wheel', go, {passive: false}); addEventListener('touchmove', go, {passive: false}); addEventListener('keydown', go);
   }
   // ...and at the end, over the map, the model asks again. It cannot read what it sees
-  let endTyped = false;
+  // v39: the hesitant ending is typed each time you arrive at the end, after the panel has faded in.
+  // Leaving the end stops it and clears it, so it never just appears finished
+  let endRun = 0, endOn = false;
   function chatEnd(p){
     const el = document.getElementById('chat-end'); if (!el) return;
     const on = p > .93;
-    el.style.opacity = on ? 1 : 0;
-    if (on && !endTyped) {
-      endTyped = true;
-      // v36: for the first time the model types like a person: it starts, deletes, hesitates. Its certainty is gone
-      (async () => {
-        const f = () => reduce, d = document.createElement('div'); d.className = 'm'; el.appendChild(d);
-        await sleep(900);
-        await humanType(d, el, 'אתה', 120, f, 0); await sleep(800); await unType(d, 3, f); await sleep(600);
-        await humanType(d, el, 'צחי ש', 130, f, 0); await sleep(1000); await unType(d, 5, f); await sleep(900);
-        await humanType(d, el, 'אני לא מצליח לזהות אותך.', 95, f, .03); await sleep(1300);
-        const q = document.createElement('div'); q.className = 'm'; el.appendChild(q);
-        await humanType(q, el, 'מי אתה?', 170, f, 0);
-        const c = document.createElement('div'); c.className = 'u'; c.innerHTML = '<span class="cur"></span>'; el.appendChild(c);
-      })();
-    }
+    if (on === endOn) return;
+    endOn = on; el.style.opacity = on ? 1 : 0;
+    const run = ++endRun;
+    if (!on) { setTimeout(() => { if (run === endRun) el.textContent = ''; }, 800); return; }
+    el.textContent = '';
+    const f = () => reduce || run !== endRun;           // a newer run, or leaving, cuts this one short
+    (async () => {
+      await sleep(1100); if (run !== endRun) return;
+      const d = document.createElement('div'); d.className = 'm'; el.appendChild(d);
+      const c0 = document.createElement('span'); c0.className = 'cur'; el.appendChild(c0);   // it thinks before it types
+      await sleep(1200); if (run !== endRun) return; c0.remove();
+      await humanType(d, el, 'אתה', 140, f, 0); await sleep(900); await unType(d, 3, f); await sleep(700);
+      await humanType(d, el, 'צחי ש', 150, f, 0); await sleep(1100); await unType(d, 5, f); await sleep(1000);
+      if (run !== endRun) return;
+      await humanType(d, el, 'אני לא מצליח לזהות אותך.', 110, f, .03); await sleep(1400);
+      if (run !== endRun) return;
+      const q = document.createElement('div'); q.className = 'm'; el.appendChild(q);
+      await humanType(q, el, 'מי אתה?', 190, f, 0);
+      if (run !== endRun) return;
+      const c = document.createElement('div'); c.className = 'u'; c.innerHTML = '<span class="cur"></span>'; el.appendChild(c);
+    })();
   }
 
   let visible = true;

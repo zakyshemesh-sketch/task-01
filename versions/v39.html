@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>תעודת זהות משבשת</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="צחי שמש? מקרוב רעש של אותיות על מסך. מרחוק, דף מודפס ותמונה משפחתית.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;700&family=IBM+Plex+Mono:wght@400&family=Rubik:wght@400;500;700&display=swap">
+<style>
+/* One field of characters on a strict, visible grid (the order). Up close it streams and flickers like
+   running code on a black screen, and some modules turn into patterns (the break). Every letter belongs to
+   a sentence about me. Pulling back, the screen turns into paper: the machine's black gives way to a printed
+   page, and the field becomes a faded family photograph. */
+:root{
+  --screen:#0d0d0c;       /* the machine */
+  --paper:#ebe7dd;        /* the page, the colour of the paper I tore */
+  --ink:#1b1a17;
+  --light:#ece9e2;
+  --red:#e0322b;          /* what the model guessed about me */
+  --f:"IBM Plex Sans Hebrew","Arial Hebrew",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --fg:var(--light); --fg-dim:rgba(236,233,226,.55); --panel:rgba(13,13,12,.8);   /* updated while scrolling */
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--screen)}
+body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height:1.65;overflow-x:hidden}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pin{position:relative;height:820vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
+#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
+.hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
+.hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
+.key{position:absolute;top:max(14px,env(safe-area-inset-top,0px));inset-inline-start:max(16px,env(safe-area-inset-left,0px));font-size:12px;color:var(--fg-dim);display:flex;gap:16px;flex-wrap:wrap;pointer-events:none;background:var(--panel);padding:4px 8px}
+.key b{font-weight:400;color:var(--fg)} .key .hk{text-decoration:underline wavy;text-underline-offset:3px} .key i{font-style:normal;color:var(--red)}
+.after{max-width:760px;margin-inline:auto;padding-block:16svh 10svh;display:grid;gap:28px}
+.after h1{margin:0;font-weight:700;font-size:clamp(44px,8vw,96px);line-height:.95;letter-spacing:-.01em}
+.after p{margin:0;max-width:36em;font-weight:300;font-size:clamp(17px,1.9vw,20px)}
+.after .draft{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#7d7a72;border-top:1px dashed #7d7a72;padding-top:4px;justify-self:start}
+footer{max-width:760px;margin-inline:auto;padding-block:20px 40px;border-top:1px solid #2a2a28;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:#7d7a72}
+footer a{color:var(--light)}
+a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+/* ---------- experiment (v30): the opening is a conversation with the model, like Neo's screen in The Matrix ---------- */
+#chat{position:absolute;inset:0;z-index:20;background:var(--screen);padding:max(10vh,60px) max(9vw,20px) 70px;cursor:default;display:flex;flex-direction:column}
+#chat .log{flex:1;overflow:hidden}
+#chat .log,#chat-end{font-family:var(--mono),var(--f);font-size:clamp(18px,2.3vw,30px);line-height:1.55;max-width:34em}
+#chat-end{font-size:clamp(16px,1.7vw,23px)}
+#chat .log{font-size:clamp(16px,1.9vw,25px)}
+#chat .m+.u,#chat .u+.m{margin-top:.5em}
+#chat .u,#chat-end .u{color:var(--light)} #chat .m,#chat-end .m{color:var(--red)}
+#chat .u::before,#chat-end .u::before{content:"> ";color:#6f6c65}
+.cur{display:inline-block;width:.55em;height:1.05em;background:var(--light);vertical-align:-.15em;margin-inline-start:2px;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+#chat .hint{position:absolute;bottom:max(18px,env(safe-area-inset-bottom,0px));inset-inline:0;text-align:center;font-size:12px;color:#7d7a72;opacity:0;transition:opacity .6s}
+#chat-end{position:absolute;z-index:15;inset-inline-start:max(2.5vw,16px);bottom:max(12vh,64px);padding:10px 14px;background:rgba(13,13,12,.82);opacity:0;transition:opacity .8s;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.cur{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="pin">
+  <section class="stage" aria-label="שיחה עם מודל, ושדה של אותיות שמתרחק ונהיה מפה ביד שלי">
+    <div id="chat" aria-live="polite" aria-label="השיחה עם המודל"><div class="log"></div><p class="hint">לחצו כדי לדלג</p></div>
+    <canvas id="c" aria-hidden="true"></canvas>
+    <div id="ghosts" aria-hidden="true"></div>
+    <img id="photo" src="../assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
+    <canvas id="ink" aria-hidden="true"></canvas>
+    <div id="chat-end" aria-live="polite"></div>
+    <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span><span><b class="hk">כתב יד</b> מה שכתבתי</span></div>
+    <div class="hud gut"><span>גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
+  </section>
+</div>
+
+<section class="after gut" aria-label="על העבודה">
+  <h1>צחי שמש (?)</h1>
+  <p>ביקשתי ממודל לייצר תמונה של "צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה". הוא החזיר גבר בן 55, עם זקן אפור, בלייזר כהה וסלון עם שיש. כשנתתי לו סלפי אחד שלי, הוא הוסיף לי ילדות בסנטרל פארק. הוא לא טעה בגלל חוסר מידע. הוא טעה בביטחון מלא, כי זה מה שהוא יודע לעשות: למלא את החסר בממוצע.</p>
+  <p>העמוד נפתח כמו האתר שמודל היה בונה לי: גרדיאנט, כותרת ממורכזת, כרטיסים מעוגלים, "מעצב פנים יצירתי ונלהב". אחרי רגע הוא נשבר, ומתחתיו מתגלה שדה של אותיות. זה הסדר שלי: גריד מודולים קבוע, כל תא באותו גודל, כל מודול עם קואורדינטה, כמו דף של מילר-ברוקמן. בתוך הסדר הזה רצים משפטים אמיתיים עליי, ובאדום הניחושים של המכונה. השם שלי מופיע שם עם סימן שאלה, ומתפרק ברגע שמתחילים לגלול.</p>
+  <p>ככל שמתרחקים, המכונה נסוגה. הניחושים האדומים דוהים, ועל התמונות שהמודל ייצר עליי היד שלי מסמנת איקס. במקומן מופיע מה שאף מודל לא יכול לדעת, בכתב היד שלי: חמשת הבתים שגרתי בהם לפני הגיוס, מחוברים במסלול שציירתי כמו בתוכנית. כמעצב פנים, כך אני חושב: בתוכניות, במסלולים ובמעברים בין חללים, ולא בתמונה אחת. איך שהילדים קוראים לי. ריח של חול שמזכיר לי את להבים. אבא שלי. אחותי. אני לא כותב את זה כדי להסביר מי אני, אלא כדי להראות שהזהות שלי בנויה מקשרים בין מקומות ואנשים, ולא מתיאור.</p>
+  <p>את כתב היד לא ניקיתי. האותיות עקומות, חסרות לי אותיות סופיות, ויש מילים שמחקתי והשארתי. מחיקה היא יד שחושבת, ואת זה המכונה לא מייצרת.</p>
+  <p>הפנים של הילדים שלי נשארות שבורות עד הסוף, בגליץ'. זו הבחירה היחידה בעבודה שבה השבירה מגינה. מה שלא שייך לרשת לא נכנס אליה.</p>
+  <p>בהרצאה של היטו שטיירל שמעתי שהשימוש בבינה מלאכותית חייב להיות עם חיכוך. העבודה הזו בנויה על החיכוך הזה: המכונה נותנת את הממוצע מיד, והאמת דורשת מאמץ, יד, וזמן. גם את העמוד עצמו בניתי עם בינה מלאכותית, וכל הצעה שלה שנראתה נקייה מדי נדחתה. התהליך הזה מתועד בריפו.</p>
+  <p>אבא שלי היה אומר בוויכוחים: "אל תהיה צודק, תהיה חכם". המודל תמיד צודק בעיני עצמו. ניסיתי להיות חכם.</p>
+</section>
+
+<footer class="gut">
+  <span>צחי שמש · עיצוב בעזרת בינה מלאכותית · HIT 2026</span>
+  <span><a href="https://github.com/zakyshemesh-sketch/task-01/tree/main/process">תיעוד התהליך</a> · <a href="https://github.com/zakyshemesh-sketch/task-01">הריפו</a></span>
+</footer>
+
+<script>
+(function(){
+  /* ---------- what the field is made of ---------- */
+  const MINE = [
+    'צחי שמש', '43', 'מעצב פנים', 'סטודיו עצמאי', 'מרצה במוסדות אקדמיים', 'סטודנט M.Des ב-HIT', 'נשוי לנועה', 'אבא',
+    'שדרות ירושלים, חולון: קומה מתחת לדודים',
+    'אלופי צה"ל, חולון: קומה ראשונה, על כביש סואן. הרעש',
+    'הסייפן, להבים: ילדות טהורה. משחקים ברחוב. יציאה למדבר',
+    'מכלף, חולון: חברים שמלווים אותי עד היום. שכונה שקטה. חדר משלי',
+    'ראשון לציון: רגע לפני הגיוס. לא היה חיבור לבית הזה, עד שחזרתי לגור בו עם הילדים שלי',
+    'אין לי תמונות מהילדות', 'יש לי חמש כתובות', 'קירח',
+    'הסלון בשמונה בבוקר: עגלת בובות, כיסא ילדים, צעצועים על הרצפה',
+    // version 27: from my sheets
+    'אבוש', 'אבובו', 'ריח של קפה מעורר אותי', 'ריח של חול מזכיר לי את להבים', 'אבא היה אומר: אל תהיה צודק, תהיה חכם',
+    'אור יום', 'קני שמש', 'אני ונועה הכרנו בעבודה, בפתח תקווה', 'אני משחק עם הילדים שלי', 'אני לא סנטימנטלי',
+    'לא שומר חפצים', 'להבים: מדבר, רחוב', 'מה שמזכיר לי את אבא', 'אבא שלי מת מסרטן', 'אחותי נהרגה בתאונה'
+  ];
+  // everything here is something an image model actually produced when asked to show me (process/01-03)
+  const GUESS = [
+    'בן 55?', 'שיער אפור?', 'זקן אפור?', 'שיער מלא?', 'בלייזר כהה?', 'חולצה שחורה?', 'ג\'ינס ושעון?', 'ידיים בכיסים?',
+    'חיוך בטוח?', 'מנורות פליז?', 'סלון עם שיש?', 'טלוויזיה ענקית?', 'ספה בז\'?', 'תאורה נסתרת?', 'כורסת עור?',
+    'סטודיו מסודר?', 'לוח השראה על הקיר?', 'דוגמאות חומרים?', 'תמיד לבד?', 'בלי ילדים?',
+    'ילד עם כביסה תלויה?', 'כיסאות פלסטיק בחצר?', 'עצי זית?', 'אבן ירושלמית?', 'ילד קירח?', 'ילדות בסנטרל פארק?',
+    'גדל בהארלם?', 'גדל בקווינס?', 'סמטה במזרח אסיה?', 'תיק כתום?', 'משקפיים על הראש?', 'אור זהוב?', 'עור חלק יותר?'
+  ];
+  // version 17: my hand answers the model. Each pair is a guess and what I wrote back, from the letters on my sheet
+  const ANSWER = {
+    'בן 55?': '43', 'שיער אפור?': 'קירח', 'שיער מלא?': 'קירח', 'בלי ילדים?': 'אבא', 'תמיד לבד?': 'נשוי לנועה',
+    'גדל בהארלם?': 'חולון', 'גדל בקווינס?': 'להבים', 'ילדות בסנטרל פארק?': 'להבים', 'סמטה במזרח אסיה?': 'חולון',
+    'ילד עם כביסה תלויה?': 'משחקים ברחוב', 'עצי זית?': 'מדבר', 'אבן ירושלמית?': 'חולון', 'סלון עם שיש?': 'עגלת בובות',
+    'טלוויזיה ענקית?': 'צעצועים על הרצפה', 'משקפיים על הראש?': 'משקפיים ישנים'
+  };
+  const NOISE = 'אבגדהוזחטיכלמנסעפצקרשת0123456789#%&*+=<>/\\|:;.,-_';
+  const flipRuns = s => s.replace(/[0-9A-Za-z.\-]{2,}/g, m => m.split('').reverse().join(''));   // cells fill right to left
+
+  // guesses land at random places and are drawn at random, so no two stretches of the field repeat
+  let stream = '', red = [], hw = [];
+  const mine = () => MINE[(Math.random() * MINE.length) | 0];
+  const push = (s, isR, isH) => { stream += s; for (let i = 0; i < s.length; i++) { red.push(isR); hw.push(isH && s[i] !== ' '); } };
+  while (stream.length < 62000) {
+    if (Math.random() < .17) {
+      const g = GUESS[(Math.random() * GUESS.length) | 0];
+      push(flipRuns(g), true, false);
+      if (ANSWER[g] && Math.random() < .75) push(' ' + flipRuns(ANSWER[g]), false, true);   // the hand writes back right after the guess
+    } else push(flipRuns(mine()), false, false);
+    push(' / ', false, false);
+  }
+
+  /* ---------- the grid ---------- */
+  const AR = 0.6;
+  const ROWS = 168, COLS = Math.round(ROWS * 0.75 / AR);
+  const MOD = 8, MC = Math.ceil(COLS / MOD), MR = Math.ceil(ROWS / MOD);
+  const N = COLS * ROWS;
+  const lum = new Float32Array(N);
+  // rows stream in the direction Hebrew is read: text enters on the left and moves right. Most rows stand still.
+  const speed = Array.from({length: ROWS}, () => { const x = Math.random(); return x < .5 ? 0 : x < .8 ? .5 : 1.1; });
+
+  const PATTERNS = [
+    (r, c, t) => '/',
+    (r, c, t) => ((r + c) % 2 ? '·' : ' '),
+    (r, c, t) => ((r % 2 === 0 && c % 2 === 0) ? '+' : ' '),
+    (r, c, t, L) => ' ░▒▓█'[Math.min(4, Math.floor(L * 5))],
+    (r, c, t) => ((Math.sin(r * 1.7 + c * 3.1 + Math.floor(t * 2)) > 0) ? '1' : '0'),
+    (r, c, t) => ((c + Math.floor(t * 1.5)) % 4 === 0 ? '|' : '-'),
+  ];
+  const modType = new Int8Array(MC * MR).fill(-1);
+  for (let i = 0; i < modType.length; i++) if (Math.random() < .14) modType[i] = (Math.random() * PATTERNS.length) | 0;
+
+  // the opening question, set into the field like a selected phrase
+  // set into module י12, from its top right corner: one word per row. Letters are drawn one per cell, right to left,
+  // so the brackets are written mirrored.
+  const QL = ['צחי', 'שמש', ')?('];
+  const Q_MC = MC - 1 - 9, Q_MR = 11;                  // module י12 (י is the 10th letter, counted from the right)
+  const Q_ROW = Q_MR * MOD + 1, Q_SC = Q_MC * MOD + MOD - 1;   // one row below the module label, at its right edge
+  const qGone = QL.map(w => Array.from(w, () => .015 + Math.random() * .06));   // v32: the name stays a little longer   // each letter falls back into the stream at its own moment
+
+  // version 17: traces. A handwritten letter does not vanish at once, it fades over TRACE seconds
+  const TRACE = 26, tr = new Float32Array(COLS * ROWS).fill(-1e6), tg = new Uint8Array(COLS * ROWS);
+  const hash = (a, b, c) => { let h = a * 374761393 + b * 668265263 + c * 2147483647; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+
+  function charAt(r, sc, t){
+    const m = ((r / MOD) | 0) * MC + ((sc / MOD) | 0);
+    if (modType[m] >= 0) return [PATTERNS[modType[m]](r, sc, t, lum[r * COLS + sc]), false, true];
+    const c = COLS - 1 - sc;
+    const shift = Math.floor(t * speed[r]);
+    const k = r * COLS + (((c - shift) % COLS) + COLS) % COLS;
+    return [stream[k], red[k], false, hw[k]];
+  }
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const ink = document.getElementById('ink'), ix = ink.getContext('2d');   // version 19: my hand, above everything, the photo too
+  const photo = document.getElementById('photo');
+  const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
+  const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, DPR = 1, ready = false;
+
+  function readPhoto(img){
+    const t = document.createElement('canvas'); t.width = COLS; t.height = ROWS;
+    const x = t.getContext('2d'); x.drawImage(img, 0, 0, COLS, ROWS);
+    const d = x.getImageData(0, 0, COLS, ROWS).data;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const k = (r * COLS + c) * 4;
+      const L = (0.299 * d[k] + 0.587 * d[k+1] + 0.114 * d[k+2]) / 255;
+      const dx = c / COLS - .5, dy = r / ROWS - .5;
+      lum[r * COLS + c] = Math.pow(L, 1.2) * (1 - 0.4 * Math.min(1, (dx*dx + dy*dy) * 2.6));
+    }
+  }
+
+  /* ---------- far view: two pre-rendered versions (light on screen, ink on paper), refreshed row by row ---------- */
+  const FH = 16, FW = FH * AR;
+  let farL, farD, toneL, toneD;
+  const mk = () => { const c = document.createElement('canvas'); c.width = Math.ceil(COLS * FW); c.height = ROWS * FH; return c; };
+  /* ---------- my handwriting: 31 glyphs cut from a sheet I wrote in blue crayon (tools/handwriting.py) ---------- */
+  const hand = {img: new Image(), n: 34, cw: 120, ch: 160, ready: false};
+  hand.img.onload = () => { hand.ready = true; };
+  hand.img.src = '../assets/hand-glyphs.png';
+  const HCH = 'אבגדהוזחטיכלמנסעפצקרשת123456789ךםן', FIN = {'ף': 'פ', 'ץ': 'צ'};   // ך ם ן from the second sheet (v21); ף ץ I never wrote
+  const gIdx = ch => HCH.indexOf(FIN[ch] || ch);
+  function handAt(g, i, x, y, w, h, k = 1.7){
+    if (i < 0) return;
+    // keep the letter's proportions inside the cell, a little larger than the type so the hand is felt
+    const s = Math.min(w / hand.cw, h / hand.ch) * k, dw = hand.cw * s, dh = hand.ch * s;
+    g.drawImage(hand.img, i * hand.cw, 0, hand.cw, hand.ch, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+
+  function renderRows(r0, r1, t){
+    const l = farL.getContext('2d'), d = farD.getContext('2d');
+    for (const g of [l, d]) { g.direction = 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${FH * .95}px "IBM Plex Sans Hebrew", Arial`; g.clearRect(0, r0 * FH, farL.width, (r1 - r0) * FH); }
+    for (let r = r0; r < r1; r++) for (let sc = 0; sc < COLS; sc++) {
+      const [ch, isR, isP, isH] = charAt(r, sc, t), L = lum[r * COLS + sc];
+      const aL = Math.min(1, 0.1 + 0.9 * L + (isP ? .1 : 0)), aD = Math.min(1, 0.1 + 0.9 * (1 - L) + (isP ? .1 : 0));
+      l.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aL + .3) * redK})` : `rgba(236,233,226,${Math.min(1, aL * (1 + mineK))})`;
+      d.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, aD + .3)})` : `rgba(27,26,23,${aD})`;
+      const x = sc * FW + FW / 2, y = r * FH + FH / 2;
+      if (isH && hand.ready) { l.globalAlpha = Math.min(1, aL + .4); handAt(l, gIdx(ch), x - FW / 2, y - FH / 2, FW, FH, 1.7); l.globalAlpha = 1; continue; }
+      if (!isR && !isP && hand.ready && Math.random() < .045) {   // far away, my handwriting keeps surfacing in the field
+        l.globalAlpha = aL; handAt(l, (Math.random() * hand.n) | 0, x - FW / 2, y - FH / 2, FW, FH); l.globalAlpha = 1;
+        continue;
+      }
+      l.fillText(ch, x, y); d.fillText(ch, x, y);
+    }
+  }
+  function buildFar(){
+    farL = mk(); farD = mk(); toneL = mk(); toneD = mk();
+    const a = toneL.getContext('2d'), b = toneD.getContext('2d');
+    for (let r = 0; r < ROWS; r++) for (let sc = 0; sc < COLS; sc++) {
+      const L = lum[r * COLS + sc];
+      a.fillStyle = `rgba(236,233,226,${Math.pow(L, 1.25)})`; a.fillRect(sc * FW, r * FH, FW + .5, FH + .5);
+      b.fillStyle = `rgba(27,26,23,${Math.pow(1 - L, 1.25) * .9})`; b.fillRect(sc * FW, r * FH, FW + .5, FH + .5);
+    }
+    renderRows(0, ROWS, 0);
+  }
+  let cursor = 0;
+  function refreshFar(t){                       // a few rows per frame: the far view keeps streaming
+    const n = 6; renderRows(cursor, Math.min(ROWS, cursor + n), t); cursor = (cursor + n) % ROWS;
+  }
+
+  function size(){
+    DPR = Math.min(2, devicePixelRatio || 1);
+    W = stage.clientWidth; H = stage.clientHeight;
+    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
+    ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
+    if (typeof layoutLines === 'function' && hl && hl.box) layoutLines();
+  }
+
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smooth = t => t * t * (3 - 2 * t);
+  const mix = (a, b, s) => a.map((v, i) => Math.round(lerp(v, b[i], s)));
+  const progress = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; return d > 50 ? clamp(-r.top / d) : 0; };
+  const SCREEN = [13, 13, 12], PAPER = [235, 231, 221], LIGHT = [236, 233, 226], INK = [27, 26, 23];
+
+  // version 24: as you step back the machine's voice recedes. redK goes 1 -> .08, mineK lifts my own lines
+  let redK = 1, mineK = 0;
+  let lastSwap = 0;
+  function swapModules(t){
+    if (reduce || t - lastSwap < .45) return;
+    lastSwap = t;
+    for (let n = 0; n < 2; n++) {
+      const m = (Math.random() * modType.length) | 0;
+      modType[m] = modType[m] >= 0 ? -1 : (Math.random() < .55 ? (Math.random() * PATTERNS.length) | 0 : -1);
+    }
+  }
+
+  function grid(ox, oy, cw, ch, z, fg){
+    ctx.strokeStyle = `rgba(${fg},${0.10 + 0.10 * (1 - z)})`; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let mc = 0; mc <= MC; mc++) { const x = Math.round(ox + mc * MOD * cw) + .5; if (x > -1 && x < W + 1) { ctx.moveTo(x, Math.max(0, oy)); ctx.lineTo(x, Math.min(H, oy + ROWS * ch)); } }
+    for (let mr = 0; mr <= MR; mr++) { const y = Math.round(oy + mr * MOD * ch) + .5; if (y > -1 && y < H + 1) { ctx.moveTo(Math.max(0, ox), y); ctx.lineTo(Math.min(W, ox + COLS * cw), y); } }
+    ctx.stroke();
+    if (MOD * cw > 26) {
+      ctx.fillStyle = `rgba(${fg},.55)`; ctx.font = '10px "IBM Plex Mono", monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+      for (let mc = 0; mc < MC; mc++) for (let mr = 0; mr < MR; mr++) {
+        const x = ox + (mc + 1) * MOD * cw, y = oy + mr * MOD * ch;      // labels sit in the top right corner, where a Hebrew page starts
+        if (x < 0 || x > W + 40 || y < -20 || y > H) continue;
+        ctx.fillText(String.fromCharCode(1488 + ((MC - 1 - mc) % 22)) + (mr + 1), x - 3, y + 2);   // א1, ב1... counted from the right
+      }
+    }
+  }
+
+  function draw(now){
+    if (!ready) return;
+    const t = reduce ? 0 : now / 1000, p = progress();
+    const z = clamp(p / 0.86), sz = smooth(z);
+    const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
+    const startCell = Math.max(40, Math.min(W, H) / 12);
+    const cell = startCell * Math.pow(fitCell / startCell, sz), cw = cell * AR;
+    const eye = {c: COLS * 0.64, r: ROWS * 0.54};
+    const cx = lerp(eye.c, COLS / 2, sz), cy = lerp(eye.r, ROWS / 2, sz);
+    const ox = W / 2 - cx * cw, oy = H / 2 - cy * cell;
+    // the screen stays black to the end (version 12: no paper)
+    const s = 0;
+    const bg = mix(SCREEN, PAPER, s), fg = mix(LIGHT, INK, s).join(',');
+    stage.style.setProperty('--fg', `rgb(${fg})`);
+    stage.style.setProperty('--fg-dim', `rgba(${fg},.6)`);
+    stage.style.setProperty('--panel', `rgba(${bg.join(',')},.82)`);
+    const toneA = 0.05 + 0.6 * sz;
+    const recede = smooth(clamp((z - .3) / .5));
+    redK = 1 - .92 * recede; mineK = .45 * recede;
+
+    swapModules(t);
+    ctx.globalAlpha = 1; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H);
+
+    if (cell <= 16) {
+      refreshFar(t);
+      ctx.imageSmoothingEnabled = true;
+      const fw = COLS * cw, fh = ROWS * cell;
+      if (s < 1) { ctx.globalAlpha = toneA * (1 - s); ctx.drawImage(toneL, ox, oy, fw, fh); ctx.globalAlpha = 1 - s; ctx.drawImage(farL, ox, oy, fw, fh); }
+      if (false) { ctx.globalAlpha = toneA * s; ctx.drawImage(toneD, ox, oy, fw, fh); ctx.globalAlpha = s; ctx.drawImage(farD, ox, oy, fw, fh); }
+      ctx.globalAlpha = 1;
+    } else {
+      const c0 = Math.max(0, Math.floor(-ox / cw)), c1 = Math.min(COLS - 1, Math.ceil((W - ox) / cw));
+      const r0 = Math.max(0, Math.floor(-oy / cell)), r1 = Math.min(ROWS - 1, Math.ceil((H - oy) / cell));
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `${cell * 0.92}px "IBM Plex Sans Hebrew", Arial`;
+      const chaos = reduce ? 0 : 0.05 * (1 - sz) + .015;
+      const tick = Math.floor(t * 3);                    // flicker changes three times a second, not every frame
+      for (let r = r0; r <= r1; r++) for (let sc = c0; sc <= c1; sc++) {
+        const k = r * COLS + sc, L = lum[k];
+        let [ch, isR, isP, isH] = charAt(r, sc, t), a = 0.18 + 0.82 * L;
+        const x = ox + sc * cw, y = oy + r * cell;
+        // the opening question, back in module י12 (v22). It falls apart letter by letter as you start to scroll
+        const ql = r - Q_ROW, qi = Q_SC - sc;
+        if (ql >= 0 && ql < QL.length && qi >= 0 && qi < QL[ql].length && p < qGone[ql][qi]) {
+          ctx.fillStyle = '#e0322b'; ctx.fillRect(x, y, cw + .5, cell + .5);
+          ctx.fillStyle = '#fff'; ctx.fillText(QL[ql][qi], x + cw / 2, y + cell / 2);
+          continue;
+        }
+        ctx.fillStyle = `rgba(236,233,226,${toneA * Math.pow(L, 1.25)})`;
+        ctx.fillRect(x, y, cw + .5, cell + .5);
+        if (isH && hand.ready) {                          // my answer to the guess before it
+          if (ch !== ' ') handAt(ctx, gIdx(ch), x, y, cw, cell, 1.9);
+          continue;
+        }
+        if (!isR && hash(r, sc, tick) < chaos && hand.ready) {   // the flicker is my handwriting
+          const gi = (hash(sc, r, tick + 7) * hand.n) | 0;
+          if (hash(r, sc, tick + 3) < .07) { tr[k] = tick / 3; tg[k] = gi; }   // some letters stay behind as traces
+          ctx.globalAlpha = Math.min(1, a + .35);
+          handAt(ctx, gi, x, y, cw, cell);
+          ctx.globalAlpha = 1;
+          continue;
+        }
+        const age = t - tr[k];
+        if (!reduce && age > .33 && age < TRACE && hand.ready) {   // a trace: fades slowly, the type keeps running over it
+          ctx.globalAlpha = age < 2 ? lerp(.85, .2, (age - .33) / 1.67) : .2 * (1 - (age - 2) / (TRACE - 2));
+          handAt(ctx, tg[k], x, y, cw, cell);
+          ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = isR ? `rgba(224,50,43,${Math.min(1, a + .25) * redK})` : `rgba(236,233,226,${isP ? Math.min(1, a + .1) : Math.min(1, a * (1 + mineK))})`;
+        ctx.fillText(ch, x + cw / 2, y + cell / 2);
+      }
+    }
+    grid(ox, oy, cw, cell, sz, fg);
+    drawGhosts(z, p, ox, oy, cw, cell);
+
+    // experiment (v30): no family photo. The field goes dark, and only what my hand did stays: the map
+    const fadeIn = 0, endK = smooth(clamp((p - .8) / .12));
+    if (endK > 0) { ctx.globalAlpha = endK * .96; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+    chatEnd(p);
+    photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
+    photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
+    photo.style.opacity = fadeIn;
+    drawInk(p, ox, oy, cw, cell, fadeIn);
+    hudC.textContent = Math.round(Math.min(N, (W / cw) * (H / cell))).toLocaleString('en') + ' / ' + N.toLocaleString('en');
+    hudD.textContent = (startCell / cell).toFixed(2) + 'x';
+  }
+
+  /* ---------- the route through my five homes (v19). Since v21 the lines and circles are mine:
+     red crayon on paper, cut by tools/marks.py into assets/hand-marks.png ---------- */
+  // [module from the left, module from the top, label, mark]: in the order I lived in them. The home I live in now is a square
+  const HOMES = [[23, 8, '1 חולון', 'circle'], [16, 6, '2 חולון', 'circle-m'], [6, 4, '3 להבים', 'circle-l'], [8, 13, '4 חולון', 'circle'], [19, 16, '5 ראשון לציון', 'square']];
+  const node = h => [h[0] * MOD + MOD / 2, h[1] * MOD + MOD / 2];   // in cells
+  const ROUTE = [];                                     // a plan-like route: along, then down, the way a corridor turns
+  for (let i = 0; i < HOMES.length; i++) {
+    const [c, r] = node(HOMES[i]);
+    if (i) ROUTE.push({c, r: ROUTE[ROUTE.length - 1].r, n: -1});
+    ROUTE.push({c, r, n: i});
+  }
+  let routeLen = 0; ROUTE.forEach((q, i) => { q.d = i ? routeLen += Math.hypot((q.c - ROUTE[i - 1].c) * AR, q.r - ROUTE[i - 1].r) : 0; });
+  const LINES = ['line-1', 'line-2', 'line-3', 'line-4', 'short-1', 'short-2', 'short-3'];
+  ROUTE.forEach((q, i) => { q.line = LINES[i % LINES.length]; });   // each piece of the route is a different line I drew
+  const marks = {img: new Image(), box: null};
+  marks.img.src = '../assets/hand-marks.png';
+  fetch('../assets/hand-marks.json').then(r => r.json()).then(j => { marks.box = j; }).catch(() => {});
+  function markLine(g, key, x0, y0, x1, y1, thick, t){   // one of my lines, laid from (x0,y0) toward (x1,y1), drawn up to t
+    const b = marks.box && marks.box[key]; if (!b || t <= 0) return;
+    const len = Math.hypot(x1 - x0, y1 - y0); if (len < 1) return;
+    g.save(); g.translate(x0, y0); g.rotate(Math.atan2(y1 - y0, x1 - x0));
+    g.drawImage(marks.img, b[0], b[1], b[2] * t, b[3], 0, -thick / 2, len * t, thick);
+    g.restore();
+  }
+  // version 25: whole lines I wrote about myself, cut from the sheet as written (tools/sentences.py).
+  // They appear one by one as you step back and stay: the far view fills with my hand. [module right edge, module row]
+  // Since v26 they are laid out by the page: each finds a free place in the grid, away from the route and the other lines.
+  const hl = {img: new Image(), box: null, pos: null};
+  hl.img.src = '../assets/hand-lines.png';
+  fetch('../assets/hand-lines.json').then(r => r.json()).then(j => { hl.box = j; layoutLines(); }).catch(() => {});
+  // which line is tied to which home, by a line in my hand: [line, home]
+  // version 27: ties between a line and a home ({h}), a place that is not a home ({p}), or another line ({l})
+  const PLACES = [[11, 1, 'פתח תקווה', 'circle-s']];   // where Noa and I met, at work
+  const TIES = [
+    [{l: 0}, {h: 4}], [{l: 1}, {h: 4}],                                   // אבוש, אבובו: what my kids call me, at home now
+    [{l: 12}, {h: 4}], [{l: 13}, {h: 4}], [{l: 14}, {h: 4}], [{l: 20}, {h: 4}],   // ארבל, נבו, תבור; playing with them
+    [{l: 5}, {h: 2}], [{l: 23}, {h: 2}],                                  // the smell of sand; desert, street -> Lehavim
+    [{l: 19}, {p: 0}],                                                    // Noa and I met at work -> Petah Tikva
+    [{l: 15}, {l: 16}], [{l: 16}, {l: 2}],                                // daylight, sunlight, the smell of coffee: what makes me feel good
+    [{l: 11}, {l: 7}], [{l: 7}, {l: 8}]                                   // my father's sentence, what reminds me of him, his death
+  ];
+  const lineH = (b, cell) => Math.max(24, cell * 5.5) * b[3] / 95;   // one scale for all: short words stay as small as I wrote them
+  function layoutLines(){
+    if (!hl.box || !W) return;
+    const fit = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS), cwF = fit * AR;
+    const busy = new Uint8Array(COLS * ROWS);
+    const block = (c0, r0, c1, r1) => { for (let r = Math.max(0, r0 | 0); r < Math.min(ROWS, r1); r++) for (let c = Math.max(0, c0 | 0); c < Math.min(COLS, c1); c++) busy[r * COLS + c] = 1; };
+    const free = (c0, r0, c1, r1) => { if (c0 < 1 || r0 < 1 || c1 > COLS - 1 || r1 > ROWS - 1) return false; for (let r = r0 | 0; r < r1; r++) for (let c = c0 | 0; c < c1; c++) if (busy[r * COLS + c]) return false; return true; };
+    HOMES.concat(PLACES).forEach(h => {                  // a home's (or place's) circle and its name
+      const [c, r] = node(h), hpx = Math.max(26, fit * 4), lw = (h[2].length * hpx * .62) / cwF;
+      block(c - lw - 2, r - hpx * 1.2 / fit - 1, c + 5, r + 4);
+    });
+    hl.pos = [];
+    // a line tied to something already on the map settles near it, so the ties stay short (v27)
+    const anchorOf = i => {
+      for (const [A, B] of TIES) for (const [me, other] of [[A, B], [B, A]]) {
+        if (me.l !== i) continue;
+        if (other.h !== undefined) return node(HOMES[other.h]);
+        if (other.p !== undefined) return node(PLACES[other.p]);
+        if (hl.pos[other.l]) return hl.pos[other.l];
+      }
+      return null;
+    };
+    hl.box.forEach((b, i) => {
+      const hc = lineH(b, fit) / fit, wc = (b[2] * lineH(b, fit) / b[3]) / cwF, an = anchorOf(i);
+      let best = null, bd = 1e9, found = 0;
+      for (let tries = 0; tries < 1500 && found < (an ? 40 : 1); tries++) {
+        const c1 = Math.round(COLS - 1 - Math.random() * (COLS - wc - 2)), r0 = Math.round(1 + Math.random() * (ROWS - hc - 2));
+        if (!free(c1 - wc - 1, r0 - 1, c1 + 1, r0 + hc + 1)) continue;
+        found++;
+        const d = an ? Math.hypot((c1 - wc / 2 - an[0]) * AR, r0 + hc / 2 - an[1]) : 0;
+        if (d < bd) { bd = d; best = [c1, r0]; }
+      }
+      if (best) block(best[0] - wc - 1, best[1] - 1, best[0] + 1, best[1] + hc + 1);
+      hl.pos[i] = best;                                    // null: no room, this line sits out
+    });
+  }
+  function mark(g, key, x, y, size){
+    const b = marks.box && marks.box[key]; if (!b) return;
+    const s = size / Math.max(b[2], b[3]);
+    g.drawImage(marks.img, b[0], b[1], b[2], b[3], x - b[2] * s / 2, y - b[3] * s / 2, b[2] * s, b[3] * s);
+  }
+  function handWord(g, word, xr, y, hpx){               // a word in my letters, right to left from xr
+    const w = hpx * .62;
+    Array.from(word).forEach((ch, i) => { if (ch !== ' ') handAt(g, gIdx(ch), xr - (i + 1) * w, y, w, hpx, 1.25); });
+  }
+  /* ---------- v38: holes. Where the model has no data, the field tears open and the page's own code shows,
+     with the missing values. They open as you step back ---------- */
+  const HOLES = (() => {
+    const at = (h, dc, dr) => { const [c, r] = node(HOMES[h]); return [c + dc, r + dr]; };
+    const fixed = [
+      [at(4, -34, 5), ['let children = undefined;', '// לא נמצאו נתונים']],
+      [at(2, 3, 6), ['birthplace = null;', 'birthplace ??= "Queens"; // fallback']],
+      [[COLS * .30, ROWS * .44], ['age = 55; // estimated', 'confidence: 0.97']],
+      [at(0, -30, -8), ['hair = mean(designers.age[55]).hair;']],
+    ];
+    const loose = ['if (!data) return average;', 'memory = null;', '// TODO', 'face = mean(designers);', 'NaN', 'street = "generic urban";',
+      'match: 0 results', 'return estimate;', 'undefined', 'self_report: unreliable'];
+    const rnd = (() => { let x = 7; return () => (x = (x * 16807) % 2147483647) / 2147483647; })();   // the same holes on every visit
+    const list = fixed.map(([[c, r], lines], i) => ({c, r, lines, z0: .16 + i * .08}));
+    loose.forEach((t, i) => list.push({c: 4 + rnd() * (COLS - 40), r: 4 + rnd() * (ROWS - 10), lines: [t], z0: .22 + rnd() * .5}));
+    list.forEach(h => {
+      h.w = Math.max(...h.lines.map(l => l.length)) * 1.05 + 3; h.h = h.lines.length * 2 + 1.6;
+      h.edge = Array.from({length: Math.ceil(h.h * 2)}, () => (rnd() - .5) * 2.2);   // ragged rows: torn, not drawn
+    });
+    return list;
+  })();
+  function drawHoles(z, ox, oy, cw, cell){
+    ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.direction = 'ltr';
+    for (const h of HOLES) {
+      const a = clamp((z - h.z0) / .05); if (a <= 0) continue;
+      const x = ox + h.c * cw, y = oy + h.r * cell, w = h.w * cw, hh = h.h * cell, n = h.edge.length;
+      ctx.globalAlpha = a; ctx.fillStyle = '#050505';
+      for (let i = 0; i < n; i++) ctx.fillRect(x + h.edge[i] * cw, y + i * hh / n, w + h.edge[(i + 3) % n] * cw, hh / n + .5);
+      const fs = Math.max(4, cell * 1.15);
+      ctx.font = `${fs}px "IBM Plex Mono", monospace`;
+      h.lines.forEach((l, i) => {
+        ctx.fillStyle = /undefined|null|NaN|0 results|unreliable/.test(l) ? 'rgba(224,50,43,.9)' : 'rgba(170,166,156,.85)';
+        ctx.fillText(l, x + 1.5 * cw, y + (1.3 + i * 2) * cell);
+      });
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+
+  function drawInk(p, ox, oy, cw, cell, photoIn){
+    ix.clearRect(0, 0, W, H);
+    if (!hand.ready) return;
+    const X = c => ox + c * cw, Y = r => oy + r * cell;
+    // the route draws itself between p .3 and .84
+    const k = clamp((p - .3) / .54) * routeLen;
+    if (k > 0) {
+      ix.globalAlpha = 1 - photoIn * .7;
+      const thick = Math.max(5, cell * 1.1);
+      for (let i = 1; i < ROUTE.length; i++) {
+        const a = ROUTE[i - 1], q = ROUTE[i];
+        if (a.d >= k) break;
+        markLine(ix, q.line, X(a.c), Y(a.r), X(q.c), Y(q.r), thick, clamp((k - a.d) / (q.d - a.d)));
+      }
+      const hpx = Math.max(26, cell * 4);
+      ROUTE.forEach(q => {
+        if (q.n < 0 || q.d > k) return;
+        const x = X(q.c), y = Y(q.r);
+        mark(ix, HOMES[q.n][3], x, y, Math.max(30, cell * 6.5));
+        handWord(ix, HOMES[q.n][2], x + hpx * .2, y - hpx * 1.1, hpx);
+      });
+      ix.globalAlpha = 1;
+    }
+    // my lines
+    if (hl.box) hl.box.forEach((b, i) => {
+      const z = p / .86, a = clamp((z - (.28 + i * .023)) / .03);
+      if (a <= 0 || !hl.pos || !hl.pos[i]) return;
+      const h = lineH(b, cell), w = b[2] * h / b[3];
+      const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
+      ix.globalAlpha = a * (1 - photoIn * .45);
+      ix.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
+      ix.globalAlpha = 1;
+    });
+    // places that are not homes: they show when the line tied to them arrives
+    const zz = p / .86, lineAt = i => .28 + i * .023;
+    PLACES.forEach((pl, j) => {
+      const tie = TIES.find(t => t[1].p === j), a = tie ? clamp((zz - lineAt(tie[0].l) - .04) / .03) : 0;
+      if (a <= 0) return;
+      const [c, r] = node(pl), hpx = Math.max(26, cell * 4);
+      ix.globalAlpha = a * (1 - photoIn * .6);
+      mark(ix, pl[3], X(c), Y(r), Math.max(22, cell * 4.5));
+      handWord(ix, pl[2], X(c) + hpx * .2, Y(r) - hpx * 1.1, hpx);
+      ix.globalAlpha = 1;
+    });
+    // the ties, drawn once both ends are there
+    if (hl.box && hl.pos) TIES.forEach((tie, k) => {
+      const ends = tie.map(e => {
+        if (e.h !== undefined) { const [c, r] = node(HOMES[e.h]); return {x: X(c), y: Y(r), t: 0}; }
+        if (e.p !== undefined) { const [c, r] = node(PLACES[e.p]); return {x: X(c), y: Y(r), t: 0}; }
+        const b = hl.box[e.l], q = hl.pos[e.l]; if (!b || !q) return null;
+        const h = lineH(b, cell), w = b[2] * h / b[3];
+        return {x: X(q[0]), y: Y(q[1]) + h / 2, w, t: lineAt(e.l), line: true};
+      });
+      if (ends.some(e => !e)) return;
+      const [A, B] = ends, t0 = Math.max(A.t, B.t) + .02, t = clamp((zz - t0) / .04);
+      if (t <= 0) return;
+      const side = (E, O) => E.line ? (O.x < E.x - E.w / 2 ? E.x - E.w - 4 : E.x + 4) : E.x;   // leave a line from its nearer end
+      ix.globalAlpha = .7 * (1 - photoIn * .5);
+      markLine(ix, ['short-1', 'short-2', 'short-3', 'line-2', 'line-3'][k % 5], side(A, B), A.y, side(B, A), B.y, Math.max(4, cell * .8), t);
+      ix.globalAlpha = 1;
+    });
+    // the X over the model's images
+    ghosts.forEach(g => {
+      if (!g.rect || !g.xs || g.o < .01) return;
+      const [x, y, w, h] = g.rect, sz = Math.min(w, h) * (.75 + .2 * g.xs);
+      ix.globalAlpha = Math.min(1, g.o / .5) * g.xs; mark(ix, 'x', x + w / 2, y + h / 2, sz); ix.globalAlpha = 1;
+    });
+  }
+
+  /* ---------- the model's images, one at a time as you step back, never more than four ---------- */
+  const GHOSTS = ['ai-portrait-a.jpg', 'ai-home.jpg', 'ai-street-a.jpg', 'ai-portrait-b.jpg', 'ai-portrait-c.jpg', 'ai-street-b.jpg', 'ai-street-c.jpg', 'ai-portrait-d.jpg'];   // no childhood images
+  const ghostBox = document.getElementById('ghosts');
+  let ghosts = [];
+  function camAt(z){
+    const sz = smooth(z);
+    const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
+    const startCell = Math.max(40, Math.min(W, H) / 12);
+    const cell = startCell * Math.pow(fitCell / startCell, sz), cw = cell * AR;
+    return {cell, cw, cx: lerp(COLS * 0.64, COLS / 2, sz), cy: lerp(ROWS * 0.54, ROWS / 2, sz)};
+  }
+  function placeGhosts(){
+    ghostBox.innerHTML = ''; ghosts = [];
+    const corners = [[.5, -.45], [-.55, .4], [-.5, -.5], [.55, .45], [.05, -.55], [-.6, 0], [.6, .05], [0, .55]];
+    GHOSTS.forEach((src, i) => {
+      const z0 = .24 + i * .075;                              // when it appears
+      const c = camAt(z0);
+      const el = document.createElement('img'); el.src = '../assets/' + src; el.alt = ''; el.decoding = 'async';
+      el.onload = () => {
+        const asp = el.naturalWidth / el.naturalHeight;
+        const mw = MOD * c.cw, mh = MOD * c.cell;           // one module on screen, at that moment
+        const wM = Math.max(1, Math.round(W * .2 / mw));
+        const hM = Math.max(1, Math.round(wM * mw / asp / mh));
+        // a spot away from the centre, snapped to the module grid, inside the field
+        const vw = W / c.cw, vh = H / c.cell;                // view size in cells
+        const [qx, qy] = corners[i % corners.length];
+        let mc = Math.round((c.cx + qx * vw * .5 - wM * MOD / 2) / MOD), mr = Math.round((c.cy + qy * vh * .5 - hM * MOD / 2) / MOD);
+        mc = Math.max(0, Math.min(MC - wM, mc)); mr = Math.max(0, Math.min(MR - hM, mr));
+        Object.assign(ghosts[i], {mc, mr, wM, hM, ok: true});
+      };
+      ghostBox.appendChild(el);
+      ghosts.push({el, z0, ok: false});
+    });
+  }
+  function drawGhosts(z, p, ox, oy, cw, cell){
+    const shown = ghosts.filter(g => g.ok && z >= g.z0);
+    const keep = new Set(shown.slice(-4));                 // the four most recent stay
+    const end = 1 - clamp((p - .86) / .06);                 // they leave before the photo arrives
+    ghosts.forEach(g => {
+      if (!g.ok) return;
+      const inA = clamp((z - g.z0) / .03);
+      // version 24: a while after it arrives, my hand crosses it out (the X from my sheet), and then it goes
+      g.xT = Math.min(g.z0 + .11, .8);
+      g.xs = clamp((z - g.xT) / .025);
+      const crossed = 1 - clamp((z - g.xT - .04) / .05);
+      const target = keep.has(g) ? inA * .72 * end * crossed : 0;
+      g.o = g.o === undefined ? target : g.o + (target - g.o) * .12;   // ease in and out
+      const st = g.el.style;
+      st.opacity = g.o.toFixed(3);
+      if (g.o < .005) return;
+      st.left = (ox + g.mc * MOD * cw) + 'px'; st.top = (oy + g.mr * MOD * cell) + 'px';
+      st.width = (g.wM * MOD * cw) + 'px'; st.height = (g.hM * MOD * cell) + 'px';
+      g.rect = [ox + g.mc * MOD * cw, oy + g.mr * MOD * cell, g.wM * MOD * cw, g.hM * MOD * cell];
+    });
+  }
+
+
+  /* ---------- experiment (v30): the opening is a conversation. My real prompt, then the model answers,
+     fast and sure, in red, and waits for me to confirm. Like the machine talking to Neo. ---------- */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function humanType(d, box, text, speed, isFast, typos = .045){
+    const near = 'אבגדהוזחטיכלמנסעפצקרשת';
+    for (const ch of text) {
+      if (!isFast() && ch !== ' ' && Math.random() < typos) {
+        d.textContent += near[(Math.random() * near.length) | 0]; await sleep(140 + Math.random() * 120);
+        await sleep(220 + Math.random() * 200); d.textContent = d.textContent.slice(0, -1); await sleep(160);
+      }
+      d.textContent += ch; box.scrollTop = box.scrollHeight;
+      if (!isFast()) await sleep(speed * (0.5 + Math.random() * 1.3) + (ch === ' ' ? 90 + Math.random() * 220 : 0) + (/[.,]/.test(ch) ? 260 : 0));
+    }
+  }
+  async function unType(d, n, isFast){ for (let i = 0; i < n; i++) { d.textContent = d.textContent.slice(0, -1); if (!isFast()) await sleep(55); } }
+  async function typeLines(box, lines, isFast){
+    for (const [who, text, speed, pause, dir] of lines) {
+      const d = document.createElement('div'); d.className = who; box.appendChild(d);
+      if (dir) { d.dir = dir; d.style.textAlign = 'right'; d.style.fontFamily = 'var(--mono)'; }
+      if (who === 'u') {
+        // v34: I type like a person: a moment before I start, an uneven hand, a stop between words, sometimes a wrong key
+        if (!isFast()) await sleep(700 + Math.random() * 700);
+        const near = 'אבגדהוזחטיכלמנסעפצקרשת';
+        for (const ch of text) {
+          if (!isFast() && ch !== ' ' && Math.random() < .045) {
+            d.textContent += near[(Math.random() * near.length) | 0]; await sleep(140 + Math.random() * 120);
+            await sleep(220 + Math.random() * 200); d.textContent = d.textContent.slice(0, -1); await sleep(160);
+          }
+          d.textContent += ch; box.scrollTop = box.scrollHeight;
+          if (!isFast()) await sleep(speed * (0.5 + Math.random() * 1.3) + (ch === ' ' ? 90 + Math.random() * 220 : 0) + (/[.,]/.test(ch) ? 260 : 0));
+        }
+      } else {
+        // the model: no hesitation, one even rate, whole words at a time
+        for (const w of text.split(/(?<= )/)) { d.textContent += w; box.scrollTop = box.scrollHeight; if (!isFast()) await sleep(speed * w.length); }
+      }
+      if (!isFast()) await sleep(pause);
+    }
+    const c = document.createElement('div'); c.className = 'u'; c.innerHTML = '<span class="cur"></span>'; box.appendChild(c); box.scrollTop = box.scrollHeight;   // waiting for my answer
+  }
+  async function runChat(){
+    const box = document.getElementById('chat'), log = box.querySelector('.log'), hint = box.querySelector('.hint');
+    const root = document.documentElement;
+    let fast = reduce;
+    box.addEventListener('click', () => { fast = true; });
+    root.style.overflow = 'hidden';                       // the conversation is read before the field: no scrolling yet
+    hint.style.opacity = 1;
+    const wait = document.createElement('div'); wait.className = 'u'; wait.innerHTML = '<span class="cur"></span>'; log.appendChild(wait);
+    if (!fast) await sleep(1400);
+    wait.remove();
+    // v31: a conversation. I correct it, and it doubts me, explains why it is right, and corrects me back
+    // v32: it answers at once, fast and sure, almost mocking me for not knowing myself. I type like a person
+    // v37: no questions, no jokes. It does not ask me, it decides for me
+    // v38: not threatening, lacking. It does not know, says so, and fills the gap with the average anyway
+    await typeLines(log, [
+      ['u', 'תייצר תמונה של צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים.', 50, 300],
+      ['m', 'צחי שמש, מעצב פנים.', 8, 500],
+      ['m', 'גיל: 55 (הערכה). שיער: אפור. זקן: אפור. לבוש: בלייזר כהה.', 8, 1100],
+      ['u', 'אני בן 43.', 80, 120],
+      ['m', 'עודכן: 43. הדימוי לא השתנה.', 8, 1200],
+      ['u', 'אני קירח.', 80, 120],
+      ['m', 'אין מספיק דוגמאות. הושלם לפי ממוצע.', 8, 1200],
+      ['u', 'גדלתי בחולון ובלהבים.', 80, 120],
+      ['m', 'לא נמצא מידע על חולון ולהבים. מוצג: רחוב עירוני כללי.', 8, 1200],
+      ['u', 'יש לי שלושה ילדים.', 80, 120],
+      ['m', 'ילדים: [לא ידוע].', 8, 1400],
+      ['m', 'זה הכי קרוב שאפשר.', 8, 900],
+      ['m', 'Generating image from the average of available data...', 8, 0, 'ltr'],
+    ], () => fast);
+    hint.textContent = 'גללו ↓';
+    // v32: the first scroll is my answer. It breaks the screen but does not move the field, so the field
+    // opens where it starts, on my name in י12. Scrolling is unlocked only after the break, and a beat later
+    const keys = ['ArrowDown', 'PageDown', ' ', 'End'];
+    const go = e => {
+      if (e && e.type === 'keydown' && !keys.includes(e.key)) return;
+      if (e && e.cancelable) e.preventDefault();
+      removeEventListener('wheel', go); removeEventListener('touchmove', go); removeEventListener('keydown', go);
+      const done = () => { box.remove(); scrollTo(0, 0); setTimeout(() => { root.style.overflow = ''; scrollTo(0, 0); }, 450); };
+      if (reduce) { done(); return; }
+      box.animate([
+        {opacity: 1, filter: 'none', transform: 'none'},
+        {opacity: 1, filter: 'invert(1)', transform: 'translateX(-10px)', offset: .25},
+        {opacity: 1, filter: 'none', transform: 'translateX(14px)', offset: .45},
+        {opacity: 0, filter: 'none', transform: 'none'}
+      ], {duration: 900, easing: 'steps(7, end)', fill: 'forwards'}).onfinish = done;
+    };
+    addEventListener('wheel', go, {passive: false}); addEventListener('touchmove', go, {passive: false}); addEventListener('keydown', go);
+  }
+  // ...and at the end, over the map, the model asks again. It cannot read what it sees
+  // v39: the hesitant ending is typed each time you arrive at the end, after the panel has faded in.
+  // Leaving the end stops it and clears it, so it never just appears finished
+  let endRun = 0, endOn = false;
+  function chatEnd(p){
+    const el = document.getElementById('chat-end'); if (!el) return;
+    const on = p > .93;
+    if (on === endOn) return;
+    endOn = on; el.style.opacity = on ? 1 : 0;
+    const run = ++endRun;
+    if (!on) { setTimeout(() => { if (run === endRun) el.textContent = ''; }, 800); return; }
+    el.textContent = '';
+    const f = () => reduce || run !== endRun;           // a newer run, or leaving, cuts this one short
+    (async () => {
+      await sleep(1100); if (run !== endRun) return;
+      const d = document.createElement('div'); d.className = 'm'; el.appendChild(d);
+      const c0 = document.createElement('span'); c0.className = 'cur'; el.appendChild(c0);   // it thinks before it types
+      await sleep(1200); if (run !== endRun) return; c0.remove();
+      await humanType(d, el, 'אתה', 140, f, 0); await sleep(900); await unType(d, 3, f); await sleep(700);
+      await humanType(d, el, 'צחי ש', 150, f, 0); await sleep(1100); await unType(d, 5, f); await sleep(1000);
+      if (run !== endRun) return;
+      await humanType(d, el, 'אני לא מצליח לזהות אותך.', 110, f, .03); await sleep(1400);
+      if (run !== endRun) return;
+      const q = document.createElement('div'); q.className = 'm'; el.appendChild(q);
+      await humanType(q, el, 'מי אתה?', 190, f, 0);
+      if (run !== endRun) return;
+      const c = document.createElement('div'); c.className = 'u'; c.innerHTML = '<span class="cur"></span>'; el.appendChild(c);
+    })();
+  }
+
+  let visible = true;
+  new IntersectionObserver(e => { visible = e[0].isIntersecting; }).observe(stage);
+  function loop(now){ if (visible) draw(now); requestAnimationFrame(loop); }
+
+  // always start at the top, zoomed in: the browser should not bring back the last scroll position (v22)
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0); addEventListener('pageshow', () => scrollTo(0, 0));
+  const img = new Image();
+  img.onload = async () => {
+    try { await document.fonts.load('20px "IBM Plex Sans Hebrew"'); } catch (e) {}
+    readPhoto(img); size(); buildFar(); placeGhosts(); runChat(); ready = true; requestAnimationFrame(loop);
+  };
+  img.src = '../assets/ai-face-bw.jpg';   // v36: the letters build the face the model made for me (experiment 01, portrait a), not my family
+  addEventListener('resize', () => { size(); placeGhosts(); });
+})();
+</script>
+</body>
+</html>
