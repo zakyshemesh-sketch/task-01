@@ -414,14 +414,20 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   fetch('assets/hand-lines.json').then(r => r.json()).then(j => { hl.box = j; layoutLines(); }).catch(() => {});
   // which line is tied to which home, by a line in my hand: [line, home]
   // version 27: ties between a line and a home ({h}), a place that is not a home ({p}), or another line ({l})
-  const PLACES = [[11, 1, 'פתח תקווה', 'circle-s']];   // where Noa and I met, at work
+  const PLACES = [[11, 1, 'פתח תקווה', 'circle-s'], [11, 19, 'המכללה למנהל', 'circle-s']];   // where Noa and I met, at work; where I became a designer (v41)
   const TIES = [
     [{l: 0}, {h: 4}], [{l: 1}, {h: 4}],                                   // אבוש, אבובו: what my kids call me, at home now
     [{l: 12}, {h: 4}], [{l: 13}, {h: 4}], [{l: 14}, {h: 4}], [{l: 20}, {h: 4}],   // ארבל, נבו, תבור; playing with them
     [{l: 5}, {h: 2}], [{l: 23}, {h: 2}],                                  // the smell of sand; desert, street -> Lehavim
     [{l: 19}, {p: 0}],                                                    // Noa and I met at work -> Petah Tikva
     [{l: 15}, {l: 16}], [{l: 16}, {l: 2}],                                // daylight, sunlight, the smell of coffee: what makes me feel good
-    [{l: 11}, {l: 7}], [{l: 7}, {l: 8}]                                   // my father's sentence, what reminds me of him, his death
+    [{l: 11}, {l: 7}], [{l: 7}, {l: 8}],                                  // my father's sentence, what reminds me of him, his death
+    // v41, the answers sheet: what each home taught me, what is here from my father and from Noa, what the kids got, where I became a designer
+    [{l: 24}, {h: 0}], [{l: 25}, {h: 1}], [{l: 26}, {h: 3}],              // 13-15: the street's noise; friendships; the third home
+    [{l: 27}, {l: 7}], [{l: 27}, {h: 4}],                                 // 16-17: a watch, from my father, at home now
+    [{l: 28}, {l: 19}], [{l: 28}, {h: 4}],                                // 18-19: order and cleanliness, from Noa, at home now
+    [{l: 29}, {l: 20}],                                                   // 20: what the kids got from me
+    [{l: 30}, {p: 1}], [{l: 30}, {l: 11}]                                 // 21-22: the College of Management, but the basics from my father
   ];
   const lineH = (b, cell) => Math.max(24, cell * 5.5) * b[3] / 95;   // one scale for all: short words stay as small as I wrote them
   function layoutLines(){
@@ -508,8 +514,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
   /* ---------- v40: at the end the map is drawn again as a sequence, in the order of my life:
      the route home by home, and each tie in its turn. A sequence of contexts, not a rendered average ---------- */
-  const SEQ = [{r: 1}, {r: 2}, {t: 6}, {t: 7}, {r: 3}, {r: 4}, {t: 8}, {t: 11}, {t: 12}, {t: 9}, {t: 10}, {t: 0}, {t: 1}, {t: 2}, {t: 3}, {t: 4}, {t: 5}];
-  const STEP = .62, SEQ_P = .82;
+  const SEQ = [{t: 13}, {r: 1}, {t: 14}, {r: 2}, {t: 6}, {t: 7}, {r: 3}, {t: 15}, {r: 4}, {t: 21}, {t: 22}, {t: 8},
+    {t: 11}, {t: 12}, {t: 16}, {t: 17}, {t: 9}, {t: 10}, {t: 18}, {t: 19}, {t: 0}, {t: 1}, {t: 2}, {t: 3}, {t: 4}, {t: 5}, {t: 20}];
+  const STEP = .42, SEQ_P = .82;
   let seqStart = null;
   const seqT = i => seqStart === null ? 1 : clamp(((performance.now() - seqStart) / 1000 - i * STEP) / (STEP * .9));
   const seqDone = () => seqStart !== null && (performance.now() - seqStart) / 1000 > SEQ.length * STEP + .4;
@@ -545,7 +552,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     }
     // my lines
     if (hl.box) hl.box.forEach((b, i) => {
-      const z = p / .86, a = clamp((z - (.28 + i * .023)) / .03);
+      const z = p / .86, a = clamp((z - (.28 + i * .019)) / .03);
       if (a <= 0 || !hl.pos || !hl.pos[i]) return;
       const h = lineH(b, cell), w = b[2] * h / b[3];
       const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
@@ -554,7 +561,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       ix.globalAlpha = 1;
     });
     // places that are not homes: they show when the line tied to them arrives
-    const zz = p / .86, lineAt = i => .28 + i * .023;
+    const zz = p / .86, lineAt = i => .28 + i * .019;
     PLACES.forEach((pl, j) => {
       const tie = TIES.find(t => t[1].p === j);
       let a = tie ? clamp((zz - lineAt(tie[0].l) - .04) / .03) : 0;
