@@ -62,11 +62,11 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 #chat-end{position:absolute;z-index:15;left:max(2.5vw,16px);right:auto;bottom:max(12vh,64px);padding:10px 14px;background:rgba(13,13,12,.82);opacity:0;transition:opacity .8s;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.cur{animation:none}}
 /* v44: where am I. Chapters on the left edge, in the language of the grid */
-#chapters{position:absolute;z-index:14;left:max(14px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;font-family:var(--mono),var(--f);font-size:12px;line-height:1;direction:rtl;background:rgba(13,13,12,.86);padding:8px 12px 8px 14px}
-#chapters li{display:flex;align-items:center;gap:8px;padding:7px 0;color:#5d5a53;cursor:pointer;transition:color .4s}
-#chapters li::before{content:"";width:10px;height:1px;background:currentColor;transition:width .4s}
-#chapters li.past{color:#7d7a72}
-#chapters li.now{color:var(--light)} #chapters li.now::before{width:26px;background:var(--red)}
+#chapters{position:absolute;z-index:14;left:max(14px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;font-family:var(--mono),var(--f);font-size:12px;line-height:1;direction:rtl;background:rgba(13,13,12,.88);padding:8px 10px}
+#chapters li{display:flex;align-items:center;justify-content:flex-end;gap:0;padding:7px 0;width:28px;color:#55524b;cursor:pointer;transition:color .4s}
+#chapters li::before{content:"";width:12px;height:2px;background:currentColor;transition:width .4s}
+#chapters li.past{color:#9a968c} #chapters li.past::before{width:18px}
+#chapters li.now{color:var(--light)} #chapters li.now::before{width:28px;height:3px;background:var(--red)}
 #chapters li:focus-visible{outline:1px solid var(--red);outline-offset:3px}
 .hud .go{transition:opacity .4s;background:rgba(13,13,12,.86);padding:4px 8px;color:var(--light)} .hud .go.idle{animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{opacity:.25;transform:translateY(3px)}}
@@ -97,14 +97,14 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 </div>
 
 <section class="after gut" aria-label="על העבודה">
-  <h1>צחי שמש (?)</h1>
-  <p>ביקשתי ממודל לייצר תמונה של "צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים". הוא החזיר גבר בן 55, עם זקן אפור, בלייזר כהה וסלון עם שיש. כשתיקנתי אותו, הוא עדכן את המספר והשאיר את הדימוי. על מה שלא ידע, חולון, להבים, שלושת הילדים שלי, הוא כתב "לא ידוע" והשלים לפי ממוצע. הוא לא שיקר. הוא פשוט לא ידע, ורינדר בכל זאת.</p>
-  <p>העמוד נפתח בשיחה הזו, ונגמר במשפט שלו: <span dir="ltr">"Generating image from the average of available data"</span>. מכאן מתחיל שדה של אותיות בגריד מודולים קבוע, כל תא באותו גודל וכל מודול עם קואורדינטה, כמו דף של מילר-ברוקמן. זה הסדר. בתוכו רצים משפטים אמיתיים עליי, ובאדום הניחושים של המכונה. ככל שמתרחקים, האותיות בונות את הפנים שהמודל המציא לי.</p>
-  <p>ואז היד נכנסת. הניחושים האדומים דוהים, ועל התמונות שהמודל ייצר מסומן איקס. מעל הפנים שלו נכתבת מפה בכתב היד שלי: חמשת הבתים שגרתי בהם לפני הגיוס, מחוברים במסלול כמו בתוכנית, ומשפטים שאף מודל לא יכול לדעת. איך שהילדים קוראים לי. ריח של חול שמזכיר לי את להבים. שעון מהבית של אבא. אחותי. כל משפט מחובר בקו למקום או לאדם. כמעצב פנים, כך אני חושב: בתוכניות, במסלולים ובמעברים בין חללים, ולא בתמונה אחת.</p>
-  <p>את כתב היד לא ניקיתי. האותיות עקומות, חלק כתבתי בצבע עפרון וחלק בטוש על גב דף עבודה באנגלית, ויש מילים שמחקתי והשארתי. מחיקה היא יד שחושבת.</p>
-  <p>הילדים שלי לא מופיעים בעבודה, רק השמות שלהם, ביד שלי. הפנים שלהם לא שייכות לרשת, ולמודל לא נתתי אותן.</p>
-  <p>בסוף הפנים של המודל כבות, והמפה נמשכת מחדש כרצף, לפי סדר החיים. המודל מנסה לרנדר ונכשל: <span dir="ltr">"Render failed. Subject is not an average."</span> ואז, לראשונה, הוא מהסס: "אני לא מצליח לזהות אותך. מי אתה?". זו הטענה של העבודה: אני לא תמונה מרונדרת של ממוצע, אלא רצף של הקשרים.</p>
-  <p>בהרצאה של היטו שטיירל שמעתי שהשימוש בבינה מלאכותית חייב להיות עם חיכוך. גם את העמוד הזה בניתי עם בינה מלאכותית, וכל הצעה שלה שנראתה נקייה מדי נדחתה. התהליך מתועד בריפו.</p>
+  <h1>צחי שמש</h1>
+  <p>ביקשתי ממודל תמונה של "צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים". הוא החזיר גבר בן 55 עם זקן אפור, בלייזר כהה וסלון עם שיש. תיקנתי את הגיל, והוא עדכן את המספר בלי לשנות את הדימוי. על מה שלא ידע, חולון, להבים, שלושת הילדים שלי, הוא כתב "לא ידוע" והשלים לפי ממוצע. הוא לא שיקר. הוא השלים.</p>
+  <p>העבודה בנויה משתי שפות. הראשונה היא סדר: גריד מודולים קבוע, כל תא באותו גודל וכל מודול עם קואורדינטה, כמו דף של מילר-ברוקמן. בתוכו רצים משפטים אמיתיים עליי, ובאדום הניחושים של המכונה. ככל שמתרחקים, האותיות בונות את הפנים שהמודל המציא לי: הממוצע, מרונדר מתוך הסדר.</p>
+  <p>השפה השנייה היא היד. היא נכנסת לגריד ושוברת אותו מבפנים: מסמנת איקס על התמונות של המודל, ומשרטטת מעל הפנים שלו מפה. חמשת הבתים שגרתי בהם לפני הגיוס, מחוברים במסלול כמו בתוכנית. משפטים שאף מודל לא יכול לדעת: איך שהילדים קוראים לי, ריח של חול שמזכיר לי את להבים, שעון מהבית של אבא. כל משפט מחובר בקו למקום או לאדם. כך אני חושב כמעצב פנים: לא בתמונה אחת, אלא בתוכניות, במסלולים ובמעברים.</p>
+  <p>את כתב היד לא ניקיתי. האותיות עקומות, חלקן בצבע עפרון וחלקן בטוש, ויש מילים שמחקתי והשארתי. מחיקה היא יד שחושבת, ואת זה המכונה לא מייצרת.</p>
+  <p>הילדים שלי לא מופיעים בעבודה, רק השמות שלהם, ביד שלי. את הפנים שלהם לא נתתי למודל.</p>
+  <p>בסוף הפנים של המודל כבות, והמפה נמשכת מחדש כרצף, לפי סדר החיים. המודל מנסה לרנדר ונכשל: <span dir="ltr">"Render failed. Subject is not an average."</span> לראשונה הוא מהסס, ושואל "מי אתה?". אני עונה בכתב יד. זו הטענה של העבודה: אני לא תמונה מרונדרת של ממוצע, אלא רצף של קשרים.</p>
+  <p>בהרצאה של היטו שטיירל שמעתי שהשימוש בבינה מלאכותית חייב לייצר חיכוך. גם את העמוד הזה בניתי עם בינה מלאכותית. כל הצעה שלה שנראתה נקייה מדי נדחתה, והתהליך מתועד בריפו.</p>
   <p>אבא שלי היה אומר בוויכוחים: "אל תהיה צודק, תהיה חכם". המודל תמיד צודק בעיני עצמו. ניסיתי להיות חכם.</p>
 </section>
 
@@ -825,7 +825,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const chapEl = document.getElementById('chapters'), goEl = document.querySelector('.hud .go');
   CHAPTERS.forEach(([name, at], i) => {
     const li = document.createElement('li'); li.tabIndex = 0;
-    li.textContent = String.fromCharCode(0x5D0 + i) + '  ' + name;   // א, ב, ג... like the module labels
+    li.title = name; li.setAttribute('aria-label', name);   // v45: no names on screen, only the ticks; the name on hover
     const jump = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; scrollTo({top: pin.offsetTop + d * (at + .002), behavior: reduce ? 'auto' : 'smooth'}); };
     li.addEventListener('click', jump); li.addEventListener('keydown', e => { if (e.key === 'Enter') jump(); });
     chapEl.appendChild(li);
