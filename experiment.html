@@ -59,8 +59,12 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 .cur{display:inline-block;width:.55em;height:1.05em;background:var(--light);vertical-align:-.15em;margin-inline-start:2px;animation:blink 1.05s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 #chat .hint{position:absolute;bottom:max(18px,env(safe-area-inset-bottom,0px));inset-inline:0;text-align:center;font-size:12px;color:#7d7a72;opacity:0;transition:opacity .6s}
-#chat-end{position:absolute;z-index:15;inset-inline-start:max(2.5vw,16px);bottom:max(12vh,64px);padding:10px 14px;background:rgba(13,13,12,.82);opacity:0;transition:opacity .8s;pointer-events:none}
+#chat-end{position:absolute;z-index:15;left:max(2.5vw,16px);right:auto;bottom:max(12vh,64px);padding:10px 14px;background:rgba(13,13,12,.82);opacity:0;transition:opacity .8s;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.cur{animation:none}}
+/* v43: my answer to "מי אתה?", written out on the screen in my hand */
+#answer{position:absolute;inset:0;z-index:16;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .9s;background:rgba(13,13,12,.78)}
+#answer .sheet{display:flex;flex-direction:column;align-items:flex-start}   /* in a right-to-left page, start is the right edge, like my sheet */
+#answer .ln{background-repeat:no-repeat;clip-path:inset(0 0 0 100%)}
 </style>
 </head>
 <body>
@@ -73,6 +77,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
     <canvas id="ink" aria-hidden="true"></canvas>
     <div id="chat-end" aria-live="polite"></div>
+    <div id="answer" aria-label="מי אני? אני רצף של קשרים. אני כמה אנשים. אני שדה של מקומות. אני רעש של רחוב ושקט של מדבר. אני זכרונות ועתידים. ילדות ובגרות. אני מה שמחקתי ומה שעוד אכתוב. אני תוכנית שעוד לא נגמרה. צחי שמש"><div class="sheet"></div></div>
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span><span><b class="hk">כתב יד</b> מה שכתבתי</span></div>
     <div class="hud gut"><span>גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
   </section>
@@ -747,6 +752,36 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     addEventListener('wheel', go, {passive: false}); addEventListener('touchmove', go, {passive: false}); addEventListener('keydown', go);
   }
   // ...and at the end, over the map, the model asks again. It cannot read what it sees
+  /* ---------- v43: my answer, line by line, as if I am writing it now: each line is uncovered from the right,
+     at the pace of a hand, with stops between words (lines cut by tools/answer.py; my signature left out) ---------- */
+  const ans = {box: null, el: document.getElementById('answer')};
+  fetch('assets/hand-answer.json').then(r => r.json()).then(j => { ans.box = j; }).catch(() => {});
+  async function writeAnswer(run){
+    if (!ans.box) return;
+    const sheet = ans.el.querySelector('.sheet'); sheet.textContent = '';
+    const tot = ans.box.reduce((t, b) => t + b[3] * 1.12, 0), maxW = Math.max(...ans.box.map(b => b[2]));
+    const sc = Math.min(1.25, H * .8 / tot, W * .86 / maxW), aw = maxW * sc;
+    const lines = ans.box.map(b => {
+      const d = document.createElement('div'); d.className = 'ln';
+      Object.assign(d.style, {width: b[2] * sc + 'px', height: b[3] * sc + 'px', marginBottom: b[3] * sc * .12 + 'px',
+        backgroundImage: 'url(assets/hand-answer.png)', backgroundSize: `${aw / maxW * maxW}px auto`,
+        backgroundPosition: `${-b[0] * sc}px ${-b[1] * sc}px`});
+      sheet.appendChild(d); return {d, b};
+    });
+    ans.el.style.opacity = 1;
+    await sleep(900);
+    for (const {d, b} of lines) {
+      if (run !== endRun) return;
+      if (reduce) { d.style.clipPath = 'none'; continue; }
+      // uneven keyframes: the hand speeds up, stops, goes on
+      const n = 5 + ((Math.random() * 4) | 0), kf = [{clipPath: 'inset(0 0 0 100%)', offset: 0}];
+      let at = 0; for (let i = 1; i < n; i++) { at += (1 - at) * (.25 + Math.random() * .3); kf.push({clipPath: `inset(0 0 0 ${100 - at * 100}%)`, offset: i / n}); }
+      kf.push({clipPath: 'inset(0 0 0 0%)', offset: 1});
+      await d.animate(kf, {duration: 450 + b[2] * 2.3, easing: 'linear', fill: 'forwards'}).finished.catch(() => {});
+      await sleep(260 + Math.random() * 340);
+    }
+  }
+
   // v39: the hesitant ending is typed each time you arrive at the end, after the panel has faded in.
   // Leaving the end stops it and clears it, so it never just appears finished
   let endRun = 0, endOn = false;
@@ -756,7 +791,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (on === endOn) return;
     endOn = on; el.style.opacity = on ? 1 : 0;
     const run = ++endRun;
-    if (!on) { setTimeout(() => { if (run === endRun) el.textContent = ''; }, 800); return; }
+    if (!on) { ans.el.style.opacity = 0; setTimeout(() => { if (run === endRun) { el.textContent = ''; ans.el.querySelector('.sheet').textContent = ''; } }, 900); return; }
     el.textContent = '';
     const f = () => reduce || run !== endRun;           // a newer run, or leaving, cuts this one short
     (async () => {
@@ -776,7 +811,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       const q = document.createElement('div'); q.className = 'm'; el.appendChild(q);
       await humanType(q, el, 'מי אתה?', 190, f, 0);
       if (run !== endRun) return;
-      const c = document.createElement('div'); c.className = 'u'; c.innerHTML = '<span class="cur"></span>'; el.appendChild(c);
+      // v43: no cursor this time. I answer, in my hand, on the screen
+      await sleep(1700); if (run !== endRun) return;
+      await writeAnswer(run);
     })();
   }
 
