@@ -33,8 +33,9 @@ body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height
 .stage{perspective:1000px;perspective-origin:50% 50%;position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
-#ink,#ink2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-#c,#ink,#ink2,#answer,#chat-end{will-change:transform;transform-origin:50% 50%}
+#ink,#ink2,#ink3,#ink4,#ink5{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#c,#ink,#ink2,#ink3,#ink4,#ink5,#answer,#chat-end{will-change:transform;transform-origin:50% 50%}
+#answer,#answer .sheet{transform-style:preserve-3d}
 #photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
 .hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
 .hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
@@ -89,7 +90,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <div id="ghosts" aria-hidden="true"></div>
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
     <canvas id="ink" aria-hidden="true"></canvas>
-    <canvas id="ink2" aria-hidden="true"></canvas>
+    <canvas id="ink2" aria-hidden="true"></canvas><canvas id="ink3" aria-hidden="true"></canvas><canvas id="ink4" aria-hidden="true"></canvas><canvas id="ink5" aria-hidden="true"></canvas>
     <div id="chat-end" aria-live="polite"></div>
     <div id="answer" aria-label="מי אני? אני רצף של קשרים. אני כמה אנשים. אני שדה של מקומות. אני רעש של רחוב ושקט של מדבר. אני זכרונות ועתידים. ילדות ובגרות. אני מה שמחקתי ומה שעוד אכתוב. אני תוכנית שעוד לא נגמרה. צחי שמש"><div class="sheet"></div></div>
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span><span><b class="hk">כתב יד</b> מה שכתבתי</span></div>
@@ -195,7 +196,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
   const cv = document.getElementById('c'), ctx = cv.getContext('2d');
   const ink = document.getElementById('ink'), ix = ink.getContext('2d');
-  const ink2 = document.getElementById('ink2'), lx = ink2.getContext('2d');   // v47: my sentences, on their own layer   // version 19: my hand, above everything, the photo too
+  const LXC = ['ink2', 'ink3', 'ink4', 'ink5'].map(id => document.getElementById(id)), LX = LXC.map(c => c.getContext('2d'));   // v49: my sentences, on four layers   // version 19: my hand, above everything, the photo too
   const photo = document.getElementById('photo');
   const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
   const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
@@ -268,7 +269,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     W = stage.clientWidth; H = stage.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
     ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
-    ink2.width = W * DPR; ink2.height = H * DPR; lx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    LXC.forEach((c, i) => { c.width = W * DPR; c.height = H * DPR; LX[i].setTransform(DPR, 0, 0, DPR, 0, 0); });
     if (typeof layoutLines === 'function' && hl && hl.box) layoutLines();
   }
 
@@ -537,7 +538,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const seqDone = () => seqStart !== null && (performance.now() - seqStart) / 1000 > SEQ.length * STEP + .4;
   const homeD = i => ROUTE.find(q => q.n === i).d;
   function drawInk(p, ox, oy, cw, cell, photoIn){
-    ix.clearRect(0, 0, W, H); lx.clearRect(0, 0, W, H);
+    ix.clearRect(0, 0, W, H); LX.forEach(g => g.clearRect(0, 0, W, H));
     if (!hand.ready) return;
     const X = c => ox + c * cw, Y = r => oy + r * cell;
     if (p > SEQ_P && !reduce) { if (seqStart === null) seqStart = performance.now(); } else seqStart = null;
@@ -571,6 +572,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       if (a <= 0 || !hl.pos || !hl.pos[i]) return;
       const h = lineH(b, cell), w = b[2] * h / b[3];
       const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
+      const lx = LX[i % LX.length];
       lx.globalAlpha = a * (1 - photoIn * .45);
       lx.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
       lx.globalAlpha = 1;
@@ -818,11 +820,11 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
      the route and the homes behind, my sentences in front, my answer nearest. The camera moves in between them,
      and the mouse (or a slow sway on a phone) turns the space a little, so the layers slide against each other ---------- */
   const LAYERS = [                                      // [element, depth it goes to (px), how much it follows the mouse]
-    [document.getElementById('c'), -1400, .25],
-    [document.getElementById('ink'), -520, .55],
-    [document.getElementById('ink2'), -120, .8],
-    [document.getElementById('answer'), 60, 1.1],
-    [document.getElementById('chat-end'), -900, .3],   // the machine's last words fall back with its face
+    [document.getElementById('c'), -1500, .25],         // v49: the model's face fades out in the depth
+    [document.getElementById('chat-end'), -1250, .3],   // the machine's last words, furthest back
+    [document.getElementById('ink'), -950, .5],         // the route, the homes and the ties
+    [LXC[0], -720, .65], [LXC[1], -500, .75], [LXC[2], -300, .85], [LXC[3], -110, .95],   // my sentences, four depths
+    [document.getElementById('answer'), 80, 1.1],       // my answer; inside it every line has its own depth
   ];
   let mx = 0, my = 0, tmx = 0, tmy = 0;
   addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tmx = e.clientX / innerWidth - .5; tmy = e.clientY / innerHeight - .5; } }, {passive: true});
@@ -830,7 +832,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
      keys) moves the camera between the layers instead of the page: in, through my answer, my sentences, the route,
      up to the model's face, and back out. Back at the start, the page scrolls again ---------- */
   let camZ = 0, camT = 0, inDepth = false;
-  const CAM_MAX = 1650;   // stop in front of the model's face, not inside it
+  const CAM_MAX = 1300;   // stop in front of the model's face, not inside it
   const atEnd = () => inDepth && ans.done;
   function moveCam(d, e){
     if (!atEnd()) return false;
@@ -849,15 +851,25 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     inDepth = dp > .98;
     if (!inDepth && camT > 0) camT = 0;                  // leaving the space resets the camera
     camZ += (camT - camZ) * .09;
-    if (dp <= 0) { LAYERS.forEach(([el]) => { if (el && el.style.transform) { el.style.transform = ''; if (el.id !== 'answer') el.style.opacity = ''; } }); ans.el.style.background = ''; document.getElementById('chat-end').style.filter = ''; return; }
+    if (dp <= 0) { ans.el.querySelectorAll('.sheet canvas').forEach(c => c.style.transform = ''); LAYERS.forEach(([el]) => { if (el && el.style.transform) { el.style.transform = ''; if (el.id !== 'answer') el.style.opacity = ''; } }); ans.el.style.background = ''; document.getElementById('chat-end').style.filter = ''; return; }
     if (!matchMedia('(hover: hover)').matches && !reduce) { tmx = .18 * Math.sin(now / 2600); tmy = .1 * Math.sin(now / 3700); }   // a phone: a slow sway
     mx += (tmx - mx) * .06; my += (tmy - my) * .06;
     const push = dp * 170;                               // the camera moves in
+    // v49: all layers turn together around one centre, so the space itself turns. Moving in also turns it,
+    // slowly, as if walking along the route; the mouse adds to that
+    const walk = camZ / CAM_MAX;
+    const ry = (mx * 26 + walk * 22 - 8 * dp) * dp, rx = (-my * 14 + walk * 6) * dp;
     LAYERS.forEach(([el, z, k]) => {
       if (!el) return;
-      const zz = z * dp + push + camZ, f = 1 + Math.min(zz, 800) / 1000;   // a nearer layer moves more under the same turn
-      el.style.transform = `translate3d(${-mx * 90 * k * dp * f}px, ${-my * 60 * k * dp * f}px, ${Math.min(zz, 960)}px) rotateY(${mx * 6 * dp}deg) rotateX(${-my * 4 * dp}deg)`;
-      el.style.opacity = String(clamp((900 - zz) / 260) * (el.id === 'answer' ? +(ans.el.dataset.o || 0) : 1));   // a layer we pass through fades away
+      const zz = z * dp + push + camZ;
+      el.style.transform = `rotateY(${ry}deg) rotateX(${rx}deg) translate3d(${-mx * 40 * k * dp}px, ${-my * 30 * k * dp}px, ${Math.min(zz, 960)}px)`;
+      let o = clamp((900 - zz) / 260);                    // a layer we pass through fades away
+      if (el.id === 'answer') o *= +(ans.el.dataset.o || 0);
+      if (el.id === 'c') o *= 1 - dp;                     // no image at the end
+      el.style.opacity = o >= .999 ? '1' : String(o);
+    });
+    ans.el.querySelectorAll('.sheet canvas').forEach((c, i, all) => {   // the lines of my answer, apart in depth
+      c.style.transform = `translateZ(${dp * (((i * 7) % 5) - 2) * 70}px)`;
     });
     goEl.textContent = !ans.done ? 'המשיכו לגלול ↓' : camT <= 0 ? 'גללו כדי להיכנס בין השכבות ↓' : camT >= CAM_MAX ? 'גללו אחורה כדי לצאת ↑' : 'גללו קדימה ואחורה בין השכבות';
     ans.el.style.background = `rgba(13,13,12,${.78 * (1 - dp)})`;
