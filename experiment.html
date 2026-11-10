@@ -793,7 +793,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       for (let q = 0; q < L.n; q++) { const tt = L.t[q]; d[q * 4 + 3] = !tt ? 0 : tt <= T ? L.a[q] : tt <= T + 3 ? L.a[q] * (1 - (tt - T) / 4) : 0; }
       L.g.putImageData(L.img, 0, 0);
     };
-    ans.done = false; ans.el.style.opacity = 1;
+    ans.done = false; ans.el.style.opacity = 1; ans.el.dataset.o = '1';
     await sleep(900);
     for (const L of lines) {
       if (run !== endRun) return;
@@ -826,16 +826,40 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   ];
   let mx = 0, my = 0, tmx = 0, tmy = 0;
   addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tmx = e.clientX / innerWidth - .5; tmy = e.clientY / innerHeight - .5; } }, {passive: true});
+  /* ---------- v48: once my answer is written and the space has opened, the wheel (or a drag on a phone, or the arrow
+     keys) moves the camera between the layers instead of the page: in, through my answer, my sentences, the route,
+     up to the model's face, and back out. Back at the start, the page scrolls again ---------- */
+  let camZ = 0, camT = 0, inDepth = false;
+  const CAM_MAX = 1650;   // stop in front of the model's face, not inside it
+  const atEnd = () => inDepth && ans.done;
+  function moveCam(d, e){
+    if (!atEnd()) return false;
+    if (d < 0 && camT <= 0) return false;                // back out of the space: the page scrolls up again
+    if (d > 0 && camT >= CAM_MAX) return false;          // all the way through: let the page go on to its footer
+    camT = Math.max(0, Math.min(CAM_MAX, camT + d));
+    if (e && e.cancelable) e.preventDefault();
+    return true;
+  }
+  addEventListener('wheel', e => moveCam(e.deltaY * 1.4, e), {passive: false});
+  let ty = null;
+  addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, {passive: true});
+  addEventListener('touchmove', e => { if (ty === null) return; const y = e.touches[0].clientY; if (moveCam((ty - y) * 3, e)) ty = y; else ty = y; }, {passive: false});
+  addEventListener('keydown', e => { const d = {ArrowDown: 160, ArrowUp: -160, PageDown: 500, PageUp: -500}[e.key]; if (d) moveCam(d, e); });
   function depth(dp, now){
-    if (dp <= 0) { LAYERS.forEach(([el]) => { if (el && el.style.transform) el.style.transform = ''; }); ans.el.style.background = ''; document.getElementById('chat-end').style.filter = ''; return; }
+    inDepth = dp > .98;
+    if (!inDepth && camT > 0) camT = 0;                  // leaving the space resets the camera
+    camZ += (camT - camZ) * .09;
+    if (dp <= 0) { LAYERS.forEach(([el]) => { if (el && el.style.transform) { el.style.transform = ''; if (el.id !== 'answer') el.style.opacity = ''; } }); ans.el.style.background = ''; document.getElementById('chat-end').style.filter = ''; return; }
     if (!matchMedia('(hover: hover)').matches && !reduce) { tmx = .18 * Math.sin(now / 2600); tmy = .1 * Math.sin(now / 3700); }   // a phone: a slow sway
     mx += (tmx - mx) * .06; my += (tmy - my) * .06;
     const push = dp * 170;                               // the camera moves in
     LAYERS.forEach(([el, z, k]) => {
       if (!el) return;
-      const zz = z * dp + push, f = 1 + zz / 1000;          // a nearer layer moves more under the same turn
-      el.style.transform = `translate3d(${-mx * 90 * k * dp * f}px, ${-my * 60 * k * dp * f}px, ${zz}px) rotateY(${mx * 6 * dp}deg) rotateX(${-my * 4 * dp}deg)`;
+      const zz = z * dp + push + camZ, f = 1 + Math.min(zz, 800) / 1000;   // a nearer layer moves more under the same turn
+      el.style.transform = `translate3d(${-mx * 90 * k * dp * f}px, ${-my * 60 * k * dp * f}px, ${Math.min(zz, 960)}px) rotateY(${mx * 6 * dp}deg) rotateX(${-my * 4 * dp}deg)`;
+      el.style.opacity = String(clamp((900 - zz) / 260) * (el.id === 'answer' ? +(ans.el.dataset.o || 0) : 1));   // a layer we pass through fades away
     });
+    goEl.textContent = !ans.done ? 'המשיכו לגלול ↓' : camT <= 0 ? 'גללו כדי להיכנס בין השכבות ↓' : camT >= CAM_MAX ? 'גללו אחורה כדי לצאת ↑' : 'גללו קדימה ואחורה בין השכבות';
     ans.el.style.background = `rgba(13,13,12,${.78 * (1 - dp)})`;
     document.getElementById('chat-end').style.filter = `opacity(${1 - .55 * dp})`;   // the dark sheet behind my answer clears, so the layers show
   }
@@ -873,7 +897,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (on === endOn) return;
     endOn = on; el.style.opacity = on ? 1 : 0;
     const run = ++endRun;
-    if (!on) { ans.el.style.opacity = 0; setTimeout(() => { if (run === endRun) { el.textContent = ''; ans.el.querySelector('.sheet').textContent = ''; } }, 900); return; }
+    if (!on) { ans.el.style.opacity = 0; ans.el.dataset.o = '0'; setTimeout(() => { if (run === endRun) { el.textContent = ''; ans.el.querySelector('.sheet').textContent = ''; } }, 900); return; }
     el.textContent = '';
     const f = () => reduce || run !== endRun;           // a newer run, or leaving, cuts this one short
     (async () => {
