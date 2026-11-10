@@ -29,11 +29,13 @@
 html,body{background:var(--screen)}
 body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height:1.65;overflow-x:hidden}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.pin{position:relative;height:820vh}
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
+.pin{position:relative;height:1000vh}
+.stage{perspective:1000px;perspective-origin:50% 50%;position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
-#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#ink,#ink2,#ink3,#ink4,#ink5{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#c,#ink,#ink2,#ink3,#ink4,#ink5,#answer,#chat-end{will-change:transform;transform-origin:50% 50%}
+#answer,#answer .sheet{transform-style:preserve-3d}
 #photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
 .hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
 .hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
@@ -70,6 +72,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 #chapters li:focus-visible{outline:1px solid var(--red);outline-offset:3px}
 .hud .go{transition:opacity .4s;background:rgba(13,13,12,.86);padding:4px 8px;color:var(--light)} .hud .go.idle{animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{opacity:.25;transform:translateY(3px)}}
+.hud .go.ready{color:#fff;box-shadow:inset 0 0 0 1px var(--red);font-size:14px;padding:6px 12px;animation:ready 1.4s ease-in-out infinite}
+@keyframes ready{50%{transform:translateY(4px)}}
 @media (max-width:640px){#chapters li:not(.now){display:none} #chapters{top:auto;bottom:44px;transform:none}}
 @media (prefers-reduced-motion:reduce){.hud .go.idle{animation:none}}
 /* v43: my answer to "מי אתה?", written out on the screen in my hand */
@@ -88,6 +92,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <div id="ghosts" aria-hidden="true"></div>
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
     <canvas id="ink" aria-hidden="true"></canvas>
+    <canvas id="ink2" aria-hidden="true"></canvas><canvas id="ink3" aria-hidden="true"></canvas><canvas id="ink4" aria-hidden="true"></canvas><canvas id="ink5" aria-hidden="true"></canvas>
     <div id="chat-end" aria-live="polite"></div>
     <div id="answer" aria-label="מי אני? אני רצף של קשרים. אני כמה אנשים. אני שדה של מקומות. אני רעש של רחוב ושקט של מדבר. אני זכרונות ועתידים. ילדות ובגרות. אני מה שמחקתי ומה שעוד אכתוב. אני תוכנית שעוד לא נגמרה. צחי שמש"><div class="sheet"></div></div>
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span><span><b class="hk">כתב יד</b> מה שכתבתי</span></div>
@@ -95,17 +100,6 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <div class="hud gut"><span class="go">גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
   </section>
 </div>
-
-<section class="after gut" aria-label="על העבודה">
-  <h1>צחי שמש</h1>
-  <p>ביקשתי ממודל תמונה של "צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים". הוא החזיר גבר בן 55 עם זקן אפור, בלייזר כהה וסלון עם שיש. תיקנתי את הגיל, והוא עדכן את המספר בלי לשנות את הדימוי. על מה שלא ידע, חולון, להבים, שלושת הילדים שלי, הוא כתב "לא ידוע" והשלים לפי ממוצע. הוא לא שיקר. הוא השלים.</p>
-  <p>העבודה בנויה משתי שפות. הראשונה היא סדר: גריד מודולים קבוע, כל תא באותו גודל וכל מודול עם קואורדינטה, כמו דף של מילר-ברוקמן. בתוכו רצים משפטים אמיתיים עליי, ובאדום הניחושים של המכונה. ככל שמתרחקים, האותיות בונות את הפנים שהמודל המציא לי: הממוצע, מרונדר מתוך הסדר.</p>
-  <p>השפה השנייה היא היד. היא נכנסת לגריד ושוברת אותו מבפנים: מסמנת איקס על התמונות של המודל, ומשרטטת מעל הפנים שלו מפה. חמשת הבתים שגרתי בהם לפני הגיוס, מחוברים במסלול כמו בתוכנית. משפטים שאף מודל לא יכול לדעת: איך שהילדים קוראים לי, ריח של חול שמזכיר לי את להבים, שעון מהבית של אבא. כל משפט מחובר בקו למקום או לאדם. כך אני חושב כמעצב פנים: לא בתמונה אחת, אלא בתוכניות, במסלולים ובמעברים.</p>
-  <p>את כתב היד לא ניקיתי. האותיות עקומות, חלקן בצבע עפרון וחלקן בטוש, ויש מילים שמחקתי והשארתי. מחיקה היא יד שחושבת, ואת זה המכונה לא מייצרת.</p>
-  <p>בסוף הפנים של המודל כבות, והמפה נמשכת מחדש כרצף, לפי סדר החיים. המודל מנסה לרנדר ונכשל: <span dir="ltr">"Render failed. Subject is not an average."</span> לראשונה הוא מהסס, ושואל "מי אתה?". אני עונה בכתב יד. זו הטענה של העבודה: אני לא תמונה מרונדרת של ממוצע, אלא רצף של קשרים.</p>
-  <p>היטו שטיירל אמרה שהשימוש בבינה מלאכותית חייב לייצר חיכוך. גם את העמוד הזה בניתי עם בינה מלאכותית, וכל הצעה שלה שנראתה נקייה מדי נדחתה.</p>
-  <p>אבא שלי היה אומר בוויכוחים: "אל תהיה צודק, תהיה חכם". המודל תמיד צודק בעיני עצמו. ניסיתי להיות חכם.</p>
-</section>
 
 <footer class="gut">
   <span>צחי שמש · עיצוב בעזרת בינה מלאכותית · HIT 2026</span>
@@ -203,7 +197,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   }
 
   const cv = document.getElementById('c'), ctx = cv.getContext('2d');
-  const ink = document.getElementById('ink'), ix = ink.getContext('2d');   // version 19: my hand, above everything, the photo too
+  const ink = document.getElementById('ink'), ix = ink.getContext('2d');
+  const LXC = ['ink2', 'ink3', 'ink4', 'ink5'].map(id => document.getElementById(id)), LX = LXC.map(c => c.getContext('2d'));   // v49: my sentences, on four layers   // version 19: my hand, above everything, the photo too
   const photo = document.getElementById('photo');
   const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
   const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
@@ -276,6 +271,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     W = stage.clientWidth; H = stage.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
     ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
+    LXC.forEach((c, i) => { c.width = W * DPR; c.height = H * DPR; LX[i].setTransform(DPR, 0, 0, DPR, 0, 0); });
     if (typeof layoutLines === 'function' && hl && hl.box) layoutLines();
   }
 
@@ -316,7 +312,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
   function draw(now){
     if (!ready) return;
-    const t = reduce ? 0 : now / 1000, p = progress();
+    const P = progress(), t = reduce ? 0 : now / 1000, p = Math.min(1, P / .82);   // v47: P is the whole scroll, p the journey before the depth
     const z = clamp(p / 0.86), sz = smooth(z);
     const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
     const startCell = Math.max(40, Math.min(W, H) / 12);
@@ -391,9 +387,14 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
     // experiment (v30): no family photo. The field goes dark, and only what my hand did stays: the map
     const fadeIn = 0, endK = smooth(clamp((p - .8) / .12));
-    if (endK > 0) { ctx.globalAlpha = endK * .96; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+    const dp = smooth(clamp((P - .85) / .13));
+    if (endK > 0) { ctx.globalAlpha = endK * .96 * (1 - .65 * dp); /* in the depth, the model's face shows again, far behind */ ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     chatEnd(p);
-    chapters(p);
+    // v50: the map can be entered only after my answer has been written to the end
+    const GATE = .845;
+    if (P > GATE && !ans.done) { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; scrollTo(0, pin.offsetTop + d * GATE); }
+    chapters(P);
+    depth(dp, now);
     photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
     photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
     photo.style.opacity = fadeIn;
@@ -542,7 +543,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const seqDone = () => seqStart !== null && (performance.now() - seqStart) / 1000 > SEQ.length * STEP + .4;
   const homeD = i => ROUTE.find(q => q.n === i).d;
   function drawInk(p, ox, oy, cw, cell, photoIn){
-    ix.clearRect(0, 0, W, H);
+    ix.clearRect(0, 0, W, H); LX.forEach(g => g.clearRect(0, 0, W, H));
     if (!hand.ready) return;
     const X = c => ox + c * cw, Y = r => oy + r * cell;
     if (p > SEQ_P && !reduce) { if (seqStart === null) seqStart = performance.now(); } else seqStart = null;
@@ -576,9 +577,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       if (a <= 0 || !hl.pos || !hl.pos[i]) return;
       const h = lineH(b, cell), w = b[2] * h / b[3];
       const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
-      ix.globalAlpha = a * (1 - photoIn * .45);
-      ix.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
-      ix.globalAlpha = 1;
+      const lx = LX[i % LX.length];
+      lx.globalAlpha = a * (1 - photoIn * .45);
+      lx.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
+      lx.globalAlpha = 1;
     });
     // places that are not homes: they show when the line tied to them arrives
     const zz = p / .86, lineAt = i => .28 + i * .019;
@@ -798,7 +800,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       for (let q = 0; q < L.n; q++) { const tt = L.t[q]; d[q * 4 + 3] = !tt ? 0 : tt <= T ? L.a[q] : tt <= T + 3 ? L.a[q] * (1 - (tt - T) / 4) : 0; }
       L.g.putImageData(L.img, 0, 0);
     };
-    ans.done = false; ans.el.style.opacity = 1;
+    ans.done = false; ans.el.style.opacity = 1; ans.el.dataset.o = '1';
     await sleep(900);
     for (const L of lines) {
       if (run !== endRun) return;
@@ -819,14 +821,74 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (run === endRun) ans.done = true;
   }
 
+  /* ---------- v47: depth. After my answer, scrolling on takes the layers apart: the model's face falls far back,
+     the route and the homes behind, my sentences in front, my answer nearest. The camera moves in between them,
+     and the mouse (or a slow sway on a phone) turns the space a little, so the layers slide against each other ---------- */
+  const LAYERS = [                                      // [element, depth it goes to (px), how much it follows the mouse]
+    [document.getElementById('c'), -1500, .25],         // v49: the model's face fades out in the depth
+    [document.getElementById('chat-end'), -1250, .3],   // the machine's last words, furthest back
+    [document.getElementById('ink'), -950, .5],         // the route, the homes and the ties
+    [LXC[0], -720, .65], [LXC[1], -500, .75], [LXC[2], -300, .85], [LXC[3], -110, .95],   // my sentences, four depths
+    [document.getElementById('answer'), 80, 1.1],       // my answer; inside it every line has its own depth
+  ];
+  let mx = 0, my = 0, tmx = 0, tmy = 0;
+  addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tmx = e.clientX / innerWidth - .5; tmy = e.clientY / innerHeight - .5; } }, {passive: true});
+  /* ---------- v48: once my answer is written and the space has opened, the wheel (or a drag on a phone, or the arrow
+     keys) moves the camera between the layers instead of the page: in, through my answer, my sentences, the route,
+     up to the model's face, and back out. Back at the start, the page scrolls again ---------- */
+  let camZ = 0, camT = 0, inDepth = false;
+  const CAM_MAX = 1300;   // stop in front of the model's face, not inside it
+  const atEnd = () => inDepth && ans.done;
+  function moveCam(d, e){
+    if (!atEnd()) return false;
+    if (d < 0 && camT <= 0) return false;                // back out of the space: the page scrolls up again
+    if (d > 0 && camT >= CAM_MAX) return false;          // all the way through: let the page go on to its footer
+    camT = Math.max(0, Math.min(CAM_MAX, camT + d));
+    if (e && e.cancelable) e.preventDefault();
+    return true;
+  }
+  addEventListener('wheel', e => moveCam(e.deltaY * 1.4, e), {passive: false});
+  let ty = null;
+  addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, {passive: true});
+  addEventListener('touchmove', e => { if (ty === null) return; const y = e.touches[0].clientY; if (moveCam((ty - y) * 3, e)) ty = y; else ty = y; }, {passive: false});
+  addEventListener('keydown', e => { const d = {ArrowDown: 160, ArrowUp: -160, PageDown: 500, PageUp: -500}[e.key]; if (d) moveCam(d, e); });
+  function depth(dp, now){
+    inDepth = dp > .98;
+    if (!inDepth && camT > 0) camT = 0;                  // leaving the space resets the camera
+    camZ += (camT - camZ) * .09;
+    if (dp <= 0) { ans.el.querySelectorAll('.sheet canvas').forEach(c => c.style.transform = ''); LAYERS.forEach(([el]) => { if (el && el.style.transform) { el.style.transform = ''; if (el.id !== 'answer') el.style.opacity = ''; } }); ans.el.style.background = ''; document.getElementById('chat-end').style.filter = ''; return; }
+    if (!matchMedia('(hover: hover)').matches && !reduce) { tmx = .18 * Math.sin(now / 2600); tmy = .1 * Math.sin(now / 3700); }   // a phone: a slow sway
+    mx += (tmx - mx) * .06; my += (tmy - my) * .06;
+    const push = dp * 170;                               // the camera moves in
+    // v49: all layers turn together around one centre, so the space itself turns. Moving in also turns it,
+    // slowly, as if walking along the route; the mouse adds to that
+    const walk = camZ / CAM_MAX;
+    const ry = (mx * 26 + walk * 22 - 8 * dp) * dp, rx = (-my * 14 + walk * 6) * dp;
+    LAYERS.forEach(([el, z, k]) => {
+      if (!el) return;
+      const zz = z * dp + push + camZ;
+      el.style.transform = `rotateY(${ry}deg) rotateX(${rx}deg) translate3d(${-mx * 40 * k * dp}px, ${-my * 30 * k * dp}px, ${Math.min(zz, 960)}px)`;
+      let o = clamp((900 - zz) / 260);                    // a layer we pass through fades away
+      if (el.id === 'answer') o *= +(ans.el.dataset.o || 0);
+      if (el.id === 'c') o *= 1 - dp;                     // no image at the end
+      el.style.opacity = o >= .999 ? '1' : String(o);
+    });
+    ans.el.querySelectorAll('.sheet canvas').forEach((c, i, all) => {   // the lines of my answer, apart in depth
+      c.style.transform = `translateZ(${dp * (((i * 7) % 5) - 2) * 70}px)`;
+    });
+    goEl.textContent = !ans.done ? 'המשיכו לגלול ↓' : camT <= 0 ? 'גללו כדי להיכנס בין השכבות ↓' : camT >= CAM_MAX ? 'גללו אחורה כדי לצאת ↑' : 'גללו קדימה ואחורה בין השכבות';
+    ans.el.style.background = `rgba(13,13,12,${.78 * (1 - dp)})`;
+    document.getElementById('chat-end').style.filter = `opacity(${1 - .55 * dp})`;   // the dark sheet behind my answer clears, so the layers show
+  }
+
   /* ---------- v44: chapters. Where you are, what has passed, and whether to keep scrolling ---------- */
-  const CHAPTERS = [['השם', 0], ['השדה', .05], ['הפנים של המודל', .3], ['המפה', .6], ['הרצף', .82], ['מי אני?', .93]];
+  const CHAPTERS = [['השם', 0], ['השדה', .041], ['הפנים של המודל', .246], ['המפה', .492], ['הרצף', .672], ['מי אני?', .763], ['עומק', .85]];
   const chapEl = document.getElementById('chapters'), goEl = document.querySelector('.hud .go');
   CHAPTERS.forEach(([name, at], i) => {
     const li = document.createElement('li'); li.tabIndex = 0;
     li.title = name; li.setAttribute('aria-label', name);   // v45: no names on screen, only the ticks; the name on hover
     const jump = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; scrollTo({top: pin.offsetTop + d * (at + .002), behavior: reduce ? 'auto' : 'smooth'}); };
-    li.addEventListener('click', jump); li.addEventListener('keydown', e => { if (e.key === 'Enter') jump(); });
+    li.addEventListener('click', () => { if (at >= .85 && !ans.done) return; jump(); }); li.addEventListener('keydown', e => { if (e.key === 'Enter') jump(); });
     chapEl.appendChild(li);
   });
   let chapNow = -1, lastMove = performance.now();
@@ -836,10 +898,20 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (c !== chapNow) {
       chapNow = c;
       [...chapEl.children].forEach((li, i) => li.className = i < c ? 'past' : i === c ? 'now' : '');
-      goEl.textContent = c < CHAPTERS.length - 1 ? 'המשיכו לגלול ↓' : 'בסוף: הטקסט על העבודה ↓';
+      goEl.textContent = c < CHAPTERS.length - 1 ? 'המשיכו לגלול ↓' : (matchMedia('(hover: hover)').matches ? 'הזיזו את העכבר' : 'זה הסוף');
     }
-    // standing still for a while, mid-way: the cue nudges. At the very end it waits for the answer to be written
-    const idle = performance.now() - lastMove > 2600 && (c < CHAPTERS.length - 1 || ans.done);
+    // v50: while my answer is being written, no cue at all: nothing to do but read. When the last line is down,
+    // the cue comes back at once and nudges: now you can go into the map
+    const ANS_C = CHAPTERS.length - 2;
+    if (c === ANS_C) {
+      const t = ans.done ? 'גללו כדי להיכנס למפה ↓' : '';
+      if (goEl.textContent !== t) goEl.textContent = t;
+      goEl.style.visibility = ans.done ? '' : 'hidden';
+      goEl.classList.toggle('ready', ans.done); goEl.classList.remove('idle');
+      return;
+    }
+    goEl.style.visibility = ''; goEl.classList.remove('ready');
+    const idle = performance.now() - lastMove > 2600 && c < ANS_C;
     goEl.classList.toggle('idle', idle && !document.getElementById('chat'));
   }
 
@@ -852,7 +924,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (on === endOn) return;
     endOn = on; el.style.opacity = on ? 1 : 0;
     const run = ++endRun;
-    if (!on) { ans.el.style.opacity = 0; setTimeout(() => { if (run === endRun) { el.textContent = ''; ans.el.querySelector('.sheet').textContent = ''; } }, 900); return; }
+    if (!on) { ans.el.style.opacity = 0; ans.el.dataset.o = '0'; setTimeout(() => { if (run === endRun) { el.textContent = ''; ans.el.querySelector('.sheet').textContent = ''; } }, 900); return; }
     el.textContent = '';
     const f = () => reduce || run !== endRun;           // a newer run, or leaving, cuts this one short
     (async () => {
