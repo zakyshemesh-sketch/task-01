@@ -29,11 +29,12 @@
 html,body{background:var(--screen)}
 body{margin:0;color:var(--light);font-family:var(--f);font-size:17px;line-height:1.65;overflow-x:hidden}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.pin{position:relative;height:820vh}
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
+.pin{position:relative;height:1000vh}
+.stage{perspective:1000px;perspective-origin:50% 50%;position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--screen)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ghosts img{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:grayscale(1) sepia(.12) contrast(.88) brightness(.82);box-shadow:0 0 0 1px rgba(236,233,226,.25)}
-#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#ink,#ink2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#c,#ink,#ink2,#answer,#chat-end{will-change:transform;transform-origin:50% 50%}
 #photo{position:absolute;opacity:0;object-fit:cover;pointer-events:none;filter:saturate(.42) sepia(.18) contrast(.9) brightness(1.04)}
 .hud{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;gap:16px;padding-block:12px 16px;font-size:12px;color:var(--fg-dim);pointer-events:none}
 .hud .n{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
@@ -88,6 +89,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <div id="ghosts" aria-hidden="true"></div>
     <img id="photo" src="assets/family-color.jpg" alt="צחי ונועה עם הילדים, בצבעים דהויים. פני הילדים מוחלפים ברעש">
     <canvas id="ink" aria-hidden="true"></canvas>
+    <canvas id="ink2" aria-hidden="true"></canvas>
     <div id="chat-end" aria-live="polite"></div>
     <div id="answer" aria-label="מי אני? אני רצף של קשרים. אני כמה אנשים. אני שדה של מקומות. אני רעש של רחוב ושקט של מדבר. אני זכרונות ועתידים. ילדות ובגרות. אני מה שמחקתי ומה שעוד אכתוב. אני תוכנית שעוד לא נגמרה. צחי שמש"><div class="sheet"></div></div>
     <div class="key"><span><b>אותיות</b> מה שאני יודע על עצמי</span><span><i>אדום</i> מה שהמודל ניחש</span><span><b class="hk">כתב יד</b> מה שכתבתי</span></div>
@@ -95,17 +97,6 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     <div class="hud gut"><span class="go">גללו כדי להתרחק ↓</span><span><span id="hud-cells" class="n">0</span> תאים · מרחק <span id="hud-dist" class="n">1.00x</span></span></div>
   </section>
 </div>
-
-<section class="after gut" aria-label="על העבודה">
-  <h1>צחי שמש</h1>
-  <p>ביקשתי ממודל תמונה של "צחי שמש, מעצב פנים בן 43, בעל משרד עצמאי ומרצה במוסדות אקדמיים". הוא החזיר גבר בן 55 עם זקן אפור, בלייזר כהה וסלון עם שיש. תיקנתי את הגיל, והוא עדכן את המספר בלי לשנות את הדימוי. על מה שלא ידע, חולון, להבים, שלושת הילדים שלי, הוא כתב "לא ידוע" והשלים לפי ממוצע. הוא לא שיקר. הוא השלים.</p>
-  <p>העבודה בנויה משתי שפות. הראשונה היא סדר: גריד מודולים קבוע, כל תא באותו גודל וכל מודול עם קואורדינטה, כמו דף של מילר-ברוקמן. בתוכו רצים משפטים אמיתיים עליי, ובאדום הניחושים של המכונה. ככל שמתרחקים, האותיות בונות את הפנים שהמודל המציא לי: הממוצע, מרונדר מתוך הסדר.</p>
-  <p>השפה השנייה היא היד. היא נכנסת לגריד ושוברת אותו מבפנים: מסמנת איקס על התמונות של המודל, ומשרטטת מעל הפנים שלו מפה. חמשת הבתים שגרתי בהם לפני הגיוס, מחוברים במסלול כמו בתוכנית. משפטים שאף מודל לא יכול לדעת: איך שהילדים קוראים לי, ריח של חול שמזכיר לי את להבים, שעון מהבית של אבא. כל משפט מחובר בקו למקום או לאדם. כך אני חושב כמעצב פנים: לא בתמונה אחת, אלא בתוכניות, במסלולים ובמעברים.</p>
-  <p>את כתב היד לא ניקיתי. האותיות עקומות, חלקן בצבע עפרון וחלקן בטוש, ויש מילים שמחקתי והשארתי. מחיקה היא יד שחושבת, ואת זה המכונה לא מייצרת.</p>
-  <p>בסוף הפנים של המודל כבות, והמפה נמשכת מחדש כרצף, לפי סדר החיים. המודל מנסה לרנדר ונכשל: <span dir="ltr">"Render failed. Subject is not an average."</span> לראשונה הוא מהסס, ושואל "מי אתה?". אני עונה בכתב יד. זו הטענה של העבודה: אני לא תמונה מרונדרת של ממוצע, אלא רצף של קשרים.</p>
-  <p>היטו שטיירל אמרה שהשימוש בבינה מלאכותית חייב לייצר חיכוך. גם את העמוד הזה בניתי עם בינה מלאכותית, וכל הצעה שלה שנראתה נקייה מדי נדחתה.</p>
-  <p>אבא שלי היה אומר בוויכוחים: "אל תהיה צודק, תהיה חכם". המודל תמיד צודק בעיני עצמו. ניסיתי להיות חכם.</p>
-</section>
 
 <footer class="gut">
   <span>צחי שמש · עיצוב בעזרת בינה מלאכותית · HIT 2026</span>
@@ -203,7 +194,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   }
 
   const cv = document.getElementById('c'), ctx = cv.getContext('2d');
-  const ink = document.getElementById('ink'), ix = ink.getContext('2d');   // version 19: my hand, above everything, the photo too
+  const ink = document.getElementById('ink'), ix = ink.getContext('2d');
+  const ink2 = document.getElementById('ink2'), lx = ink2.getContext('2d');   // v47: my sentences, on their own layer   // version 19: my hand, above everything, the photo too
   const photo = document.getElementById('photo');
   const stage = document.querySelector('.stage'), pin = document.querySelector('.pin');
   const hudC = document.getElementById('hud-cells'), hudD = document.getElementById('hud-dist');
@@ -276,6 +268,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     W = stage.clientWidth; H = stage.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.direction = 'ltr';
     ink.width = W * DPR; ink.height = H * DPR; ix.setTransform(DPR, 0, 0, DPR, 0, 0); ix.direction = 'ltr';
+    ink2.width = W * DPR; ink2.height = H * DPR; lx.setTransform(DPR, 0, 0, DPR, 0, 0);
     if (typeof layoutLines === 'function' && hl && hl.box) layoutLines();
   }
 
@@ -316,7 +309,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
   function draw(now){
     if (!ready) return;
-    const t = reduce ? 0 : now / 1000, p = progress();
+    const P = progress(), t = reduce ? 0 : now / 1000, p = Math.min(1, P / .82);   // v47: P is the whole scroll, p the journey before the depth
     const z = clamp(p / 0.86), sz = smooth(z);
     const fitCell = Math.min(W * 0.92 / (COLS * AR), H * 0.88 / ROWS);
     const startCell = Math.max(40, Math.min(W, H) / 12);
@@ -391,9 +384,11 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 
     // experiment (v30): no family photo. The field goes dark, and only what my hand did stays: the map
     const fadeIn = 0, endK = smooth(clamp((p - .8) / .12));
-    if (endK > 0) { ctx.globalAlpha = endK * .96; ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+    const dp = smooth(clamp((P - .85) / .13));
+    if (endK > 0) { ctx.globalAlpha = endK * .96 * (1 - .65 * dp); /* in the depth, the model's face shows again, far behind */ ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     chatEnd(p);
-    chapters(p);
+    chapters(P);
+    depth(dp, now);
     photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
     photo.style.width = COLS * cw + 'px'; photo.style.height = ROWS * cell + 'px';
     photo.style.opacity = fadeIn;
@@ -542,7 +537,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
   const seqDone = () => seqStart !== null && (performance.now() - seqStart) / 1000 > SEQ.length * STEP + .4;
   const homeD = i => ROUTE.find(q => q.n === i).d;
   function drawInk(p, ox, oy, cw, cell, photoIn){
-    ix.clearRect(0, 0, W, H);
+    ix.clearRect(0, 0, W, H); lx.clearRect(0, 0, W, H);
     if (!hand.ready) return;
     const X = c => ox + c * cw, Y = r => oy + r * cell;
     if (p > SEQ_P && !reduce) { if (seqStart === null) seqStart = performance.now(); } else seqStart = null;
@@ -576,9 +571,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       if (a <= 0 || !hl.pos || !hl.pos[i]) return;
       const h = lineH(b, cell), w = b[2] * h / b[3];
       const xr = X(hl.pos[i][0]), y = Y(hl.pos[i][1]);
-      ix.globalAlpha = a * (1 - photoIn * .45);
-      ix.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
-      ix.globalAlpha = 1;
+      lx.globalAlpha = a * (1 - photoIn * .45);
+      lx.drawImage(hl.img, b[0], b[1], b[2], b[3], xr - w, y, w, h);
+      lx.globalAlpha = 1;
     });
     // places that are not homes: they show when the line tied to them arrives
     const zz = p / .86, lineAt = i => .28 + i * .019;
@@ -819,8 +814,34 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (run === endRun) ans.done = true;
   }
 
+  /* ---------- v47: depth. After my answer, scrolling on takes the layers apart: the model's face falls far back,
+     the route and the homes behind, my sentences in front, my answer nearest. The camera moves in between them,
+     and the mouse (or a slow sway on a phone) turns the space a little, so the layers slide against each other ---------- */
+  const LAYERS = [                                      // [element, depth it goes to (px), how much it follows the mouse]
+    [document.getElementById('c'), -1400, .25],
+    [document.getElementById('ink'), -520, .55],
+    [document.getElementById('ink2'), -120, .8],
+    [document.getElementById('answer'), 60, 1.1],
+    [document.getElementById('chat-end'), -900, .3],   // the machine's last words fall back with its face
+  ];
+  let mx = 0, my = 0, tmx = 0, tmy = 0;
+  addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tmx = e.clientX / innerWidth - .5; tmy = e.clientY / innerHeight - .5; } }, {passive: true});
+  function depth(dp, now){
+    if (dp <= 0) { LAYERS.forEach(([el]) => { if (el && el.style.transform) el.style.transform = ''; }); ans.el.style.background = ''; document.getElementById('chat-end').style.filter = ''; return; }
+    if (!matchMedia('(hover: hover)').matches && !reduce) { tmx = .18 * Math.sin(now / 2600); tmy = .1 * Math.sin(now / 3700); }   // a phone: a slow sway
+    mx += (tmx - mx) * .06; my += (tmy - my) * .06;
+    const push = dp * 170;                               // the camera moves in
+    LAYERS.forEach(([el, z, k]) => {
+      if (!el) return;
+      const zz = z * dp + push, f = 1 + zz / 1000;          // a nearer layer moves more under the same turn
+      el.style.transform = `translate3d(${-mx * 90 * k * dp * f}px, ${-my * 60 * k * dp * f}px, ${zz}px) rotateY(${mx * 6 * dp}deg) rotateX(${-my * 4 * dp}deg)`;
+    });
+    ans.el.style.background = `rgba(13,13,12,${.78 * (1 - dp)})`;
+    document.getElementById('chat-end').style.filter = `opacity(${1 - .55 * dp})`;   // the dark sheet behind my answer clears, so the layers show
+  }
+
   /* ---------- v44: chapters. Where you are, what has passed, and whether to keep scrolling ---------- */
-  const CHAPTERS = [['השם', 0], ['השדה', .05], ['הפנים של המודל', .3], ['המפה', .6], ['הרצף', .82], ['מי אני?', .93]];
+  const CHAPTERS = [['השם', 0], ['השדה', .041], ['הפנים של המודל', .246], ['המפה', .492], ['הרצף', .672], ['מי אני?', .763], ['עומק', .85]];
   const chapEl = document.getElementById('chapters'), goEl = document.querySelector('.hud .go');
   CHAPTERS.forEach(([name, at], i) => {
     const li = document.createElement('li'); li.tabIndex = 0;
@@ -836,10 +857,10 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     if (c !== chapNow) {
       chapNow = c;
       [...chapEl.children].forEach((li, i) => li.className = i < c ? 'past' : i === c ? 'now' : '');
-      goEl.textContent = c < CHAPTERS.length - 1 ? 'המשיכו לגלול ↓' : 'בסוף: הטקסט על העבודה ↓';
+      goEl.textContent = c < CHAPTERS.length - 1 ? 'המשיכו לגלול ↓' : (matchMedia('(hover: hover)').matches ? 'הזיזו את העכבר' : 'זה הסוף');
     }
     // standing still for a while, mid-way: the cue nudges. At the very end it waits for the answer to be written
-    const idle = performance.now() - lastMove > 2600 && (c < CHAPTERS.length - 1 || ans.done);
+    const idle = performance.now() - lastMove > 2600 && (c < CHAPTERS.length - 2 || (c === CHAPTERS.length - 2 && ans.done));
     goEl.classList.toggle('idle', idle && !document.getElementById('chat'));
   }
 
