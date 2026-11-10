@@ -72,6 +72,8 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 #chapters li:focus-visible{outline:1px solid var(--red);outline-offset:3px}
 .hud .go{transition:opacity .4s;background:rgba(13,13,12,.86);padding:4px 8px;color:var(--light)} .hud .go.idle{animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{opacity:.25;transform:translateY(3px)}}
+.hud .go.ready{color:#fff;box-shadow:inset 0 0 0 1px var(--red);font-size:14px;padding:6px 12px;animation:ready 1.4s ease-in-out infinite}
+@keyframes ready{50%{transform:translateY(4px)}}
 @media (max-width:640px){#chapters li:not(.now){display:none} #chapters{top:auto;bottom:44px;transform:none}}
 @media (prefers-reduced-motion:reduce){.hud .go.idle{animation:none}}
 /* v43: my answer to "מי אתה?", written out on the screen in my hand */
@@ -388,6 +390,9 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const dp = smooth(clamp((P - .85) / .13));
     if (endK > 0) { ctx.globalAlpha = endK * .96 * (1 - .65 * dp); /* in the depth, the model's face shows again, far behind */ ctx.fillStyle = `rgb(${bg.join(',')})`; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     chatEnd(p);
+    // v50: the map can be entered only after my answer has been written to the end
+    const GATE = .845;
+    if (P > GATE && !ans.done) { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; scrollTo(0, pin.offsetTop + d * GATE); }
     chapters(P);
     depth(dp, now);
     photo.style.left = ox + 'px'; photo.style.top = oy + 'px';
@@ -883,7 +888,7 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
     const li = document.createElement('li'); li.tabIndex = 0;
     li.title = name; li.setAttribute('aria-label', name);   // v45: no names on screen, only the ticks; the name on hover
     const jump = () => { const r = pin.getBoundingClientRect(), d = r.height - innerHeight; scrollTo({top: pin.offsetTop + d * (at + .002), behavior: reduce ? 'auto' : 'smooth'}); };
-    li.addEventListener('click', jump); li.addEventListener('keydown', e => { if (e.key === 'Enter') jump(); });
+    li.addEventListener('click', () => { if (at >= .85 && !ans.done) return; jump(); }); li.addEventListener('keydown', e => { if (e.key === 'Enter') jump(); });
     chapEl.appendChild(li);
   });
   let chapNow = -1, lastMove = performance.now();
@@ -895,8 +900,18 @@ a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
       [...chapEl.children].forEach((li, i) => li.className = i < c ? 'past' : i === c ? 'now' : '');
       goEl.textContent = c < CHAPTERS.length - 1 ? 'המשיכו לגלול ↓' : (matchMedia('(hover: hover)').matches ? 'הזיזו את העכבר' : 'זה הסוף');
     }
-    // standing still for a while, mid-way: the cue nudges. At the very end it waits for the answer to be written
-    const idle = performance.now() - lastMove > 2600 && (c < CHAPTERS.length - 2 || (c === CHAPTERS.length - 2 && ans.done));
+    // v50: while my answer is being written, no cue at all: nothing to do but read. When the last line is down,
+    // the cue comes back at once and nudges: now you can go into the map
+    const ANS_C = CHAPTERS.length - 2;
+    if (c === ANS_C) {
+      const t = ans.done ? 'גללו כדי להיכנס למפה ↓' : '';
+      if (goEl.textContent !== t) goEl.textContent = t;
+      goEl.style.visibility = ans.done ? '' : 'hidden';
+      goEl.classList.toggle('ready', ans.done); goEl.classList.remove('idle');
+      return;
+    }
+    goEl.style.visibility = ''; goEl.classList.remove('ready');
+    const idle = performance.now() - lastMove > 2600 && c < ANS_C;
     goEl.classList.toggle('idle', idle && !document.getElementById('chat'));
   }
 
